@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Workout Coach · Project structure</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* One A4 page: folder tree on the left, data flow and roadmap on the right. Same identity as the presentation. */
+:root{
+  --ink:#101A23; --muted:#56646F; --line:#D5DCE3; --sunk:#EEF1F4; --paper:#FFFFFF;
+  --accent:#1E4BD2; --accent-soft:#E3E9FC;
+  --ok:#1F7F52; --ok-soft:#DFF2E7; --warn:#B06F0C; --warn-soft:#FBEFD9; --data:#7A4FD0; --data-soft:#EEE7FB;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif; --body:"Public Sans","Segoe UI",Arial,sans-serif; --mono:"IBM Plex Mono",Consolas,monospace;
+}
+@page{size:A4;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:9.6pt/1.45 var(--body)}
+.page{width:210mm;height:297mm;padding:12mm 13mm 14mm;display:flex;flex-direction:column;gap:4.5mm;position:relative}
+h1,h2{margin:0;font-family:var(--display);text-transform:uppercase;line-height:.95}
+h1{font-stretch:66%;font-weight:900;font-size:25pt}
+h1 em{font-style:normal;color:var(--accent)}
+h2{font-stretch:74%;font-weight:850;font-size:13pt;margin-bottom:2.5mm;display:flex;gap:2.5mm;align-items:center}
+h2 .n{font:600 8pt var(--mono);color:var(--paper);background:var(--accent);border-radius:50%;width:6mm;height:6mm;display:inline-flex;align-items:center;justify-content:center}
+p{margin:0}
+.top{display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:var(--display);font-stretch:70%;font-weight:900;font-size:12pt;text-transform:uppercase}
+.brand b{color:var(--accent)}
+.tag{font:600 7.5pt var(--mono);background:var(--ink);color:var(--paper);padding:1.6mm 2.6mm;border-radius:1.6mm;text-transform:uppercase;letter-spacing:.06em}
+.lede{font-size:10.5pt;color:var(--muted);max-width:170mm}
+.lede b{color:var(--ink)}
+.cols{display:grid;grid-template-columns:96mm 1fr;gap:6mm;flex:1;min-height:0}
+
+/* tree */
+.tree{border:1.2pt solid var(--line);border-radius:3mm;padding:3.5mm 4mm;font:8.6pt/1.62 var(--mono)}
+.tree .r{display:grid;grid-template-columns:auto 1fr;gap:2.5mm;align-items:baseline}
+.tree .f{white-space:pre;font-weight:600}
+.tree .d{font:8pt/1.35 var(--body);color:var(--muted)}
+.tree .sep{height:1.4mm}
+.f.dat{color:var(--data)} .f.code{color:var(--accent)} .f.out{color:var(--ok)} .f.doc{color:var(--warn)} .f.root{color:var(--ink)}
+.legend{display:flex;gap:3mm;flex-wrap:wrap;margin-top:2.5mm;font:7.6pt var(--body);color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:1.2mm}
+.legend i{width:2.6mm;height:2.6mm;border-radius:.8mm;display:inline-block}
+
+/* flow */
+.right{display:flex;flex-direction:column;gap:3.5mm;min-width:0}
+.flow{display:flex;flex-direction:column;gap:0}
+.fl{display:grid;grid-template-columns:30mm 1fr;gap:3mm;align-items:center;padding:1.4mm 3mm;border-radius:2.4mm}
+.fl b{font:600 8.4pt var(--mono)}
+.fl span{font-size:8.6pt;color:var(--muted);line-height:1.3}
+.fl.dat{background:var(--data-soft)} .fl.dat b{color:var(--data)}
+.fl.code{background:var(--accent-soft)} .fl.code b{color:var(--accent)}
+.fl.out{background:var(--ok-soft)} .fl.out b{color:var(--ok)}
+.dn{font:600 8pt/1 var(--mono);color:var(--muted);padding:.6mm 0 .6mm 13mm}
+
+/* roadmap */
+.road{display:flex;flex-direction:column;gap:.7mm}
+.st{display:grid;grid-template-columns:5.6mm 1fr auto;gap:2.5mm;align-items:center;font-size:8.6pt;padding:.8mm 2mm;border-radius:2mm}
+.st i{font:700 7.6pt/5.6mm var(--mono);width:5.6mm;height:5.6mm;border-radius:50%;text-align:center;font-style:normal;background:var(--sunk);color:var(--muted)}
+.st small{font:600 7.4pt var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.st.done{background:var(--ok-soft)} .st.done i{background:var(--ok);color:var(--paper)} .st.done small{color:var(--ok)}
+.st.next{background:var(--warn-soft)} .st.next i{background:var(--warn);color:var(--paper)} .st.next small{color:var(--warn)}
+.st.key b{color:var(--accent)}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm}
+.rule{background:var(--sunk);border-radius:2.4mm;padding:3mm;font-size:8.4pt;line-height:1.35}
+.rule b{font-size:9pt;display:block;margin-bottom:1mm}
+.rule code{font:500 8pt var(--mono)}
+.foot{position:absolute;left:13mm;right:13mm;bottom:6mm;display:flex;justify-content:space-between;font:500 7.4pt var(--mono);color:var(--muted)}
+</style>
+</head>
+<body>
+<section class="page">
+  <div class="top"><div class="brand">AI Workout <b>Coach</b></div><div class="tag">Project structure · v0.1</div></div>
+  <h1>One folder per job, <em>one direction for the data.</em></h1>
+  <p class="lede">Raw datasets go in, are never modified, and flow one way through <b>cleaning → models → results</b>. Code lives in one Python package (<b>awc</b>), every path comes from one config file, and the README logs each finished step.</p>
+
+  <div class="cols">
+    <div>
+      <h2><span class="n">1</span>Folder tree</h2>
+      <div class="tree">
+        <div class="r"><span class="f root">README.md</span><span class="d">overview + progress log, updated every step</span></div>
+        <div class="r"><span class="f root">requirements.txt</span><span class="d">Python dependencies (all free)</span></div>
+        <div class="r"><span class="f root">pyproject.toml</span><span class="d">installable package, test config</span></div>
+        <div class="sep"></div>
+        <div class="r"><span class="f dat">data/</span><span class="d"></span></div>
+        <div class="r"><span class="f dat">├─ raw/</span><span class="d">original datasets, read-only, not in git</span></div>
+        <div class="r"><span class="f dat">│  ├─ mm-fit/</span><span class="d">21 sessions · 3.8 GB</span></div>
+        <div class="r"><span class="f dat">│  ├─ ec3d/</span><span class="d">371 labelled reps · 3D</span></div>
+        <div class="r"><span class="f dat">│  └─ own_recordings/</span><span class="d">phone + Galaxy Watch 7</span></div>
+        <div class="r"><span class="f dat">├─ interim/</span><span class="d">synced + normalized (Parquet)</span></div>
+        <div class="r"><span class="f dat">└─ processed/</span><span class="d">model-ready tensors</span></div>
+        <div class="sep"></div>
+        <div class="r"><span class="f code">src/awc/</span><span class="d">the project's Python package</span></div>
+        <div class="r"><span class="f code">├─ config.py</span><span class="d">every path and constant</span></div>
+        <div class="r"><span class="f code">├─ data/</span><span class="d">loaders: MM-Fit, EC3D, ours</span></div>
+        <div class="r"><span class="f code">├─ features/</span><span class="d">sync, skeleton, windows, reps</span></div>
+        <div class="r"><span class="f code">├─ models/</span><span class="d">Model 1 · Model 2 · Model 3</span></div>
+        <div class="r"><span class="f code">├─ training/</span><span class="d">training loops</span></div>
+        <div class="r"><span class="f code">├─ evaluation/</span><span class="d">metrics, benchmarks (RQ1–RQ4)</span></div>
+        <div class="r"><span class="f code">├─ streaming/</span><span class="d">Kafka producers + consumer</span></div>
+        <div class="r"><span class="f code">├─ bigdata/</span><span class="d">Spark batch jobs</span></div>
+        <div class="r"><span class="f code">└─ coach/</span><span class="d">live voice feedback</span></div>
+        <div class="sep"></div>
+        <div class="r"><span class="f code">scripts/analysis/</span><span class="d">first measurements on the data</span></div>
+        <div class="r"><span class="f code">notebooks/</span><span class="d">exploration</span></div>
+        <div class="r"><span class="f code">tests/</span><span class="d">data and code checks</span></div>
+        <div class="sep"></div>
+        <div class="r"><span class="f out">experiments/</span><span class="d">one folder per run: config + metrics</span></div>
+        <div class="r"><span class="f out">models/</span><span class="d">trained checkpoints</span></div>
+        <div class="r"><span class="f out">reports/</span><span class="d">briefing, figures, final report</span></div>
+        <div class="r"><span class="f doc">presentation/</span><span class="d">validation web app</span></div>
+        <div class="r"><span class="f doc">docs/</span><span class="d">course documents, notes</span></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--data)"></i>data</span><span><i style="background:var(--accent)"></i>code</span><span><i style="background:var(--ok)"></i>results</span><span><i style="background:var(--warn)"></i>communication</span></div>
+    </div>
+
+    <div class="right">
+      <div>
+        <h2><span class="n">2</span>How data flows</h2>
+        <div class="flow">
+          <div class="fl dat"><b>data/raw/</b><span>MM-Fit · EC3D · our recordings, as downloaded</span></div>
+          <div class="dn">↓ features/ + bigdata/ (Spark)</div>
+          <div class="fl dat"><b>data/interim/</b><span>streams synced on the 30 fps clock, skeletons normalized</span></div>
+          <div class="dn">↓ features/windows, reps</div>
+          <div class="fl dat"><b>data/processed/</b><span>3 s windows (Model 1), one tensor per rep (Models 2, 3)</span></div>
+          <div class="dn">↓ models/ + training/ (PyTorch)</div>
+          <div class="fl out"><b>models/ · experiments/</b><span>checkpoints, configs, metrics of every run</span></div>
+          <div class="dn">↓ evaluation/</div>
+          <div class="fl out"><b>reports/</b><span>benchmarks answering RQ1–RQ4</span></div>
+        </div>
+        <p style="font-size:8.4pt;color:var(--muted);margin-top:2mm">Live mode: <b style="color:var(--ink)">streaming/</b> (Kafka) feeds the trained models and <b style="color:var(--ink)">coach/</b> speaks the result.</p>
+      </div>
+      <div>
+        <h2><span class="n">3</span>Roadmap</h2>
+        <div class="road">
+          <div class="st done"><i>0</i><span>Proposal & validation presentation</span><small>done</small></div>
+          <div class="st done"><i>1</i><span>Structure, git, dataset loaders, tests</span><small>done</small></div>
+          <div class="st next"><i>2</i><span>Data pipeline: sync, normalize, windows</span><small>next</small></div>
+          <div class="st"><i>3</i><span>Model 1: recognition + rep counting</span><small>MM-Fit</small></div>
+          <div class="st"><i>4</i><span>Model 2: form check</span><small>EC3D</small></div>
+          <div class="st"><i>5</i><span>Own recordings + Kafka capture</span><small>ours</small></div>
+          <div class="st key"><i>6</i><span><b>Model 3: fatigue & baseline</b></span><small>contribution</small></div>
+          <div class="st"><i>7</i><span>Live coach with voice feedback</span><small>live</small></div>
+          <div class="st"><i>8</i><span>Evaluation & benchmarks</span><small>RQ1–RQ4</small></div>
+          <div class="st"><i>9</i><span>Final report and demo</span><small>end</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h2><span class="n">4</span>Rules we follow</h2>
+    <div class="rules">
+      <div class="rule"><b>Raw data is read-only</b>Every result can be rebuilt from the original files.</div>
+      <div class="rule"><b>One source of paths</b>All code imports its paths from <code>config.py</code>.</div>
+      <div class="rule"><b>Data stays out of git</b>Only code, docs and results are versioned; <code>data/README.md</code> says how to download.</div>
+      <div class="rule"><b>Tested and logged</b>Tests check the datasets; the README logs every finished step.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Deep Learning & Big Data · AI Workout Coach</span><span>October 2026</span></div>
+</section>
+</body>
+</html>

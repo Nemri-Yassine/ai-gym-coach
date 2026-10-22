@@ -1,0 +1,17 @@
+---
+description: AI Workout Coach project rules
+alwaysApply: true
+---
+
+- The work plan is `docs/PLAN.md`. Do **one step at a time**; do not start the next step until every acceptance check passes and the user confirms.
+- Read `README.md`, `src/awc/config.py` and the files named in the step before editing.
+- All paths come from `src/awc/config.py`. Never hard-code paths. The project path contains spaces: always quote it.
+- `data/raw/` is read-only (except `data/raw/own_recordings/` written by the recorder). Never commit data, `.npy`, `.pickle`, `.parquet`, checkpoints or zips.
+- Windows + CPU only (PyTorch CPU). Keep models small; every training script has `--quick`.
+- Spark and Kafka temp/log folders go in `C:/awc_tmp/`, never inside OneDrive.
+- Every step adds tests: unit tests on synthetic data (no dataset needed) and `@pytest.mark.data` tests for real data.
+- Training runs: `awc.training.tracking.new_run(...)` → `experiments/<YYYYMMDD>_<name>/` with config.json, metrics.json, figures. Seed 42.
+- Splits are fixed: `MMFIT_SPLIT` in config (test on `test_unseen`), leave-one-person-out for EC3D, time-ordered per user for our recordings.
+- Canonical skeleton: 18 joints, COCO-18 order, x right / **y up**, centered on mid-hip, scaled by torso length.
+- End every step: `python -m pytest -q`, update README progress table + dated log line with key numbers, `git commit -m "Step X.Y: ..."`.
+- Report numbers honestly, including when a target is missed.

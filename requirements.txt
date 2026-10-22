@@ -1,0 +1,15 @@
+numpy
+pandas
+pyarrow
+scipy
+scikit-learn
+matplotlib
+torch
+opencv-python
+mediapipe
+pyspark
+kafka-python
+pyttsx3
+pytest
+jupyter
+markdown

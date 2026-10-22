@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Workout Coach · Briefing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Print layout: three A4 pages, one idea per block, the same visual identity as the presentation app. */
+:root{
+  --ink:#101A23; --muted:#56646F; --line:#D5DCE3; --sunk:#EEF1F4; --paper:#FFFFFF;
+  --accent:#1E4BD2; --accent-soft:#E3E9FC;
+  --ok:#1F7F52; --ok-soft:#DFF2E7; --warn:#B06F0C; --warn-soft:#FBEFD9; --stop:#C8323A; --stop-soft:#FBE3E3;
+  --hr:#C8323A; --imu:#B06F12;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif; --body:"Public Sans","Segoe UI",Arial,sans-serif; --mono:"IBM Plex Mono",Consolas,monospace;
+}
+@page{size:A4;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:10.6pt/1.5 var(--body)}
+.page{width:210mm;height:297mm;padding:12mm 14mm 15mm;display:flex;flex-direction:column;gap:4.2mm;page-break-after:always;position:relative;overflow:hidden}
+.page:last-child{page-break-after:auto}
+h1,h2,h3{margin:0;font-family:var(--display);text-transform:uppercase;line-height:.95;text-wrap:balance}
+h2{font-stretch:72%;font-weight:850;font-size:19pt;display:flex;align-items:center;gap:3mm}
+h2 .n{font:600 9pt var(--mono);color:var(--paper);background:var(--accent);border-radius:50%;width:7mm;height:7mm;display:inline-flex;align-items:center;justify-content:center;flex:none}
+h3{font-stretch:80%;font-weight:800;font-size:12.5pt}
+p{margin:0}
+b{font-weight:700}
+.cap{font:600 7.6pt var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.foot{position:absolute;left:14mm;right:14mm;bottom:6mm;display:flex;justify-content:space-between;font:500 7.5pt var(--mono);color:var(--muted)}
+
+/* page 1 header */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm}
+.brand{font-family:var(--display);font-stretch:70%;font-weight:900;font-size:13pt;text-transform:uppercase;letter-spacing:.02em}
+.brand b{color:var(--accent);font-weight:900}
+.tag{font:600 8pt var(--mono);background:var(--ink);color:var(--paper);padding:2mm 3mm;border-radius:2mm;text-transform:uppercase;letter-spacing:.06em}
+.pitch{font-family:var(--display);font-stretch:66%;font-weight:900;font-size:33pt;line-height:.92;text-transform:uppercase}
+.pitch em{font-style:normal;color:var(--accent)}
+.one{font-size:12.5pt;line-height:1.45;max-width:165mm}
+.one b{background:linear-gradient(transparent 60%,var(--accent-soft) 60%)}
+
+/* chain of models */
+.chain{display:grid;grid-template-columns:1fr 5mm 1fr 5mm 1fr 5mm 1.15fr 5mm 1fr;align-items:stretch}
+.lk{border:1.4pt solid var(--line);border-radius:3mm;padding:3mm;display:flex;flex-direction:column;gap:1.2mm;background:var(--paper)}
+.lk .cap{color:var(--accent)}
+.lk b{font-size:10.5pt;line-height:1.2}
+.lk span{font-size:8.6pt;color:var(--muted);line-height:1.35}
+.lk.me{border-color:var(--accent);background:var(--accent-soft)}
+.lk.me .cap{color:var(--accent)}
+.ar{display:flex;align-items:center;justify-content:center;color:var(--accent);font:700 13pt var(--mono)}
+.note{font-size:9pt;color:var(--muted);border-left:2pt solid var(--line);padding-left:3mm}
+
+/* dataset cards */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm}
+.card{border-radius:3mm;padding:4mm;display:flex;flex-direction:column;gap:2mm;background:var(--sunk)}
+.card h3{font-size:16pt;font-stretch:74%}
+.big{display:flex;gap:4mm;flex-wrap:wrap;border-block:1pt solid var(--line);padding:2mm 0}
+.big div{display:flex;flex-direction:column;font-size:7.6pt;color:var(--muted);line-height:1.2}
+.big strong{font:850 17pt/1 var(--display);font-stretch:78%;color:var(--ink)}
+.card .job{font:700 8pt var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:1.2mm 2.4mm;border-radius:1.5mm;align-self:flex-start;color:var(--paper)}
+.card .miss{font-size:8.8pt;color:var(--muted);margin-top:auto}
+.j1{background:var(--accent)} .j2{background:var(--ok)} .j3{background:var(--warn)}
+
+/* research questions */
+.rq{border:1.4pt solid var(--line);border-radius:3mm;padding:3mm 3.5mm;display:grid;grid-template-columns:15mm 1fr;gap:1mm 3mm}
+.rq .k{grid-row:span 3;font:900 22pt/1 var(--display);font-stretch:72%;color:var(--accent)}
+.rq .q{font-weight:700;font-size:11pt;line-height:1.3}
+.rq .why{font-size:9.2pt;color:var(--muted)}
+.rq .ex{font-size:9pt;background:var(--sunk);border-radius:2mm;padding:1.6mm 2.4mm;margin-top:1mm}
+.rq.main{border-color:var(--accent);background:var(--accent-soft)}
+.rq.main .ex{background:var(--paper)}
+.star{font:700 7.5pt var(--mono);color:var(--paper);background:var(--accent);border-radius:1.5mm;padding:.6mm 1.6mm;margin-left:1.5mm;vertical-align:2pt}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm}
+.st{border-radius:3mm;padding:3.4mm;display:flex;flex-direction:column;gap:1mm}
+.st strong{font:900 24pt/1 var(--display);font-stretch:74%}
+.st span{font-size:8.8pt;line-height:1.3}
+.st small{font-size:7.8pt;color:var(--muted);line-height:1.3}
+.s1{background:var(--stop-soft)} .s1 strong{color:var(--stop)}
+.s2{background:var(--ok-soft)} .s2 strong{color:var(--ok)}
+.s3{background:var(--accent-soft)} .s3 strong{color:var(--accent)}
+.s4{background:var(--warn-soft)} .s4 strong{color:var(--warn)}
+
+/* camera */
+.cam{display:grid;grid-template-columns:44mm 1fr;gap:5mm;align-items:center;border:1.4pt solid var(--line);border-radius:3mm;padding:3mm 4mm}
+.cam svg{width:100%;height:auto}
+.rules{display:flex;flex-direction:column;gap:2mm;margin:0;padding:0;list-style:none}
+.rules li{display:grid;grid-template-columns:6mm 1fr;gap:2mm;font-size:10pt;line-height:1.35}
+.rules li i{font:700 9pt/6mm var(--mono);width:6mm;height:6mm;border-radius:50%;background:var(--ok);color:var(--paper);text-align:center;font-style:normal}
+.bars{display:flex;gap:2mm;align-items:flex-end;height:13mm;margin-top:1mm}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:.8mm;font:600 7.5pt var(--mono);color:var(--muted)}
+.bars em{display:block;width:100%;border-radius:1.2mm 1.2mm 0 0;background:var(--line)}
+.bars .best em{background:var(--ok)} .bars .best{color:var(--ok)}
+
+/* criticism table */
+.crit{display:flex;flex-direction:column;gap:1.8mm}
+.cr{display:grid;grid-template-columns:1fr 1.25fr;border-radius:3mm;overflow:hidden;border:1pt solid var(--line)}
+.cr > div{padding:2mm 3.4mm;font-size:9.6pt;line-height:1.35}
+.cr .t{background:var(--stop-soft);color:#6E1D21;font-style:italic;display:flex;gap:2mm}
+.cr .t::before{content:"✕";font:700 9pt var(--mono);color:var(--stop);font-style:normal}
+.cr .a{background:var(--ok-soft);display:flex;gap:2mm}
+.cr .a::before{content:"✓";font:700 9pt var(--mono);color:var(--ok)}
+
+.alert{border:1.6pt solid var(--warn);background:var(--warn-soft);border-radius:3mm;padding:3mm 4mm;display:flex;gap:4mm;align-items:flex-start}
+.alert .ic{font:900 20pt/1 var(--display);color:var(--paper);background:var(--warn);border-radius:50%;width:10mm;height:10mm;display:flex;align-items:center;justify-content:center;flex:none}
+.alert p{font-size:10.4pt}
+
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm}
+.key{display:flex;flex-direction:column;gap:1.5mm;align-items:flex-start;font-size:9pt;line-height:1.3}
+kbd{font:700 11pt var(--mono);border:1.2pt solid var(--ink);border-bottom-width:3pt;border-radius:1.6mm;padding:.6mm 2.4mm;background:var(--paper)}
+.close{margin-top:auto;background:var(--ink);color:var(--paper);border-radius:3mm;padding:4mm 6mm;display:flex;justify-content:space-between;align-items:center;gap:6mm}
+.close .q{font:900 17pt/1 var(--display);font-stretch:68%;text-transform:uppercase}
+.close .q em{font-style:normal;color:#8FA8FF}
+.close span{font:500 8pt var(--mono);color:#B8C3CE;text-align:right}
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 · WHAT IT IS ============ -->
+<section class="page">
+  <div class="top">
+    <div class="brand">AI Workout <b>Coach</b></div>
+    <div class="tag">Briefing · validation tomorrow</div>
+  </div>
+  <div class="pitch">Most apps tell you what you did.<br><em>Ours tells you when to stop.</em></div>
+  <p class="one">An AI coach that watches you train with <b>your phone camera</b> and <b>your smartwatch</b>. It recognizes the exercise, checks your form, compares today with <b>your own past sessions</b>, and tells you to stop before fatigue turns into injury.</p>
+
+  <h2><span class="n">1</span>How it works</h2>
+  <div class="chain">
+    <div class="lk"><span class="cap">Capture</span><b>Phone + watch</b><span>Phone films you; each frame becomes a skeleton of 18 joints (MediaPipe, not trained by us). Watch sends heart rate + wrist motion.</span></div>
+    <div class="ar">→</div>
+    <div class="lk"><span class="cap">Model 1</span><b>What & how many</b><span>Which exercise, and where each rep starts and ends.</span></div>
+    <div class="ar">→</div>
+    <div class="lk"><span class="cap">Model 2</span><b>Good or bad</b><span>Judges each rep from Model 1: good, or which mistake (knees inward, not low enough…).</span></div>
+    <div class="ar">→</div>
+    <div class="lk me"><span class="cap">Model 3 · our contribution</span><b>When to stop</b><span>Rep speed + form + heart rate, compared with <b>your</b> past sessions.</span></div>
+    <div class="ar">→</div>
+    <div class="lk"><span class="cap">Voice</span><b>The verdict</b><span>"Keep going", "Slow down", or "Stop".</span></div>
+  </div>
+  <p class="note"><b>Big data side:</b> Kafka streams the live data to the laptop (≈ 300 messages per second). Spark processes every stored session to build each person's history.</p>
+
+  <h2><span class="n">2</span>Three datasets, three jobs</h2>
+  <div class="g3">
+    <div class="card"><span class="job j1">Recognize · count · heart rate</span><h3>MM-Fit</h3>
+      <div class="big"><div><strong>70.8 M</strong>sensor rows</div><div><strong>6,160</strong>reps</div><div><strong>10</strong>people</div></div>
+      <p>21 sessions, 10 exercises. Camera + watches + phone recorded at the same time. 3.8 GB.</p>
+      <p class="miss">Missing: no good/bad label on reps.</p></div>
+    <div class="card"><span class="job j2">Good rep or bad rep</span><h3>EC3D</h3>
+      <div class="big"><div><strong>371</strong>labelled reps</div><div><strong>29,789</strong>3D frames</div><div><strong>8</strong>mistakes</div></div>
+      <p>Squat, lunge, plank in 3D (25 joints), 4 people. Full file: 62,387 frames × 4 cameras.</p>
+      <p class="miss">Missing: heart rate. Only 4 people.</p></div>
+    <div class="card"><span class="job j3">Fatigue over weeks</span><h3>Our recordings</h3>
+      <div class="big"><div><strong>2</strong>people</div><div><strong>3–6</strong>weeks</div><div><strong>1–10</strong>effort score</div></div>
+      <p>The two of us, Poco X3 Pro + Galaxy Watch 7, effort score after each set.</p>
+      <p class="miss">The only data that follows the same person over time.</p></div>
+  </div>
+  <div class="foot"><span>Deep Learning & Big Data · Project validation</span><span>1 / 3</span></div>
+</section>
+
+<!-- ============ PAGE 2 · QUESTIONS & EVIDENCE ============ -->
+<section class="page">
+  <h2><span class="n">3</span>The 4 research questions, in plain words</h2>
+  <div class="g2">
+    <div class="rq"><span class="k">RQ1</span><p class="q">Does it recognize the exercise and count reps on a person it has never seen?</p><p class="why">A coach that only works on its training people is useless.</p><p class="ex">Answer looks like: "92 % correct on new people, 0.3 reps off per set."</p></div>
+    <div class="rq"><span class="k">RQ2</span><p class="q">Does the watch's heart rate detect fatigue better than movement alone?</p><p class="why">The teacher asked us to use the watch's vital data. We train Model 3 with and without heart rate.</p><p class="ex">"With heart rate, the warning comes 2 reps earlier." Or "it doesn't help". Both are results.</p></div>
+    <div class="rq main"><span class="k">RQ3</span><p class="q">Is comparing you with <b>your own</b> past sessions better than comparing you with an average person?<span class="star">MAIN IDEA</span></p><p class="why">People are very different; one threshold can't fit everyone.</p><p class="ex">Your squats are usually 1.4 s, today 1.8 s → warning, even if 1.8 s is normal for someone else.</p></div>
+    <div class="rq"><span class="k">RQ4</span><p class="q">Does it still work on our own phone and Galaxy Watch 7, outside the dataset?</p><p class="why">The "useful in real life" test.</p><p class="ex">"90 % on the dataset, 80 % on our devices: we lose 10 % because of camera quality and angle."</p></div>
+  </div>
+
+  <h2><span class="n">4</span>What we already measured</h2>
+  <p class="note">Quick tests on the real datasets. Present them as <b>first measurements</b>, not final results.</p>
+  <div class="stats">
+    <div class="st s1"><strong>45 / 64</strong><span>squat sets end with <b>slower reps</b>: fatigue is visible</span><small>Lunges: no clear effect, so speed alone isn't enough → we add heart rate.</small></div>
+    <div class="st s2"><strong>63 / 64</strong><span>squat sets where reps were <b>counted exactly</b> from the skeleton</span><small>62 / 62 for lunges. Our rep timings are reliable.</small></div>
+    <div class="st s3"><strong>53–90 %</strong><span>mistakes recognized on a <b>new person</b> (squat → plank)</span><small>Chance is 20–33 %. EC3D authors reach 90.9 %: our target.</small></div>
+    <div class="st s4"><strong>123–188</strong><span>peak heart rate (bpm) <b>between people</b></span><small>One fixed threshold can't work → personal baseline (RQ3).</small></div>
+  </div>
+
+  <h2><span class="n">5</span>Where to put the phone</h2>
+  <div class="cam">
+    <svg viewBox="0 0 200 170" aria-label="Phone at 45 degrees in front of the user">
+      <circle cx="100" cy="100" r="62" fill="none" stroke="#D5DCE3" stroke-dasharray="4 5"/>
+      <line x1="100" y1="100" x2="100" y2="48" stroke="#101A23" stroke-width="2"/><polygon points="100,40 94,52 106,52" fill="#101A23"/>
+      <circle cx="100" cy="100" r="14" fill="#EEF1F4" stroke="#101A23" stroke-width="2"/><text x="100" y="104" text-anchor="middle" font-family="Public Sans,Arial" font-size="10" font-weight="700">you</text>
+      <rect x="88" y="24" width="24" height="13" rx="3" fill="#B06F0C"/><text x="100" y="17" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#B06F0C">0° front</text>
+      <rect x="132" y="44" width="24" height="13" rx="3" fill="#1F7F52" transform="rotate(45 144 50)"/><text x="160" y="36" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#1F7F52">45° best</text>
+      <rect x="164" y="94" width="24" height="13" rx="3" fill="#B06F0C"/><text x="176" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#B06F0C">90° side</text>
+    </svg>
+    <div style="display:flex;flex-direction:column;gap:3mm">
+      <ul class="rules">
+        <li><i>1</i><span><b>About 45° in front</b> of the user. From the front you can't judge depth; from the side one leg is hidden.</span></li>
+        <li><i>2</i><span>Phone at <b>hip height</b>, <b>2–3 m</b> away, whole body in the frame.</span></li>
+        <li><i>3</i><span><b>Same spot every session</b>, so a change in the numbers means fatigue, not a moved camera.</span></li>
+      </ul>
+      <div><span class="cap">Squat mistakes recognized, by angle (our test on EC3D)</span>
+        <div class="bars"><div><em style="height:8mm"></em>0° · 57 %</div><div class="best"><em style="height:12mm"></em>45° · 71 %</div><div><em style="height:7.6mm"></em>90° · 55 %</div></div></div>
+    </div>
+  </div>
+  <div class="foot"><span>Deep Learning & Big Data · Project validation</span><span>2 / 3</span></div>
+</section>
+
+<!-- ============ PAGE 3 · DEFENSE ============ -->
+<section class="page">
+  <h2><span class="n">6</span>When the teacher says…, we answer</h2>
+  <div class="crit">
+    <div class="cr"><div class="t">"Comparing live frames to the dataset is not training."</div><div class="a">We train 3 models ourselves: recognition, form check, fatigue and risk.</div></div>
+    <div class="cr"><div class="t">"Camera + watch beats watch alone, that's obvious."</div><div class="a">Agreed. It's only a sanity check, not our claim. Our claims are RQ2 (heart rate) and RQ3 (personal history).</div></div>
+    <div class="cr"><div class="t">"Posture detection already exists."</div><div class="a">Yes, so we reuse MediaPipe for it and spend our training on fatigue and risk.</div></div>
+    <div class="cr"><div class="t">"Who guarantees the reps in the dataset are correct?"</div><div class="a">EC3D: every mistake was performed on instruction and each sequence was checked by hand. MM-Fit is never used to judge form.</div></div>
+    <div class="cr"><div class="t">"You have no injury labels."</div><div class="a">Right, and we never claim to predict injuries. We detect fatigue and form breakdown, the warning signs, and recommend stopping.</div></div>
+    <div class="cr"><div class="t">"EC3D has only 4 people."</div><div class="a">We test the strictest way (train on 3, test on the 4th), augment with 3D views from any angle, and add our own reps as a test set.</div></div>
+    <div class="cr"><div class="t">"3.8 GB is not big data."</div><div class="a">70.8 M rows already, and the hard part is speed and variety: 4 live streams at 1–100 Hz to sync, history growing every session.</div></div>
+    <div class="cr"><div class="t">"Two people is not a dataset."</div><div class="a">It's a proof of concept: each of us is compared with our own history. No public dataset follows one person for weeks.</div></div>
+  </div>
+
+  <div class="alert"><span class="ic">!</span><div><h3 style="margin-bottom:1.5mm">To settle together tonight</h3><p>How do we get <b>live heart rate from the Galaxy Watch 7</b> without writing a Kotlin app? We need one clear answer: which free app or export method.</p></div></div>
+
+  <h2><span class="n">7</span>The presentation app</h2>
+  <p style="font-size:10pt">Open <b>presentation/index.html</b> in Chrome. 9 slides, about 8½ minutes. Extra controls are hidden on purpose:</p>
+  <div class="keys">
+    <div class="key"><span><kbd>←</kbd> <kbd>→</kbd></span>Previous / next slide</div>
+    <div class="key"><kbd>B</kbd>Appendix with all details and the "Hard questions" slide. Or double-click the logo.</div>
+    <div class="key"><kbd>T</kbd>Show and start a timer. Press again to hide.</div>
+    <div class="key"><kbd>F</kbd>Fullscreen</div>
+  </div>
+
+  <div class="close"><div class="q">A rep counter that becomes<br><em>a coach that protects you.</em></div><span>3 models we train ourselves<br>2 devices people already own<br>1 personal history</span></div>
+  <div class="foot"><span>Deep Learning & Big Data · Project validation</span><span>3 / 3</span></div>
+</section>
+</body>
+</html>

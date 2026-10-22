@@ -1,0 +1,778 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AI Workout Coach · Implementation plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--ink:#101A23;--muted:#56646F;--line:#D5DCE3;--sunk:#EEF1F4;--accent:#1E4BD2;--accent-soft:#E3E9FC;
+--ok:#1F7F52;--ok-soft:#DFF2E7;--warn:#B06F0C;--warn-soft:#FBEFD9;--w1:#1E4BD2;--w2:#1F7F52;--w3:#7A4FD0}
+@page{size:A4;margin:14mm 14mm 16mm}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}
+body{font:10pt/1.5 "Public Sans","Segoe UI",Arial,sans-serif;color:var(--ink);margin:0}
+h1,h2,h3,h4{font-family:"Archivo","Arial Narrow",Arial,sans-serif;text-transform:uppercase;line-height:1;margin:0}
+h1{font-stretch:66%;font-weight:900;font-size:34pt;margin:2mm 0 4mm}
+h2{font-stretch:72%;font-weight:900;font-size:22pt;color:#fff;background:var(--ink);padding:5mm 6mm;border-radius:3mm;margin:0 0 5mm;break-before:page}
+h2.w1{background:var(--w1)} h2.w2{background:var(--w2)} h2.w3{background:var(--w3)}
+h3{font-stretch:76%;font-weight:850;font-size:14pt;margin:7mm 0 3mm;padding:3mm 4mm;border-left:2mm solid var(--accent);background:var(--accent-soft);border-radius:0 2mm 2mm 0;break-after:avoid}
+h3 .tag{font:700 7.5pt "IBM Plex Mono",Consolas,monospace;padding:1mm 2mm;border-radius:1.5mm;margin-left:2mm;vertical-align:2pt;color:#fff}
+h3 .must{background:var(--accent)} h3 .should{background:var(--warn)}
+h4{font-size:10pt;letter-spacing:.04em;margin:4mm 0 1.5mm;color:var(--muted)}
+p{margin:1.5mm 0}
+p strong:first-child{color:var(--accent)}
+ul,ol{margin:1mm 0 2mm;padding-left:6mm}
+li{margin:.8mm 0}
+code{font:8.8pt "IBM Plex Mono",Consolas,monospace;background:var(--sunk);padding:.2mm 1.2mm;border-radius:1mm}
+pre{background:#0F1720;color:#E6EDF3;border-radius:2mm;padding:3mm 4mm;font-size:8.4pt;line-height:1.45;white-space:pre-wrap;break-inside:avoid}
+pre code{background:none;color:inherit;padding:0}
+table{border-collapse:collapse;width:100%;margin:2mm 0 3mm;font-size:9pt;break-inside:avoid}
+th{background:var(--sunk);text-align:left;font:600 8pt "IBM Plex Mono",Consolas,monospace;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+th,td{border-bottom:1px solid var(--line);padding:1.8mm 2.4mm;vertical-align:top}
+blockquote{margin:3mm 0;padding:3mm 4mm;background:var(--warn-soft);border-left:2mm solid var(--warn);border-radius:0 2mm 2mm 0}
+blockquote p{margin:0}
+hr{border:0;border-top:1px solid var(--line);margin:5mm 0}
+li.check{list-style:none;margin-left:-5mm}
+li.check::before{content:"";display:inline-block;width:3.4mm;height:3.4mm;border:1.3pt solid var(--ok);border-radius:.8mm;margin-right:2mm;vertical-align:-.5mm;background:#fff}
+.cover{height:265mm;display:flex;flex-direction:column;gap:6mm}
+.cover .brand{font:900 13pt "Archivo",Arial;font-stretch:70%;text-transform:uppercase}
+.cover .brand b{color:var(--accent)}
+.cover .lede{font-size:13pt;color:var(--muted);max-width:160mm}
+.weeks{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin-top:6mm}
+.wk{border-radius:3mm;padding:5mm;color:#fff;display:flex;flex-direction:column;gap:2mm}
+.wk b{font:900 20pt/1 "Archivo",Arial;font-stretch:70%;text-transform:uppercase}
+.wk span{font-size:10pt;opacity:.92}
+.wk small{font:600 8pt "IBM Plex Mono",monospace;opacity:.85}
+.howto{margin-top:auto;background:var(--sunk);border-radius:3mm;padding:5mm;font-size:10pt}
+</style></head><body>
+<div class="cover">
+  <div class="brand">AI Workout <b>Coach</b></div>
+  <h1>Implementation plan</h1>
+  <p class="lede">Three weeks, one validation per week. Every step is small, tested on its own and confirmed before the next one starts. Written to be followed step by step in Cursor.</p>
+  <div class="weeks">
+    <div class="wk" style="background:#1E4BD2"><small>Week 1 · steps 1.1–1.6</small><b>Data pipeline + Model 1</b><span>Environment, capture decision, recording starts, Spark sync to Parquet, unified skeleton, Model 1 benchmark, rep counting.</span></div>
+    <div class="wk" style="background:#1F7F52"><small>Week 2 · steps 2.1–2.6</small><b>Model 2 + live capture</b><span>EC3D rep dataset, ST-GCN vs baselines, Kafka streaming of pose and heart rate, our videos through Models 1–2, Spark history job.</span></div>
+    <div class="wk" style="background:#7A4FD0"><small>Week 3 · steps 3.1–3.5</small><b>Model 3 + coach + results</b><span>Fatigue and risk labels, Model 3 vs fixed-threshold rule (RQ2, RQ3), live coach with voice, RQ1–RQ4 evaluation, final report.</span></div>
+  </div>
+  <div class="howto"><b>How to use it.</b> Give Cursor <code>docs/PLAN.md</code> (this document's source) and the rules file <code>.cursor/rules/awc.mdc</code>. Ask for one step at a time: "Do step 1.3". Each step ends with tests, a README update and a commit. Steps marked <b>MUST</b> are required; <b>SHOULD</b> can be cut if only two weeks remain (section 4).</div>
+</div>
+<h2>0 · How to use this plan</h2>
+<h3>0.1 Rules for every step (Cursor must follow these)</h3>
+<ol>
+<li><strong>Read before writing.</strong> Read <code>README.md</code>, <code>src/awc/config.py</code> and the files listed in the step before changing anything.</li>
+<li><strong>Paths come from <code>src/awc/config.py</code>.</strong> Never hard-code a path. Add new paths to <code>config.py</code>.</li>
+<li><strong>Raw data is read-only.</strong> Never write inside <code>data/raw/</code> except when recording our own sessions (step 1.2).</li>
+<li><strong>No data or checkpoints in git.</strong> They are already in <code>.gitignore</code>. Check <code>git status</code> before each commit.</li>
+<li><strong>Every step ships with tests.</strong> Unit tests use small synthetic arrays and need no dataset. Tests that need the real data are marked <code>@pytest.mark.data</code> and skip automatically when the data is missing.</li>
+<li><strong>Every training run is logged</strong> in <code>experiments/&lt;YYYYMMDD&gt;_&lt;name&gt;/</code> with <code>config.json</code>, <code>metrics.json</code>, <code>log.txt</code> and figures. Checkpoints go to <code>models/&lt;same name&gt;.pt</code>.</li>
+<li><strong>Reproducible.</strong> Fixed seed (42), fixed splits from <code>config.py</code>, git commit hash saved in <code>config.json</code>.</li>
+<li><strong>Finish every step the same way:</strong><ul>
+<li>run <code>python -m pytest -q</code> (all green) and <code>python -m pytest -q -m data</code> (all green when data is present)</li>
+<li>update the README: progress table + one dated log line with the key numbers</li>
+<li>commit: <code>git commit -m "Step X.Y: &lt;what was done&gt;"</code></li>
+</ul>
+</li>
+<li><strong>Keep it CPU-friendly.</strong> We have no GPU (PyTorch 2.14 CPU). Models stay small; every training script has a <code>--quick</code> flag (tiny subset, 1 epoch) used by tests.</li>
+<li><strong>Ask instead of guessing</strong> when an instruction is ambiguous or a check fails twice.</li>
+</ol>
+<h3>0.2 Environment facts</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS</td>
+<td>Windows 11, Git Bash or PowerShell</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>3.12.10, PyTorch 2.14.1 <strong>CPU</strong></td>
+</tr>
+<tr>
+<td>Project path</td>
+<td><code>C:\Users\yassi\OneDrive\Bureau\projet DL BIG DATA</code>: <strong>contains spaces, always quote paths</strong></td>
+</tr>
+<tr>
+<td>Inside OneDrive</td>
+<td>Spark and Kafka temporary folders must live <strong>outside</strong> OneDrive (use <code>C:\awc_tmp\</code>) or OneDrive sync will lock files</td>
+</tr>
+<tr>
+<td>Not installed yet</td>
+<td>Java 17, PySpark, MediaPipe, OpenCV, Kafka (step 1.1 installs them)</td>
+</tr>
+<tr>
+<td>Devices</td>
+<td>Poco X3 Pro (camera), Samsung Galaxy Watch 7 (Wear OS)</td>
+</tr>
+<tr>
+<td>Constraint</td>
+<td>All tools free. No Kotlin / Android Studio / emulator. We train our own models; only the pose estimator is pretrained.</td>
+</tr>
+</tbody>
+</table>
+<h3>0.3 Data facts already verified</h3>
+<p><strong>MM-Fit</strong> (<code>data/raw/mm-fit/w00 … w20</code>)</p>
+<ul>
+<li>21 sessions, 616 sets, 6,160 reps, 10 exercises + <code>non_activity</code> = 11 classes.</li>
+<li>Every stream has a <code>frame</code> column on the <strong>30 fps video clock</strong>: this is the sync key.</li>
+<li>Streams we use: <code>pose_2d</code> (2, frames, 19) = x/y, then [frame, 18 joints, COCO-18 order, pixels, <strong>y points down</strong>]; <code>sw_l_acc</code>, <code>sw_l_gyr</code> (≈100 Hz, rows <code>[frame, ts_ms, x, y, z]</code>); <code>sw_l_hr</code> (≈1 Hz, rows <code>[frame, ts_ms, bpm]</code>).</li>
+<li>Heart rate is <strong>missing</strong> in w05, w10, w18.</li>
+<li>Labels: one row per <strong>set</strong> (<code>start_frame, end_frame, reps, exercise</code>), no per-rep boundaries, no form label.</li>
+<li><strong>Official split</strong> (from the authors' <code>train_multimodal_ar.py</code>):</li>
+<li>train <code>01 02 03 04 06 07 08 16 17 18</code></li>
+<li>val <code>14 15 19</code></li>
+<li>test (seen people) <code>09 10 11</code></li>
+<li>test (unseen people) <code>00 05 12 13 20</code>, <strong>our main RQ1 test</strong></li>
+</ul>
+<p><strong>EC3D</strong> (<code>data/raw/ec3d/data_3D.pickle</code>)</p>
+<ul>
+<li><code>labels</code> (29,789, 5) = exercise, subject, mistake code, rep index, frame. <code>poses</code> (29,789, 3, 25) = x, y, <strong>z up</strong>, OpenPose BODY_25, already normalized (mid-hip at origin, trunk upright).</li>
+<li>371 reps, 4 people (Hugues, Isinsu, Sena, Vidit).</li>
+<li>Codes: 1 correct, 2 feet too wide, 3 knees inward, 4 not low enough, 5 front bent, 6 knee passes toe, 7 arched back, 8 hunched back, 10 unknown (<strong>exclude 10</strong>).</li>
+<li>Per exercise: squat {1,2,3,4,5}, lunge {1,4,6}, plank {1,7,8}.</li>
+<li>Baseline already measured (random forest, leave-one-person-out): squat 53 %, lunge 82 %, plank 90 %. Authors' graph network: 90.9 %.</li>
+</ul>
+<h3>0.4 The three weeks at a glance</h3>
+<table>
+<thead>
+<tr>
+<th>Week</th>
+<th>Theme</th>
+<th>Steps</th>
+<th>Shown at validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Data pipeline + Model 1, start recording</td>
+<td>1.1 → 1.6</td>
+<td>Spark job → Parquet, Model 1 benchmark (9 runs), rep counting, first own sessions recorded</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Model 2 + live capture</td>
+<td>2.1 → 2.6</td>
+<td>ST-GCN vs baselines on EC3D, live pose + heart rate through Kafka, Models 1–2 on our own videos, Spark history job</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Model 3 + live coach + evaluation</td>
+<td>3.1 → 3.5</td>
+<td>Model 3 vs fixed-threshold rule, RQ1–RQ4 results, live demo with voice</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>If only two weeks remain:</strong> see section 4 at the end. Steps are marked <strong>MUST</strong> or <strong>SHOULD</strong>.</p>
+</blockquote>
+<hr />
+<h2 class="w1">Week 1 · Data pipeline and Model 1</h2>
+<h3>Step 1.1 · Environment and first commit <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Everyone can run the project from a clean clone; the first commit exists.</p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li>Create a virtual environment and install dependencies:
+    <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div></li>
+<li>Update <code>requirements.txt</code> to contain exactly (no versions pinned unless an install fails):
+    <code>numpy pandas pyarrow scipy scikit-learn matplotlib torch opencv-python mediapipe pyspark kafka-python pyttsx3 pytest jupyter markdown</code>.</li>
+<li>Install <strong>Java 17</strong> (free: Eclipse Temurin 17 JDK). Set <code>JAVA_HOME</code> and add <code>%JAVA_HOME%\bin</code> to <code>PATH</code>. Check: <code>java -version</code> shows 17.</li>
+<li>Spark on Windows needs <code>winutils.exe</code> to write files:<ul>
+<li>download <code>winutils.exe</code> and <code>hadoop.dll</code> for Hadoop 3.3 (GitHub repo <code>cdarlint/winutils</code>) into <code>C:\hadoop\bin\</code></li>
+<li>set <code>HADOOP_HOME=C:\hadoop</code>, add <code>C:\hadoop\bin</code> to <code>PATH</code></li>
+<li>create <code>C:\awc_tmp\spark</code> and use it as Spark's local dir</li>
+</ul>
+</li>
+<li>Add to <code>config.py</code>: <code>TMP = Path("C:/awc_tmp")</code>, <code>SPARK_LOCAL_DIR = TMP / "spark"</code>, and the MM-Fit split:
+    <div class="highlight"><pre><span></span><code><span class="n">MMFIT_SPLIT</span> <span class="o">=</span> <span class="p">{</span>
+   <span class="s2">"train"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"w01"</span><span class="p">,</span><span class="s2">"w02"</span><span class="p">,</span><span class="s2">"w03"</span><span class="p">,</span><span class="s2">"w04"</span><span class="p">,</span><span class="s2">"w06"</span><span class="p">,</span><span class="s2">"w07"</span><span class="p">,</span><span class="s2">"w08"</span><span class="p">,</span><span class="s2">"w16"</span><span class="p">,</span><span class="s2">"w17"</span><span class="p">,</span><span class="s2">"w18"</span><span class="p">],</span>
+   <span class="s2">"val"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"w14"</span><span class="p">,</span><span class="s2">"w15"</span><span class="p">,</span><span class="s2">"w19"</span><span class="p">],</span>
+   <span class="s2">"test_seen"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"w09"</span><span class="p">,</span><span class="s2">"w10"</span><span class="p">,</span><span class="s2">"w11"</span><span class="p">],</span>
+   <span class="s2">"test_unseen"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"w00"</span><span class="p">,</span><span class="s2">"w05"</span><span class="p">,</span><span class="s2">"w12"</span><span class="p">,</span><span class="s2">"w13"</span><span class="p">,</span><span class="s2">"w20"</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">MMFIT_CLASSES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"squats"</span><span class="p">,</span><span class="s2">"lunges"</span><span class="p">,</span><span class="s2">"bicep_curls"</span><span class="p">,</span><span class="s2">"situps"</span><span class="p">,</span><span class="s2">"pushups"</span><span class="p">,</span><span class="s2">"tricep_extensions"</span><span class="p">,</span>
+                <span class="s2">"dumbbell_rows"</span><span class="p">,</span><span class="s2">"jumping_jacks"</span><span class="p">,</span><span class="s2">"dumbbell_shoulder_press"</span><span class="p">,</span>
+                <span class="s2">"lateral_shoulder_raises"</span><span class="p">,</span><span class="s2">"non_activity"</span><span class="p">]</span>
+</code></pre></div></li>
+<li>Create <code>src/awc/spark.py</code> with <code>get_spark(app_name, cores="local[*]")</code> that builds a <code>SparkSession</code> with <code>spark.local.dir</code> = <code>SPARK_LOCAL_DIR</code>, <code>spark.sql.session.timeZone=UTC</code>, driver memory 4g.</li>
+<li>Create <code>src/awc/training/tracking.py</code>:<ul>
+<li><code>seed_everything(seed=42)</code> (python, numpy, torch)</li>
+<li><code>new_run(name, config) -&gt; Path</code>: creates <code>experiments/&lt;YYYYMMDD&gt;_&lt;name&gt;/</code>, writes <code>config.json</code> including the git commit hash</li>
+<li><code>save_metrics(run_dir, metrics: dict)</code></li>
+</ul>
+</li>
+<li>Register the pytest marker <code>data</code> in <code>pyproject.toml</code> and add <code>tests/conftest.py</code> that skips <code>data</code> tests when <code>data/raw/mm-fit</code> or <code>data/raw/ec3d/data_3D.pickle</code> is missing.</li>
+<li>Mark the existing tests in <code>tests/test_data.py</code> with <code>@pytest.mark.data</code>.</li>
+<li>Write <code>docs/decisions.md</code> (empty template: date, decision, options considered, why). Every important choice gets one entry.</li>
+</ol>
+<p><strong>Tests</strong> (<code>tests/test_env.py</code>)</p>
+<ul>
+<li><code>test_imports</code>: numpy, pandas, torch, cv2, mediapipe, pyspark import without error.</li>
+<li><code>test_spark_roundtrip</code>: <code>get_spark("test", "local[2]")</code> writes a 3-row DataFrame to Parquet in <code>C:\awc_tmp\test_parquet</code> and reads it back (3 rows).</li>
+<li><code>test_tracking</code>: <code>new_run("unit", {...})</code> creates the folder with <code>config.json</code> containing <code>git_commit</code>; clean up afterwards.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check"><code>java -version</code> → 17</li>
+<li class="check"><code>python -m pytest -q</code> green, <code>python -m pytest -q -m data</code> green</li>
+<li class="check"><code>git status</code> shows no <code>.npy</code>, <code>.pickle</code>, <code>.zip</code>, <code>data/raw</code> files</li>
+<li class="check">First commit done: <code>Step 1.1: environment, Spark helper, run tracking</code></li>
+</ul>
+<hr />
+<h3>Step 1.2 · Capture choice and recording protocol <span class="tag must">MUST</span> · start recording this week</h3>
+<p><strong>Goal.</strong> Decide how phone video and watch heart rate reach the PC <strong>without writing a watch app</strong>, and start recording our own sessions now. Model 3 needs many sessions per person, so recording cannot wait until week 3.</p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><strong>Phone camera → PC.</strong> Install the free Android app <em>IP Webcam</em> on the Poco X3 Pro. It serves <code>http://&lt;phone-ip&gt;:8080/video</code>. On the PC, read it with <code>cv2.VideoCapture(url)</code>. Measure the real frame rate over 30 s (target ≥ 25 fps at 720p). Fallback: DroidCam (free) over USB.</li>
+<li><strong>Watch heart rate → PC.</strong> Test these options in order and keep the first one that passes the criteria. They are third-party apps, so check that the feature still exists and is free before relying on it:<ul>
+<li>(A) <em>Pulsoid</em> (Wear OS app + WebSocket API with a personal token)</li>
+<li>(B) <em>HypeRate</em> (Wear OS app + WebSocket API)</li>
+<li>(C) <em>Sensor Logger</em> with Wear OS companion (HTTP push or CSV export)</li>
+<li>(D) <strong>fallback:</strong> Samsung Health / Health Connect export after the session, aligned on the PC clock with a start marker</li>
+<li><strong>Pass criteria:</strong> free, at least one value every 2 s, a timestamp per value, no custom watch code</li>
+<li><strong>Bonus:</strong> check whether the option also gives wrist accelerometer/gyroscope. If not, Model 1 runs on pose only in live mode (supported by the modality dropout in step 1.5).</li>
+</ul>
+</li>
+<li>Write the decision in <code>docs/decisions.md</code> (what was tested, what passed, latency measured).</li>
+<li>Create <code>scripts/record_session.py</code> (runs on the PC during training):<ul>
+<li>arguments: <code>--user {yassine,partner} --session-id s01 --camera-url ... --hr-source {pulsoid,hyperate,sensorlogger,none}</code></li>
+<li>records video from the camera URL to <code>video.mp4</code> with OpenCV <strong>and</strong> writes <code>frames.csv</code> (<code>frame, pc_ts_ms</code>): every frame gets the PC timestamp, so no clock sync with the phone is needed</li>
+<li>receives heart rate and writes <code>hr.csv</code> (<code>pc_ts_ms, bpm</code>) with the PC receive time</li>
+<li>keyboard during the session: <code>s</code> = set starts, <code>e</code> = set ends, then it asks: exercise, reps done, RPE 1–10, form label (<code>correct</code> or an EC3D mistake name, default <code>correct</code>); appends to <code>sets.csv</code> (<code>set, exercise, start_ms, end_ms, reps, rpe, form_label</code>)</li>
+<li>writes <code>meta.json</code> (user, date, phone position, camera angle, body weight optional)</li>
+<li>output folder: <code>data/raw/own_recordings/&lt;user&gt;/&lt;YYYY-MM-DD&gt;_&lt;session-id&gt;/</code></li>
+</ul>
+</li>
+<li>Write <code>docs/recording_protocol.md</code> and follow it for every session:<ul>
+<li><strong>Phone:</strong> about 45° in front of the person, hip height, 2–3 m, whole body visible. Mark the tripod position on the floor with tape; same spot every session.</li>
+<li><strong>Normal session (≈ 30 min):</strong> 5 min warm-up, then 3 sets of squats and 3 sets of lunges, each set taken to RPE 8–9 (hard but <strong>safe</strong>: bodyweight or light load, stop immediately on pain), 90 s rest, RPE typed after each set.</li>
+<li><strong>Form session (once a week):</strong> 8 reps correct + 8 reps of each EC3D mistake (squat: feet too wide, knees inward, not low enough, front bent; lunge: not low enough, knee passes toe), each labelled in <code>sets.csv</code>.</li>
+<li><strong>Targets by the end of week 3:</strong> ≥ 6 normal sessions and ≥ 2 form sessions <strong>per person</strong>.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>tests/test_record_session.py</code> (no camera needed): the CSV writers produce the right headers; <code>sets.csv</code> rows validate (RPE 1–10, known exercise, known form label); folder naming follows the pattern.</li>
+<li>Manual: a 2-minute dry run; <code>video.mp4</code> plays, <code>frames.csv</code> has ≈ fps × 120 rows, <code>hr.csv</code> has ≥ 60 rows.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check">Decision recorded in <code>docs/decisions.md</code></li>
+<li class="check">Dry run passes the manual check</li>
+<li class="check"><strong>At least 2 real sessions recorded per person by validation 1</strong></li>
+<li class="check">Commit: <code>Step 1.2: capture decision, recorder script, recording protocol</code></li>
+</ul>
+<hr />
+<h3>Step 1.3 · Sync MM-Fit streams with Spark → Parquet <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> One synced table per session at 30 Hz: pose + watch IMU + heart rate + label, written as Parquet by a Spark job. This is the big data stage.</p>
+<p><strong>Files</strong>: <code>src/awc/features/sync.py</code>, <code>src/awc/bigdata/build_interim.py</code>, <code>tests/test_sync.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li>In <code>features/sync.py</code> write pure pandas/numpy functions (testable without Spark):<ul>
+<li><code>pose_to_frame(pose_2d) -&gt; DataFrame</code> with columns <code>frame, x0..x17, y0..y17</code>; flip y (<code>y = -y_pixel</code>) so <strong>y points up</strong> everywhere in the project.</li>
+<li><code>imu_to_frame(arr, prefix) -&gt; DataFrame</code>: IMU rows already carry the <code>frame</code> index; group by frame and take the mean → <code>frame, {prefix}_x, _y, _z</code> (≈ 3.3 samples per frame).</li>
+<li><code>hr_to_frame(arr, frames) -&gt; DataFrame</code>: linear interpolation of bpm on the given frames; <code>hr_mask = 1</code> where a real value exists within ±5 s (150 frames), else <code>hr = NaN, hr_mask = 0</code>. A session without an HR file → all <code>hr_mask = 0</code>.</li>
+<li><code>attach_labels(df, labels) -&gt; df</code>: adds <code>exercise</code> (from the set containing the frame, else <code>non_activity</code>), <code>set_id</code> (−1 outside sets), <code>set_reps</code>.</li>
+<li><code>sync_session(session_id) -&gt; DataFrame</code>: loads streams with <code>awc.data.mmfit</code>, starts from pose frames (the reference clock), left-joins IMU and HR on <code>frame</code>, attaches labels, adds <code>session</code> and <code>split</code> (from <code>MMFIT_SPLIT</code>, w-id not in any list → <code>"unused"</code>).</li>
+</ul>
+</li>
+<li>In <code>bigdata/build_interim.py</code>:<ul>
+<li>Spark job: <code>spark.createDataFrame([(s,) for s in sessions])</code> → <code>groupBy("session").applyInPandas(sync_fn, schema)</code> → write <code>data/interim/mmfit_synced/</code> partitioned by <code>session</code>.</li>
+<li>Flags: <code>--cores local[4]</code>, <code>--no-spark</code> (runs the same <code>sync_session</code> with plain pandas, for debugging), <code>--sessions w00 w01</code> (subset).</li>
+<li>At the end print and save <code>data/interim/mmfit_synced_summary.json</code>: rows per session, % frames with IMU, % with HR, rows per class, runtime.</li>
+</ul>
+</li>
+<li><strong>Big data measurement</strong> (needed for the report): run with <code>local[1]</code>, <code>local[2]</code>, <code>local[4]</code> and save runtimes in <code>experiments/&lt;date&gt;_spark_scaling/metrics.json</code>.</li>
+</ol>
+<p><strong>Tests</strong> (<code>tests/test_sync.py</code>)</p>
+<ul>
+<li><code>test_imu_to_frame_mean</code>: synthetic IMU with 3 rows on frame 10 → one row with the mean.</li>
+<li><code>test_hr_interpolation_and_mask</code>: HR at frames 0 and 60 → value at 30 is the midpoint; frames &gt; 150 away get mask 0.</li>
+<li><code>test_attach_labels</code>: frames inside / outside a set get the right <code>exercise</code> and <code>set_id</code>.</li>
+<li><code>test_pose_y_flipped</code>: head y &gt; ankle y after conversion.</li>
+<li><code>@data test_sync_w00</code>: rows = number of pose frames in w00 (63,918); no NaN in pose columns; <code>hr_mask</code> mean &gt; 0.9; 30 distinct <code>set_id ≥ 0</code>.</li>
+<li><code>@data test_session_without_hr</code>: w05 has <code>hr_mask == 0</code> everywhere.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check"><code>data/interim/mmfit_synced/</code> has 21 session partitions, total ≈ 1.46 M rows</li>
+<li class="check">Summary JSON written; scaling runtimes saved</li>
+<li class="check">Tests green</li>
+<li class="check">README updated · commit <code>Step 1.3: Spark job syncing MM-Fit streams to Parquet</code></li>
+</ul>
+<hr />
+<h3>Step 1.4 · One skeleton for all sources + windows <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> MM-Fit, EC3D and live MediaPipe skeletons all become the same normalized 18-joint 2D skeleton. Then cut 3-second windows for Model 1.</p>
+<p><strong>Files</strong>: <code>src/awc/features/skeleton.py</code>, <code>src/awc/features/windows.py</code>, <code>tests/test_skeleton.py</code>, <code>tests/test_windows.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li>Canonical skeleton = <strong>COCO-18 order</strong> (<code>awc.data.mmfit.JOINTS_2D</code>), coordinates <code>(x right, y up)</code>.</li>
+<li>Mappings in <code>skeleton.py</code>:<ul>
+<li><code>EC3D_TO_COCO18 = [0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18]</code> (BODY_25 indices; BODY_25 index 8 is mid-hip and is dropped)</li>
+<li><code>MEDIAPIPE_TO_COCO18</code>: nose 0; <strong>neck = mean of 11 and 12</strong>; r_shoulder 12, r_elbow 14, r_wrist 16, l_shoulder 11, l_elbow 13, l_wrist 15, r_hip 24, r_knee 26, r_ankle 28, l_hip 23, l_knee 25, l_ankle 27, r_eye 5, l_eye 2, r_ear 8, l_ear 7. MediaPipe image y points down → flip.</li>
+<li><code>BONES</code> (17 pairs, same list as the presentation): used by the graph network in week 2.</li>
+</ul>
+</li>
+<li><code>normalize(seq)</code> for <code>seq</code> of shape (T, 18, 2):<ul>
+<li>origin = mid-hip = mean of r_hip (8) and l_hip (11), per frame</li>
+<li>scale = <strong>median over the sequence</strong> of the neck→mid-hip distance (torso length); divide all coordinates by it</li>
+<li>return float32; must be invariant to translation and uniform scaling</li>
+</ul>
+</li>
+<li><code>project_ec3d(p3d, yaw_deg)</code> for EC3D (T, 3, 25): find the facing direction from toes minus heels (same as <code>scripts/analysis/angle_experiment.py</code>), rotate by <code>yaw_deg</code>, keep horizontal coordinate as x and z as y → (T, 18, 2) via <code>EC3D_TO_COCO18</code>.</li>
+<li><code>mirror(seq)</code>: flip x and swap left/right joints (augmentation).</li>
+<li><code>windows.py</code>:<ul>
+<li><code>make_windows(df, length=90, hop=45)</code> per session from the synced Parquet</li>
+<li>outputs: <code>X_pose</code> (N, 90, 36) normalized, <code>X_imu</code> (N, 90, 6) = acc + gyr, <code>imu_mask</code> (N,), <code>y</code> (N,) = class index of the <strong>center frame</strong>, <code>session</code> (N,), <code>start_frame</code> (N,)</li>
+<li>drop windows where pose has NaN; windows where IMU is missing keep <code>imu_mask = 0</code> and zeros</li>
+<li>IMU standardization: mean/std computed <strong>on the train split only</strong>, saved to <code>data/processed/imu_stats.json</code>, applied to all splits</li>
+<li>save <code>data/processed/m1_windows.npz</code></li>
+<li>print the count per split and class (expected ≈ 32,000 windows in total)</li>
+</ul>
+</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_normalize_invariance</code>: random skeleton, then translated and scaled ×2.5 → identical output (tolerance 1e-5).</li>
+<li><code>test_mapping_lengths</code>: both mappings give 18 joints; MediaPipe neck = midpoint of shoulders.</li>
+<li><code>test_project_front_vs_side</code>: a synthetic T-pose seen at 0° has wide shoulders; at 90° shoulder width ≈ 0.</li>
+<li><code>test_mirror_twice_identity</code>.</li>
+<li><code>test_window_count</code>: 300 synthetic frames, length 90, hop 45 → 5 windows; center labels correct.</li>
+<li><code>@data test_windows_file</code>: npz exists, shapes consistent, no NaN, all 11 classes present in train.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check"><code>m1_windows.npz</code> and <code>imu_stats.json</code> written; counts printed and pasted in the README log</li>
+<li class="check">Tests green · commit <code>Step 1.4: unified skeleton, EC3D projection, Model 1 windows</code></li>
+</ul>
+<hr />
+<h3>Step 1.5 · Model 1: recognition benchmark + rep counting <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Train Model 1 (which exercise), compare 3 architectures × 3 input sets, and count reps inside each set. Answers <strong>RQ1</strong>.</p>
+<p><strong>Files</strong>: <code>src/awc/models/m1_recognition.py</code>, <code>src/awc/training/train_m1.py</code>, <code>src/awc/features/reps.py</code>, <code>src/awc/evaluation/metrics.py</code>, <code>tests/test_m1.py</code>, <code>tests/test_reps.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>m1_recognition.py</code>: three encoders with the same interface <code>forward(x: (B, T, C)) -&gt; (B, D)</code>:<ul>
+<li><code>CNN1DEncoder</code>: 3 × [Conv1d(k=5) → BatchNorm → ReLU → MaxPool(2)], channels 64-128-128, global average pool → 128</li>
+<li><code>LSTMEncoder</code>: 2-layer bidirectional LSTM, hidden 64, mean over time → 128</li>
+<li><code>TransformerEncoder</code>: linear to 64, learned positional embedding (90), 2 layers, 4 heads, dropout 0.1, mean pool → 64</li>
+<li><code>M1Model(arch, inputs)</code>: <code>inputs ∈ {pose, imu, both}</code>; one encoder per used modality; fusion = concat(pose_emb, imu_emb × imu_mask, imu_mask) → Linear 128 → ReLU → Dropout 0.3 → Linear 11</li>
+<li><strong>Modality dropout</strong>: in training with <code>inputs=both</code>, set <code>imu_mask = 0</code> for 30 % of samples. This lets the same model run on pose only in live mode if the watch gives no IMU.</li>
+</ul>
+</li>
+<li><code>train_m1.py</code> (argparse): <code>--arch {cnn,lstm,transformer} --inputs {pose,imu,both} --epochs 30 --batch 128 --lr 1e-3 --seed 42 --quick</code><ul>
+<li>loss: cross-entropy with class weights (inverse frequency, train split)</li>
+<li>early stopping on <strong>validation macro-F1</strong>, patience 5; keep the best checkpoint</li>
+<li>evaluate on <code>test_unseen</code> (main) and <code>test_seen</code></li>
+<li>save run folder: metrics (accuracy, macro-F1, per-class F1 for both tests, train time, parameter count), <code>confusion_test_unseen.png</code>, checkpoint in <code>models/</code></li>
+<li><code>--quick</code>: 512 train windows, 1 epoch (used by tests)</li>
+</ul>
+</li>
+<li><code>scripts/run_m1_benchmark.py</code>: runs the 9 combinations and writes <code>reports/m1_benchmark.md</code> (table: arch × inputs → macro-F1 unseen, accuracy, params, train minutes).</li>
+<li><code>features/reps.py</code>, rep counting and boundaries inside a set (exercise-agnostic):<ul>
+<li>input: normalized pose of one set (T, 18, 2)</li>
+<li>signal = first principal component of the 36 coordinates over the set (the main movement direction), smoothed with a moving average of 9 frames</li>
+<li><code>find_peaks</code> (scipy) with <code>distance = 0.6 s × 30</code> and <code>prominence = 0.3 × std(signal)</code>; also try the negated signal and keep the version whose count has the lower variance of peak-to-peak intervals</li>
+<li>return <code>count</code>, <code>boundaries</code> = list of (start_frame, end_frame) per rep (valleys between peaks)</li>
+<li><code>scripts/eval_rep_counting.py</code>: run on every labelled MM-Fit set; table per exercise: exact %, within ±1 %, mean absolute error → <code>reports/rep_counting.md</code> + <code>experiments/&lt;date&gt;_rep_counting/metrics.json</code></li>
+</ul>
+</li>
+<li><code>evaluation/metrics.py</code>: <code>macro_f1</code>, <code>per_class_f1</code>, <code>confusion(y, p, labels)</code>, <code>plot_confusion(...)</code>, <code>rep_count_errors(...)</code>.</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_encoders_shapes</code>: each encoder maps (4, 90, 36) to (4, D).</li>
+<li><code>test_m1_forward_all_inputs</code>: <code>M1Model</code> returns (B, 11) for pose, imu, both; works with <code>imu_mask = 0</code>.</li>
+<li><code>test_one_step_decreases_loss</code>: 10 optimizer steps on a fixed tiny batch reduce the loss.</li>
+<li><code>test_train_quick</code>: <code>train_m1.py --quick</code> finishes and writes <code>metrics.json</code>.</li>
+<li><code>test_rep_count_sine</code>: a synthetic skeleton moving with 10 sine cycles → count 10.</li>
+<li><code>@data test_rep_count_mmfit_squats</code>: squat sets of w00 → mean absolute error ≤ 1.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check">9 runs logged; <code>reports/m1_benchmark.md</code> written</li>
+<li class="check"><strong>Target:</strong> best macro-F1 on <code>test_unseen</code> ≥ 0.85. Report the real number either way; if lower, write in the README what was tried.</li>
+<li class="check">Rep counting MAE ≤ 0.5 rep per set averaged over exercises (report per exercise)</li>
+<li class="check">Tests green · commit <code>Step 1.5: Model 1 benchmark and rep counting</code></li>
+</ul>
+<hr />
+<h3>Step 1.6 · Validation 1 package <span class="tag must">MUST</span></h3>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>reports/week1.md</code> (one page): what was built, the Spark scaling numbers, the M1 benchmark table, rep-counting table, number of own sessions recorded, problems met and decisions taken.</li>
+<li>Figures in <code>reports/figures/</code>: M1 confusion matrix (best model), rep counting error per exercise, Spark runtime vs cores.</li>
+<li>README: steps 1.1–1.5 marked done with dates; log lines with key numbers.</li>
+<li>Demo commands that work from a clean terminal:
+    <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>awc.bigdata.build_interim<span class="w"> </span>--sessions<span class="w"> </span>w00<span class="w"> </span>--cores<span class="w"> </span>local<span class="o">[</span><span class="m">2</span><span class="o">]</span>
+python<span class="w"> </span>-m<span class="w"> </span>awc.training.train_m1<span class="w"> </span>--arch<span class="w"> </span>cnn<span class="w"> </span>--inputs<span class="w"> </span>both<span class="w"> </span>--quick
+python<span class="w"> </span>scripts/eval_rep_counting.py
+</code></pre></div></li>
+</ol>
+<p><strong>Acceptance</strong>: the user confirms validation 1 content. Commit <code>Week 1 validation package</code>.</p>
+<hr />
+<h2 class="w2">Week 2 · Model 2 and live capture</h2>
+<h3>Step 2.1 · EC3D rep dataset for Model 2 <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Every EC3D rep becomes a fixed-size 2D skeleton sequence that looks like what our phone sees.</p>
+<p><strong>Files</strong>: <code>src/awc/features/form_dataset.py</code>, <code>tests/test_form_dataset.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li>Load with <code>awc.data.ec3d.load()</code> and <code>reps()</code>. Drop code 10 (unknown) → 362 reps.</li>
+<li>For each rep: <code>project_ec3d</code> at a yaw angle → <code>normalize</code> → <strong>resample to T = 64 frames</strong> (linear interpolation over time).</li>
+<li>Labels: <code>exercise ∈ {squat, lunge, plank}</code> and <code>mistake</code> = index inside that exercise (squat 5 classes, lunge 3, plank 3); also <code>is_correct</code> (binary).</li>
+<li>Angles:<ul>
+<li><strong>train:</strong> yaw ∈ {0, 15, 30, 45, 60, 75, 90} × {normal, mirrored}</li>
+<li><strong>test:</strong> 45° only (main) and the full sweep (robustness, reported separately)</li>
+</ul>
+</li>
+<li>Online augmentation (train only, in the PyTorch Dataset): scale ×U(0.9, 1.1), time-warp ×U(0.8, 1.2) then resample back to 64, Gaussian noise σ = 0.01.</li>
+<li>Folds: <strong>leave one person out</strong> (4 folds). A person never appears in train and test of the same fold.</li>
+<li>Save <code>data/processed/m2_reps.npz</code> (base 3D-projected arrays + metadata); angles and augmentation are applied in the Dataset so the file stays small.</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_resample_length</code>: any input length → 64 frames; endpoints preserved.</li>
+<li><code>test_no_subject_leak</code>: for each fold, train subjects ∩ test subjects = ∅.</li>
+<li><code>test_label_spaces</code>: squat labels in 0..4, lunge 0..2, plank 0..2.</li>
+<li><code>@data test_rep_counts</code>: 362 reps after dropping code 10; per exercise: squat 132 (141 minus 9 unknown), lunge 127, plank 103.</li>
+</ul>
+<p><strong>Acceptance</strong>: tests green · commit <code>Step 2.1: EC3D rep dataset with projections and LOSO folds</code>.</p>
+<hr />
+<h3>Step 2.2 · Model 2: ST-GCN vs LSTM vs random forest <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Judge each rep: correct or which mistake. Compare a graph network with two baselines.</p>
+<p><strong>Files</strong>: <code>src/awc/models/m2_form.py</code>, <code>src/awc/features/form_features.py</code>, <code>src/awc/training/train_m2.py</code>, <code>tests/test_m2.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>form_features.py</code>: move the 6 hand-made measurements from <code>scripts/analysis/extract_ec3d.py</code> here (knee width, feet width, depth, trunk-vs-shin angle, knee-past-toe, hip sag) and add 2D versions computed on the projected skeleton. The analysis script then imports them (no duplicated code).</li>
+<li><code>m2_form.py</code>:<ul>
+<li>adjacency <code>A</code> from <code>BONES</code> + self-loops, normalized <code>D^-1/2 A D^-1/2</code> (18 × 18)</li>
+<li><code>STGCNBlock(c_in, c_out)</code>: spatial graph conv (<code>X·A·W</code>) → BatchNorm → ReLU → temporal Conv (kernel 9 over time) → BatchNorm → residual → ReLU</li>
+<li><code>STGCN</code>: input (B, 2, 64, 18) → blocks 2→64, 64→64, 64→128 (stride 2 in time on the last) → global average pool → <strong>one head per exercise</strong> (5/3/3 outputs). The exercise is known (from Model 1), so each sample uses its exercise head.</li>
+<li><code>AngleLSTM</code> baseline: per frame 9 joint angles (both knees, hips, elbows, shoulders + trunk lean) → 2-layer LSTM hidden 64 → per-exercise heads</li>
+<li>random forest baseline: <code>form_features</code> → sklearn <code>RandomForestClassifier(300)</code></li>
+</ul>
+</li>
+<li><code>train_m2.py --model {stgcn,lstm,rf} --epochs 60 --lr 1e-3 --quick</code>:<ul>
+<li>4 LOSO folds; fixed epochs (no early stopping, too little data for a validation split)</li>
+<li>metrics per fold and mean ± std: accuracy per exercise, macro-F1, <strong>recall of "not correct"</strong> (binary: any mistake vs correct), test at 45° and at every angle</li>
+<li>outputs: run folder with metrics, a bar chart of accuracy per exercise for the 3 models, and a checkpoint trained on <strong>all 4 people</strong> (used live)</li>
+</ul>
+</li>
+<li><code>reports/m2_benchmark.md</code>: table models × exercise (mean ± std), plus the angle robustness curve.</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_adjacency_symmetric_normalized</code></li>
+<li><code>test_stgcn_forward</code>: (8, 2, 64, 18) + exercise ids → correct output size per exercise head</li>
+<li><code>test_overfit_tiny</code>: 16 reps, 100 steps → train accuracy 100 %</li>
+<li><code>test_train_quick</code> for stgcn and rf</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check">All three models benchmarked with LOSO</li>
+<li class="check"><strong>Target:</strong> ST-GCN beats the random forest on mean accuracy for squat (&gt; 53 %); report all numbers honestly</li>
+<li class="check">Recall of mistakes reported (missing a bad rep is the worst error)</li>
+<li class="check">Commit <code>Step 2.2: Model 2 benchmark on EC3D</code></li>
+</ul>
+<hr />
+<h3>Step 2.3 · Kafka + live producers (pose and heart rate) <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Live streams from the phone and the watch reach the laptop through Kafka.</p>
+<p><strong>Files</strong>: <code>src/awc/streaming/schemas.py</code>, <code>pose_producer.py</code>, <code>hr_producer.py</code>, <code>monitor.py</code>, <code>sink.py</code>, <code>tests/test_streaming.py</code>, <code>docs/kafka_setup.md</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><strong>Kafka setup</strong> (<code>docs/kafka_setup.md</code>):<ul>
+<li><strong>Option A (simplest):</strong> Docker Desktop (free for personal/education), <code>docker run -p 9092:9092 apache/kafka:latest</code></li>
+<li><strong>Option B:</strong> Apache Kafka 4.x binaries in KRaft mode, using <code>bin\windows\*.bat</code>, with <code>log.dirs=C:/awc_tmp/kafka</code></li>
+<li>Write down which one works.</li>
+</ul>
+</li>
+<li>Topics: <code>pose.keypoints</code>, <code>watch.hr</code>, <code>watch.imu</code> (only if step 1.2 found an IMU source), <code>coach.events</code>. 1 partition each.</li>
+<li><code>schemas.py</code>: dataclasses + <code>to_json</code> / <code>from_json</code> + <code>validate</code>:<ul>
+<li><code>pose.keypoints</code>: <code>{"session", "frame", "pc_ts_ms", "kp": [[x, y, visibility] × 18]}</code> (already mapped to COCO-18, image coordinates; normalization happens in the consumer)</li>
+<li><code>watch.hr</code>: <code>{"session", "pc_ts_ms", "bpm"}</code></li>
+<li><code>coach.events</code>: <code>{"session", "pc_ts_ms", "type": "rep|form|risk|say", "payload": {...}}</code></li>
+</ul>
+</li>
+<li><code>pose_producer.py --camera-url ... | --video file.mp4 --session ...</code>: OpenCV frames → MediaPipe Pose Landmarker (Tasks API, model <code>pose_landmarker_full.task</code>, CPU) → <code>MEDIAPIPE_TO_COCO18</code> → Kafka. With <code>--video</code> it <strong>replays a recorded file at real speed</strong>: this is the safety net for the demo.</li>
+<li><code>hr_producer.py --source {pulsoid,hyperate,sensorlogger,replay} --session ...</code>: the source chosen in step 1.2, or replay of an <code>hr.csv</code>.</li>
+<li><code>monitor.py</code>: consumes all topics and prints, every 5 s, messages per second per topic and median latency (<code>now − pc_ts_ms</code>).</li>
+<li><code>sink.py</code>: consumes topics and appends to Parquet in <code>data/raw/own_recordings/&lt;user&gt;/&lt;session&gt;/stream/</code>, so live sessions are also recorded.</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_schema_roundtrip</code> for every message type; <code>validate</code> rejects wrong joint counts, missing fields, bpm outside 30–230.</li>
+<li><code>test_mediapipe_mapping_on_image</code>: on a test image of a standing person in <code>tests/assets/</code> (take one photo), 18 joints are returned and the head is above the ankles.</li>
+<li>Integration (<code>@pytest.mark.kafka</code>, skipped when no broker): produce 100 pose messages, consume them in order, median latency &lt; 200 ms.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check">Live: monitor shows ≈ 25–30 msg/s on <code>pose.keypoints</code> and ≈ 1 msg/s on <code>watch.hr</code> for 2 minutes</li>
+<li class="check">Replay of a recorded session works with the broker</li>
+<li class="check">Commit <code>Step 2.3: Kafka streaming of pose and heart rate</code></li>
+</ul>
+<hr />
+<h3>Step 2.4 · Our recordings through Models 1 and 2 <span class="tag should">SHOULD</span> · first look at RQ4</h3>
+<p><strong>Goal.</strong> Run the trained models on our own videos and compare with the dataset results.</p>
+<p><strong>Files</strong>: <code>scripts/process_recording.py</code>, <code>src/awc/data/recordings.py</code> (implement <code>load</code>), <code>tests/test_recordings.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>process_recording.py &lt;session folder&gt;</code>: <code>video.mp4</code> → MediaPipe → COCO-18 → normalize → <code>pose.parquet</code> (frame, pc_ts_ms, joints); join <code>hr.csv</code> by nearest PC timestamp (±2 s) → synced table like MM-Fit interim (same columns). Write it to <code>data/interim/own/&lt;user&gt;/&lt;session&gt;.parquet</code>.</li>
+<li><code>recordings.load(session_id)</code> returns that table plus <code>sets.csv</code>.</li>
+<li>Model 1 on own sets: exercise accuracy (squats vs lunges vs non_activity, pose only, since we may not have the watch IMU) and rep counting MAE against the reps typed in <code>sets.csv</code>.</li>
+<li>Model 2 on form sessions: accuracy per mistake against <code>form_label</code>.</li>
+<li><code>reports/rq4_first_look.md</code>: dataset vs own-device numbers side by side.</li>
+</ol>
+<p><strong>Acceptance</strong>: tables written, even if numbers are low (that is a valid RQ4 finding) · commit <code>Step 2.4: Models 1-2 on our recordings</code>.</p>
+<hr />
+<h3>Step 2.5 · Spark history job: rep table + personal baselines <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Build the per-rep history that Model 3 learns from, with Spark.</p>
+<p><strong>Files</strong>: <code>src/awc/bigdata/history.py</code>, <code>tests/test_history.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><strong>Rep table</strong>, one row per rep, from MM-Fit interim (squats, lunges, and every other exercise where rep counting works) and own interim. Columns:<ul>
+<li><code>source, user, session, session_date, exercise, set_id, rep_idx, n_reps_in_set</code></li>
+<li><code>duration_s, rom</code> (range of the main signal), <code>mean_speed = rom / duration</code></li>
+<li><code>form_score</code> (Model 2 probability of "correct"; NaN for exercises Model 2 doesn't cover)</li>
+<li><code>hr_mean, hr_end, hr_rise</code> (hr_end − HR at set start), <code>hr_mask</code></li>
+<li><code>rpe</code> (own data only)</li>
+<li>For MM-Fit <code>user = session</code> (the session→person mapping is unknown; treat each session as its own history).</li>
+</ul>
+</li>
+<li><strong>Personal baselines</strong> with Spark window functions:<ul>
+<li><code>Window.partitionBy("user", "exercise").orderBy("session_date").rowsBetween(Window.unboundedPreceding, -1)</code></li>
+<li><strong>strictly past sessions, no leakage</strong></li>
+<li>for each session: mean and std of the first-3-reps duration, ROM, speed and HR rise in previous sessions</li>
+<li>first session of a user: baseline = NaN → flagged <code>has_baseline = 0</code></li>
+</ul>
+</li>
+<li>Write <code>data/processed/rep_table.parquet</code> and <code>data/processed/baselines.parquet</code>; print the row counts.</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_baseline_uses_only_past</code>: synthetic user with 3 sessions → session 3's baseline equals the mean of sessions 1–2, session 1's baseline is NaN.</li>
+<li><code>test_rep_table_columns</code>: schema and dtypes.</li>
+<li><code>@data</code>: rep table has &gt; 5,000 MM-Fit rows.</li>
+</ul>
+<p><strong>Acceptance</strong>: both Parquet files exist; tests green · commit <code>Step 2.5: Spark rep history and personal baselines</code>.</p>
+<hr />
+<h3>Step 2.6 · Validation 2 package <span class="tag must">MUST</span></h3>
+<ul>
+<li><code>reports/week2.md</code>: M2 benchmark (vs RF baseline and vs the authors' 90.9 %), angle robustness, Kafka throughput and latency, RQ4 first look, number of own sessions so far.</li>
+<li>Live demo: <code>monitor.py</code> running with the phone and watch; then a replay.</li>
+<li>README updated · commit <code>Week 2 validation package</code>.</li>
+</ul>
+<hr />
+<h2 class="w3">Week 3 · Model 3, live coach, evaluation</h2>
+<h3>Step 3.1 · Model 3 dataset and labels <span class="tag must">MUST</span></h3>
+<p><strong>Goal.</strong> Turn the rep history into sequences with fatigue and risk labels.</p>
+<p><strong>Files</strong>: <code>src/awc/features/fatigue_dataset.py</code>, <code>tests/test_fatigue_dataset.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li>One sample = <strong>one set</strong> = a sequence of reps; per-rep features:<ul>
+<li><code>duration, rom, mean_speed, form_score, hr_end, hr_rise, rep_idx / n, time since set start</code></li>
+<li>masks for missing <code>form_score</code> and HR</li>
+</ul>
+</li>
+<li>Two normalizations (this is the RQ3 comparison):<ul>
+<li><strong>general:</strong> z-score with global train statistics</li>
+<li><strong>personal:</strong> z-score with the user's baseline from step 2.5 (fallback to global when <code>has_baseline = 0</code>)</li>
+</ul>
+</li>
+<li>Labels:<ul>
+<li><strong>fatigue score</strong> (all data): <code>rep_idx / (n − 1)</code> = position in the set (weak label, 0 fresh → 1 tired)</li>
+<li><strong>breakdown event</strong> (own data, and MM-Fit as a weak version): the first rep where speed has dropped ≥ 20 % vs the mean of the first 2 reps <strong>or</strong> <code>form_score &lt; 0.5</code>. Make the 20 % a parameter.</li>
+<li><strong>risk label</strong> per rep: 1 if a breakdown happens at this rep or within the next 2 reps</li>
+<li><strong>RPE</strong> per set (own data): used only for validation, never for training</li>
+</ul>
+</li>
+<li>Splits:<ul>
+<li>MM-Fit: same session split as Model 1</li>
+<li>own data: <strong>time-ordered per user</strong>, the last 2 sessions of each person are the test set</li>
+</ul>
+</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_fatigue_label_range</code>: 0 to 1, increasing.</li>
+<li><code>test_breakdown_detection</code>: synthetic speeds [1, 1, 0.95, 0.85, 0.78] with a 20 % threshold → breakdown at index 4.</li>
+<li><code>test_personal_norm_fallback</code>: no baseline → global stats used.</li>
+<li><code>test_time_split</code>: test sessions are later than all train sessions of the same user.</li>
+</ul>
+<p><strong>Acceptance</strong>: dataset built, counts printed · commit <code>Step 3.1: Model 3 sequences and labels</code>.</p>
+<hr />
+<h3>Step 3.2 · Model 3 training and the RQ2 / RQ3 comparisons <span class="tag must">MUST</span> · our contribution</h3>
+<p><strong>Files</strong>: <code>src/awc/models/m3_fatigue.py</code>, <code>src/awc/training/train_m3.py</code>, <code>tests/test_m3.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>M3Model</code>: 1-layer GRU (hidden 32) over reps → two heads per rep: <code>fatigue</code> (sigmoid, MSE loss) and <code>risk</code> (sigmoid, BCE loss with positive weight). Small on purpose: little data.</li>
+<li>Training: pre-train on MM-Fit (fatigue + weak risk), then fine-tune on own train sessions. <code>--norm {general,personal} --hr {on,off}</code>.</li>
+<li>Compare <strong>four variants plus one rule</strong> (see the table after this list).</li>
+<li>Metrics on the own test sessions (and MM-Fit test for the weak version):<ul>
+<li>risk AUC</li>
+<li><strong>warning lead time</strong>: reps between the first alert (risk ≥ 0.7) and the breakdown; alerts after the breakdown count as 0</li>
+<li><strong>false alarms per session</strong>: alerts in sets with no breakdown</li>
+<li><strong>Spearman correlation</strong> between the predicted fatigue of the last rep of each set and the RPE typed for that set</li>
+</ul>
+</li>
+<li><code>reports/m3_results.md</code>: table of the 5 variants; <strong>RQ2 = B4 vs B3</strong>, <strong>RQ3 = B4 vs B2</strong>, existing apps = B4 vs B1. Per-person numbers too (only 2 people: say so).</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Variant</th>
+<th>What</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1 rule</td>
+<td>stop when speed loss &gt; 25 % (like the Metric VBT app)</td>
+<td>"existing apps"</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>general normalization, with HR</td>
+<td>RQ3 reference</td>
+</tr>
+<tr>
+<td>B3</td>
+<td>personal normalization, without HR</td>
+<td>RQ2 reference</td>
+</tr>
+<tr>
+<td><strong>B4 (ours)</strong></td>
+<td>personal normalization, with HR</td>
+<td>RQ2, RQ3</td>
+</tr>
+<tr>
+<td>B5</td>
+<td>general, without HR</td>
+<td>completeness</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_m3_forward_variable_length</code> (padding + mask)</li>
+<li><code>test_rule_baseline</code>: synthetic speeds trigger exactly at the 25 % point</li>
+<li><code>test_lead_time_metric</code>: hand-made example with a known lead time</li>
+<li><code>test_train_quick</code></li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check">All variants trained and evaluated on the same test sessions</li>
+<li class="check">Results reported honestly, including if B4 does not win (that is a valid finding)</li>
+<li class="check">Commit <code>Step 3.2: Model 3 and RQ2/RQ3 comparisons</code></li>
+</ul>
+<hr />
+<h3>Step 3.3 · Live coach with voice <span class="tag should">SHOULD</span></h3>
+<p><strong>Goal.</strong> Everything runs live: phone + watch → Kafka → Models 1-2-3 → spoken feedback.</p>
+<p><strong>Files</strong>: <code>src/awc/coach/live.py</code>, <code>src/awc/coach/policy.py</code>, <code>src/awc/coach/voice.py</code>, <code>tests/test_policy.py</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>live.py</code> consumes <code>pose.keypoints</code> and <code>watch.hr</code>:<ul>
+<li>ring buffer of 90 frames</li>
+<li>Model 1 every 15 frames; exercise = majority over the last 4 predictions</li>
+<li>online rep detection: the step 1.5 rep detector on a sliding buffer with 0.5 s lag</li>
+<li>when a rep ends: rep tensor → Model 2 (if squat/lunge) → per-rep features with the personal baseline → Model 3 → <code>policy.decide</code></li>
+</ul>
+</li>
+<li><code>policy.py</code>:<ul>
+<li>risk ≥ 0.7 → "Stop the set."</li>
+<li>risk 0.4–0.7 → "Slow down, control the movement."</li>
+<li>Model 2 mistake with probability ≥ 0.6 → the cue for that mistake (e.g. knees inward → "Push your knees out.")</li>
+<li>else "Good rep" spoken every 3 reps only</li>
+<li>never more than one message per rep</li>
+</ul>
+</li>
+<li><code>voice.py</code>: <code>pyttsx3</code> (free, offline, uses Windows voices), speaking in a background thread so it never blocks inference.</li>
+<li>Publish every decision on <code>coach.events</code>; log latency (rep end → speech start).</li>
+<li>Optional overlay window (OpenCV): skeleton, exercise, rep count, last message.</li>
+<li><code>--replay &lt;session folder&gt;</code> runs the whole chain on a recorded session: <strong>the demo backup</strong>.</li>
+</ol>
+<p><strong>Tests</strong></p>
+<ul>
+<li><code>test_policy_priorities</code>: stop beats form cue beats "good rep"; one message per rep.</li>
+<li><code>test_policy_debounce</code>.</li>
+<li>Manual: replay of a recorded set → spoken messages appear at the right reps; latency logged.</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li class="check">Live run of one set works end to end</li>
+<li class="check">Median latency rep end → voice &lt; 1 s</li>
+<li class="check">Replay mode works without the phone and watch</li>
+<li class="check">Commit <code>Step 3.3: live coach with voice feedback</code></li>
+</ul>
+<hr />
+<h3>Step 3.4 · Evaluation RQ1–RQ4 and final report <span class="tag must">MUST</span></h3>
+<p><strong>Files</strong>: <code>src/awc/evaluation/collect.py</code>, <code>reports/results.md</code>, <code>reports/final_report/</code></p>
+<p><strong>Instructions</strong></p>
+<ol>
+<li><code>collect.py</code> reads every <code>experiments/*/metrics.json</code> and writes <code>reports/results.md</code>:<ul>
+<li><strong>RQ1:</strong> M1 macro-F1 on unseen people, best architecture, camera vs watch vs both (sanity check), rep counting</li>
+<li><strong>RQ2:</strong> B4 vs B3</li>
+<li><strong>RQ3:</strong> B4 vs B2, plus B4 vs the fixed rule B1</li>
+<li><strong>RQ4:</strong> dataset vs own devices (M1, M2, M3)</li>
+<li><strong>Big data:</strong> Spark scaling, Kafka throughput and latency</li>
+</ul>
+</li>
+<li>Figures: M1 confusion, M2 per-exercise bars, M3 lead time and false alarms per variant, Spark runtime vs cores.</li>
+<li>Final report (HTML → PDF, same look as the briefing in <code>reports/briefing/</code>), following the teacher's format: objective, research questions, context and existing apps, data, approach, results, limits, references.</li>
+<li>Add a "Results" slide to the presentation appendix if asked.</li>
+</ol>
+<p><strong>Acceptance</strong>: every number in the report comes from a <code>metrics.json</code> file · commit <code>Step 3.4: evaluation and final report</code>.</p>
+<hr />
+<h3>Step 3.5 · Final validation rehearsal <span class="tag must">MUST</span></h3>
+<ul>
+<li>Fresh clone test: clone the repo in another folder, follow the README setup, run <code>python -m pytest -q</code>: must pass (data tests skip).</li>
+<li>Run the demo twice: live, then replay.</li>
+<li>README: all steps done, final log line, final results table.</li>
+<li>Tag the release: <code>git tag v1.0</code>.</li>
+</ul>
+<hr />
+<h2>4 · If only two weeks remain</h2>
+<table>
+<thead>
+<tr>
+<th>Keep</th>
+<th>Cut or simplify</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Week 1 as written (1.1 → 1.6)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>2.1, 2.2 (Model 2)</td>
+<td>2.4 → only Model 1 rep counting on own videos</td>
+</tr>
+<tr>
+<td>2.3 in replay-only form (recorded files → Kafka)</td>
+<td>live watch connection becomes optional</td>
+</tr>
+<tr>
+<td>2.5, 3.1, 3.2 on whatever own sessions exist</td>
+<td>3.3 live coach → replay demo + the presentation's replay slide</td>
+</tr>
+<tr>
+<td>3.4 results + short report</td>
+<td>final report kept to the results and limits sections</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Never cut:</strong> the own recordings (1.2), the Spark jobs (1.3, 2.5), and Model 3 with the B1–B4 comparison (3.2). They carry the project's contribution and the big data part.</p>
+<hr />
+<h2>5 · Checklist template to paste at the end of every step</h2>
+<div class="highlight"><pre><span></span><code>Step X.Y done
+- [ ] python -m pytest -q          → all green
+- [ ] python -m pytest -q -m data  → all green (data present)
+- [ ] metrics.json saved in experiments/ (if training)
+- [ ] README progress table + log line updated
+- [ ] git status clean of data/checkpoints
+- [ ] git commit -m "Step X.Y: ..."
+- [ ] user confirmed → next step
+</code></pre></div></body></html>

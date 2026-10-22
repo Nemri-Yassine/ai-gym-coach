@@ -1,0 +1,1778 @@
+<meta charset="utf-8">
+<title>AI Workout Coach</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a fixed pipeline rail (the project's real stage order) above one stage at a time; data shown as instrument panels. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunk:#E3E8ED; --ink:#101A23; --muted:#56646F; --line:#CDD5DD;
+  --accent:#1E4BD2; --accent-soft:#DCE4FB;
+  --pose:#1E4BD2; --imu:#B06F12; --hr:#D2353A;
+  --ok:#23885A; --warn:#C27B0C; --stop:#D2353A;
+  --ok-soft:#DDF1E6; --warn-soft:#F8EBD3; --stop-soft:#F9DEDE;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1116; --surface:#141B22; --sunk:#0F151B; --ink:#E5EBF0; --muted:#8D9BA7; --line:#25313C;
+  --accent:#7393FF; --accent-soft:#1C2850;
+  --pose:#7393FF; --imu:#E2A54A; --hr:#FF6A64;
+  --ok:#4CC487; --warn:#EFB043; --stop:#FF6A64;
+  --ok-soft:#14301F; --warn-soft:#33270F; --stop-soft:#3A1717; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1116; --surface:#141B22; --sunk:#0F151B; --ink:#E5EBF0; --muted:#8D9BA7; --line:#25313C;
+  --accent:#7393FF; --accent-soft:#1C2850;
+  --pose:#7393FF; --imu:#E2A54A; --hr:#FF6A64;
+  --ok:#4CC487; --warn:#EFB043; --stop:#FF6A64;
+  --ok-soft:#14301F; --warn-soft:#33270F; --stop-soft:#3A1717; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+
+/* ---------- camera angle ---------- */
+.topview{width:100%;max-width:340px;height:auto;margin:0 auto;display:block;overflow:visible}
+.topview .ring{fill:none;stroke:var(--line);stroke-dasharray:4 5}
+.topview .body{fill:var(--sunk);stroke:var(--ink);stroke-width:2}
+.topview .face{stroke:var(--ink);stroke-width:2}
+.topview .facehead{fill:var(--ink)}
+.topview .t{fill:var(--ink);font:600 11px var(--f-body)}
+.topview .cam text{font:500 11px var(--f-mono)}
+.topview .cam.ok rect{fill:var(--ok)} .topview .cam.ok text{fill:var(--ok)}
+.topview .cam.warn rect{fill:var(--warn)} .topview .cam.warn text{fill:var(--warn)}
+
+/* ---------- existing apps ---------- */
+.ex-t td,.ex-t th{font-size:15px;padding:11px 14px}
+.ex-t th{white-space:normal;line-height:1.3;min-width:90px}
+.ex-t td:first-child{white-space:normal;min-width:190px}
+.ex-t th:not(:first-child),.ex-t td:not(:first-child){text-align:center}
+.ex-t td small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.ex-t .y{color:var(--ok);font-weight:800;font-size:19px}
+.ex-t .n{color:var(--muted);opacity:.55;font-size:16px}
+.ex-t tr.us td{background:var(--accent-soft)}
+.ex-t tr.us td:first-child b{color:var(--accent)}
+
+/* ---------- talk slides ---------- */
+#spk{font-size:12px}
+#spk i{width:8px;height:8px}
+#timer.run{border-color:var(--ok);color:var(--ok);font-family:var(--f-mono)}
+#timer.late{border-color:var(--warn);color:var(--warn)}
+#timer.over{border-color:var(--stop);color:var(--stop);background:var(--stop-soft)}
+#trackBtn.on{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+body.is-backup .rail-fill{background:var(--warn)}
+body.is-backup .rail-fill::after{background:var(--warn);box-shadow:0 0 0 5px color-mix(in srgb,var(--warn) 22%,transparent)}
+body.is-backup .st.on .dot{background:var(--warn);border-color:var(--warn)}
+body.is-backup .st.done .dot{border-color:var(--warn);color:var(--warn)}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+.rq2{flex-direction:row;align-items:flex-start;gap:16px}
+.rq2 .k{font-family:var(--f-display);font-stretch:75%;font-weight:850;font-size:34px;line-height:1;color:var(--accent);flex:none}
+.rq2 p{font-size:18px;line-height:1.4}
+.rq2.hl{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+
+.dcard h3{font:850 34px/1 var(--f-display);font-stretch:76%;text-transform:uppercase}
+.dcard .mini{display:flex;gap:16px;flex-wrap:wrap;padding:10px 0;border-block:1px solid var(--line)}
+.dcard .mini span{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
+.dcard .mini b{font:800 24px/1.1 var(--f-display);font-stretch:80%;color:var(--ink);font-variant-numeric:tabular-nums}
+.dcard .lack{font-size:13px;margin-top:auto}
+.dcard .go{align-self:flex-start}
+
+.scene{display:grid;grid-template-columns:minmax(0,.55fr) 32px minmax(0,1fr) 32px minmax(0,1.05fr) 32px minmax(0,.8fr);align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.sc{display:flex;flex-direction:column;align-items:center;gap:10px;transition:opacity .4s}
+.sc-cap{display:flex;flex-direction:column;align-items:center;text-align:center;font-size:13px}
+.sc-cap span{color:var(--muted);font-size:12px}
+.sc-dev svg{width:100%;max-width:110px;height:auto;overflow:visible}
+.sc-dev svg line{stroke:var(--muted);stroke-width:3;stroke-linecap:round}
+.sc-dev .ph{fill:var(--sunk);stroke:var(--ink);stroke-width:3}
+.sc-dev .lens{fill:var(--pose)}
+.sc-dev .rec{fill:var(--stop);animation:blink 1.2s steps(2) infinite}
+.sc-dev .cone{stroke:var(--pose);stroke-width:1.5;stroke-dasharray:4 4;fill:none;opacity:.6}
+@keyframes blink{50%{opacity:.15}}
+.sc-person{width:100%}
+.sc-person .viz{width:100%;min-height:230px}
+.sc-laptop{width:100%}
+.sc-laptop .screen{width:100%;border:3px solid var(--ink);border-radius:10px 10px 0 0;padding:10px;display:flex;flex-direction:column;gap:7px;background:var(--sunk)}
+.sc-laptop .lbase{width:112%;height:10px;background:var(--ink);border-radius:0 0 8px 8px;margin-top:-10px}
+.mchip{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:7px 10px;font-size:13.5px;font-weight:600;display:flex;flex-direction:column;transition:all .35s;opacity:.45}
+.mchip small{font:500 10.5px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.mchip.on{opacity:1;background:var(--accent);border-color:var(--accent);color:var(--surface);transform:translateX(4px)}
+.mchip.on small{color:color-mix(in srgb,var(--surface) 75%,transparent)}
+.bubble{position:relative;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:15px;padding:12px 14px;border-radius:14px;text-align:center;min-height:64px;display:flex;align-items:center;transition:background .4s,color .4s}
+.bubble.warn{background:var(--warn-soft);color:var(--warn)} .bubble.stop{background:var(--stop-soft);color:var(--stop)}
+.sc-dev.on,.sc-person.on{opacity:1}
+.stages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stage{border-top:3px solid var(--line);padding-top:10px;cursor:pointer;opacity:.5;transition:opacity .35s,border-color .35s;display:flex;flex-direction:column;gap:4px}
+.stage.on{opacity:1;border-color:var(--accent)}
+.stage .sn{font:600 12px var(--f-mono);color:var(--accent)}
+.stage b{font-size:15px}
+.stage p{font-size:13.5px;color:var(--muted)}
+@media (max-width:900px){.scene{grid-template-columns:minmax(0,1fr)}.stages{grid-template-columns:repeat(2,minmax(0,1fr))}.sc-dev svg{max-width:80px}}
+@media (max-width:520px){.stages{grid-template-columns:minmax(0,1fr)}}
+
+.io{display:flex;flex-direction:column;gap:0;min-width:0}
+.ioi{padding:12px 0 12px 16px;border-left:2px solid var(--line);position:relative}
+.ioi::before{content:"";position:absolute;left:-6px;top:17px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--line)}
+.ioi .cap{display:block;margin-bottom:3px}
+.ioi p{font-size:15.5px}
+.ioi.pass{border-left-color:var(--accent)}
+.ioi.pass::before{background:var(--accent);border-color:var(--accent)}
+.io .stats{margin-top:12px}
+.m1out{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.m1out div{background:var(--sunk);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.m1out b{font:800 26px/1.1 var(--f-display);font-stretch:78%;text-transform:uppercase}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1240px;margin:0 auto;padding:12px 24px 0;display:flex;flex-direction:column;gap:10px}
+.brand-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-stretch:72%;font-weight:850;font-size:22px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand b{color:var(--accent);font-weight:850}
+.course{font-size:12.5px;color:var(--muted)}
+.ctrl{margin-left:auto;display:flex;align-items:center;gap:8px}
+.counter{font-family:var(--f-mono);font-size:13px;color:var(--muted);min-width:64px;text-align:right}
+.ibtn{border:1px solid var(--line);background:var(--surface);height:34px;min-width:34px;padding:0 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px}
+.ibtn:hover{border-color:var(--accent)}
+.ibtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ---------- pipeline rail ---------- */
+.rail-wrap{overflow-x:auto;scrollbar-width:thin;margin:0 -24px;padding:0 24px}
+.rail{position:relative;display:flex;gap:0;min-width:max-content;padding:16px 0 12px}
+.rail-track,.rail-fill{position:absolute;left:0;height:2px;top:41px;border-radius:2px}
+.rail-track{right:0;background:var(--line)}
+.rail-fill{background:var(--accent);width:0;transition:width .7s cubic-bezier(.6,0,.2,1)}
+.rail-fill::after{content:"";position:absolute;right:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 22%,transparent)}
+.st{position:relative;background:none;border:0;cursor:pointer;padding:0 10px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:84px}
+.st .grp{position:absolute;top:-14px;left:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.st .dot{width:22px;height:22px;border-radius:50%;background:var(--surface);border:2px solid var(--line);font:500 10.5px/18px var(--f-mono);color:var(--muted);text-align:center;transition:all .35s;position:relative;z-index:1}
+.st .lbl{font-size:12px;color:var(--muted);white-space:nowrap;transition:color .3s}
+.st.done .dot{border-color:var(--accent);color:var(--accent)}
+.st.on .dot{background:var(--accent);border-color:var(--accent);color:var(--surface);transform:scale(1.15)}
+.st.on .lbl{color:var(--ink);font-weight:600}
+.st:hover .lbl{color:var(--ink)}
+.st.key .dot{border-style:dashed}
+.st.on.key .dot{border-style:solid}
+
+/* ---------- stage ---------- */
+main{max-width:1240px;margin:0 auto;overflow-x:clip;padding-block:28px 64px;padding-inline:24px}
+section.step{display:flex;flex-direction:column;gap:22px}
+section.step.in-r{animation:inR .55s cubic-bezier(.2,.7,.2,1)}
+section.step.in-l{animation:inL .55s cubic-bezier(.2,.7,.2,1)}
+@keyframes inR{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+@keyframes inL{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:none}}
+section.step.in-r .rv,section.step.in-l .rv{animation:rise .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 70ms + 120ms)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:flex;gap:10px;align-items:center}
+.eyebrow span{color:var(--muted)}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font-family:var(--f-display);font-stretch:74%;font-weight:850;text-transform:uppercase;font-size:clamp(30px,4.4vw,50px);line-height:.98;letter-spacing:.005em}
+h3{font-size:16px;font-weight:700}
+.lede{font-size:17px;max-width:68ch;color:var(--muted);margin:0}
+.lede strong{color:var(--ink);font-weight:600}
+p{margin:0}
+
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-hero{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:stretch;gap:28px}
+.g-side{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
+@media (max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g-hero,.g-side,.g2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.panel.flat{background:transparent}
+.panel h3 small{font-weight:500;color:var(--muted);font-size:12.5px;margin-left:6px}
+.cap{font:500 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.list li::marker{color:var(--muted)}
+
+/* stat tiles */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.stat{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat .n{font-family:var(--f-display);font-stretch:80%;font-weight:800;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat .u{font-size:12.5px;color:var(--muted)}
+
+/* chips & pills */
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 12px/1 var(--f-mono);padding:5px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pill{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;padding:6px 12px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.stop{background:var(--stop-soft);color:var(--stop)}
+.c-pose{background:var(--pose)} .c-imu{background:var(--imu)} .c-hr{background:var(--hr)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:9px 12px;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabpane{padding-top:16px}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sunk);position:sticky;top:0}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+tbody tr{animation:rowin .35s both}
+@keyframes rowin{from{opacity:0;transform:translateX(-6px)}}
+.tall{max-height:360px;overflow:auto}
+
+/* file picker */
+.picker{display:flex;flex-direction:column;gap:4px}
+.pick{display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:8px 10px;cursor:pointer}
+.pick:hover{background:var(--sunk)}
+.pick[aria-pressed="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.pick .fn{font:500 13px var(--f-mono)}
+.pick .fd{font-size:12px;color:var(--muted);margin-left:auto;text-align:right}
+.decode{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.seg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--sunk);gap:2px}
+.seg b{font:600 14px var(--f-mono)}
+.seg span{font-size:11.5px;color:var(--muted)}
+
+/* session tiles */
+.sess{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.ses{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 10px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:3px;transition:transform .15s,border-color .15s}
+.ses:hover{transform:translateY(-2px);border-color:var(--accent)}
+.ses[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.ses b{font:600 14px var(--f-mono)}
+.ses small{font-size:11.5px;color:var(--muted)}
+.ses .hrb{font:500 10.5px var(--f-mono);color:var(--hr)}
+.ses .hrb.no{color:var(--warn)}
+
+/* bars */
+.bars{display:flex;flex-direction:column;gap:4px}
+.bar{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;align-items:center;gap:10px;background:none;border:0;padding:5px 6px;border-radius:6px;cursor:pointer;text-align:left}
+.bar:hover{background:var(--sunk)}
+.bar[aria-pressed="true"]{background:var(--accent-soft)}
+.bar .bl{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .bt{height:10px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.bar .bt i{display:block;height:100%;background:var(--pose);border-radius:3px;transform-origin:left;animation:grow .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.bar .bn{font:500 12px var(--f-mono);color:var(--muted);text-align:right}
+
+/* canvas stage */
+.viz{position:relative;background:var(--sunk);border-radius:8px;overflow:hidden;min-height:260px}
+.viz canvas{display:block;width:100%;height:100%;position:absolute;inset:0}
+.viz .tag{position:absolute;left:10px;top:10px;font:500 11px var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--surface) 85%,transparent);padding:3px 7px;border-radius:5px}
+
+/* charts */
+svg.chart{width:100%;height:auto;display:block;overflow:visible}
+svg.chart text{fill:var(--muted);font:11px var(--f-mono)}
+svg.chart .grid line{stroke:var(--line);stroke-width:1}
+svg.chart .axis{stroke:var(--muted);stroke-width:1}
+svg.chart path.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+svg.chart .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.2s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.s-pose{stroke:var(--pose)} .s-imu{stroke:var(--imu)} .s-hr{stroke:var(--hr)} .s-muted{stroke:var(--muted)} .s-ok{stroke:var(--ok)}
+.f-hr{fill:var(--hr)} .f-imu{fill:var(--imu)} .f-muted{fill:var(--muted)} .f-pose{fill:var(--pose)} .f-band{fill:var(--accent);opacity:.08} .f-band2{fill:var(--accent);opacity:.2}
+
+/* toggle group */
+.seg-ctl{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);flex-wrap:wrap}
+.seg-ctl button{border:0;background:none;padding:7px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
+.seg-ctl button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+
+/* hero */
+.hero h1{font-family:var(--f-display);font-stretch:68%;font-weight:900;text-transform:uppercase;font-size:clamp(40px,6.6vw,84px);line-height:.92;letter-spacing:-.005em}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.flow3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.flow3{grid-template-columns:minmax(0,1fr)}}
+.src{border-top:3px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:3px}
+.src b{font-size:14px} .src span{font-size:13px;color:var(--muted)}
+.src.p{border-color:var(--pose)} .src.w{border-color:var(--hr)} .src.d{border-color:var(--ink)}
+.verdicts{display:flex;gap:8px;flex-wrap:wrap}
+.verdicts .pill{opacity:.35;transition:opacity .4s,transform .4s}
+.verdicts .pill.lit{opacity:1;transform:scale(1.04)}
+
+/* RQ cards */
+.rq{display:grid;grid-template-columns:56px minmax(0,1fr);gap:4px 14px;padding:16px 0;border-top:1px solid var(--line)}
+.rq .k{font-family:var(--f-display);font-stretch:75%;font-weight:850;font-size:26px;color:var(--accent);line-height:1;grid-row:span 3}
+.rq p.q{font-weight:600;font-size:16px}
+.rq .how{font-size:13.5px;color:var(--muted)}
+.rq .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.fb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;font-size:13.5px}
+.fb > div{padding:10px 0;border-top:1px solid var(--line)}
+.fb > div:nth-child(odd){padding-right:14px;color:var(--muted)}
+.fb .h{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-top:0}
+
+/* coverage matrix */
+.yes{color:var(--ok);font-weight:600} .no{color:var(--muted)} .part{color:var(--warn);font-weight:600}
+
+/* callout */
+.callout{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:var(--accent-soft);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.callout .q{font-family:var(--f-display);font-stretch:78%;font-weight:800;font-size:20px;text-transform:uppercase;line-height:1.05}
+.note{font-size:12.5px;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
+
+/* architecture */
+.arch{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1fr) 28px minmax(0,1fr) 28px minmax(0,1fr);align-items:center;gap:6px}
+.arch .col{display:flex;flex-direction:column;gap:8px}
+.blk{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);display:flex;flex-direction:column;gap:2px}
+.blk b{font-size:13.5px}
+.blk span{font:12px var(--f-mono);color:var(--muted)}
+.blk.p{border-left:3px solid var(--pose)} .blk.w{border-left:3px solid var(--imu)} .blk.h{border-left:3px solid var(--hr)} .blk.a{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.arr{height:2px;background:var(--line);position:relative;overflow:hidden}
+.arr::after{content:"";position:absolute;top:0;left:-40%;width:40%;height:100%;background:var(--accent);animation:flow 1.6s linear infinite}
+@keyframes flow{to{left:100%}}
+@media (max-width:900px){.arch{grid-template-columns:minmax(0,1fr)}.arr{height:18px;width:2px;margin:0 auto}.arr::after{width:100%;height:40%;left:0;top:-40%;animation-name:flowv}}
+@keyframes flowv{to{top:100%}}
+
+/* steps list */
+.ol{counter-reset:o;list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ol li{counter-increment:o;display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.ol li::before{content:counter(o);font:600 12px/22px var(--f-mono);width:22px;height:22px;border-radius:50%;background:var(--sunk);text-align:center;color:var(--muted)}
+.ol li b{display:block}
+.ol li span{color:var(--muted);font-size:13px}
+
+/* demo */
+.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px}
+@media (max-width:900px){.demo{grid-template-columns:minmax(0,1fr)}}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ro{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.ro .cap{margin-bottom:4px}
+.ro .v{font-family:var(--f-display);font-stretch:80%;font-weight:800;font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+.meter{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--ok) 0 28%,var(--warn) 28% 71%,var(--stop) 71%);position:relative;opacity:.9}
+.meter i{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--ink);left:0;transition:left .5s cubic-bezier(.2,.7,.2,1)}
+.repbars{display:flex;align-items:flex-end;gap:6px;height:120px;border-bottom:1px solid var(--line);padding-top:6px}
+.repbars div{flex:1;border-radius:4px 4px 0 0;position:relative;animation:up .45s cubic-bezier(.2,.7,.2,1) both;transform-origin:bottom}
+.repbars div span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font:500 10.5px var(--f-mono);color:var(--muted);white-space:nowrap}
+@keyframes up{from{transform:scaleY(0)}}
+.msg{font-family:var(--f-display);font-stretch:78%;font-weight:800;font-size:24px;text-transform:uppercase;line-height:1.05;padding:14px 16px;border-radius:8px;transition:background .4s,color .4s}
+.msg.ok{background:var(--ok-soft);color:var(--ok)} .msg.warn{background:var(--warn-soft);color:var(--warn)} .msg.stop{background:var(--stop-soft);color:var(--stop);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--stop) 18%,transparent)}}
+
+/* stream svg */
+.stream text{fill:var(--ink);font:600 13px var(--f-body)}
+.stream text.s{fill:var(--muted);font:11px var(--f-mono)}
+.stream rect{fill:var(--surface);stroke:var(--line)}
+.stream rect.k{fill:var(--accent-soft);stroke:var(--accent)}
+.stream path{fill:none;stroke:var(--line);stroke-width:2}
+.stream path.back{stroke-dasharray:5 5}
+
+/* refs */
+.refs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.refs li{padding:11px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr);gap:3px;font-size:14px}
+.refs li span{font-size:13px;color:var(--muted)}
+.refs li i{font-style:italic}
+
+.qa{border-top:1px solid var(--line)}
+.qa:last-child{border-bottom:1px solid var(--line)}
+.qa summary{display:flex;gap:12px;align-items:center;padding:14px 4px;cursor:pointer;font-weight:600;font-size:16px;list-style:none}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"+";margin-left:auto;font:400 22px/1 var(--f-mono);color:var(--muted);transition:transform .25s}
+.qa[open] summary::after{transform:rotate(45deg)}
+.qa summary .chip{flex:none;min-width:84px;justify-content:center}
+.qa-b{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:0 4px 18px 100px;font-size:14px;animation:rise .35s both}
+.qa-e{background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+@media (max-width:620px){.qa-b{padding-left:4px}.qa summary{flex-wrap:wrap}}
+.foot{display:flex;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap}
+.navbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 16px;cursor:pointer;display:flex;flex-direction:column;gap:2px;text-align:left;min-width:180px}
+.navbtn:hover{border-color:var(--accent)}
+.navbtn small{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.navbtn b{font-size:14px}
+.navbtn.next{text-align:right;margin-left:auto}
+.kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--muted)}
+
+@media (max-width:620px){.top-in{padding:10px 16px 0}.rail-wrap{margin:0 -16px;padding:0 16px}main{padding-inline:16px}.course{display:none}.bar{grid-template-columns:110px minmax(0,1fr) 50px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand-row">
+      <div class="brand">AI Workout <b>Coach</b></div>
+      <div class="course" id="course"></div>
+      <div class="ctrl">
+        <button class="ibtn" id="timer" aria-label="Presentation timer" hidden>Timer</button>
+        <button class="ibtn" id="trackBtn" hidden>← Back to talk</button>
+        <span class="counter" id="counter"></span>
+        <button class="ibtn" id="prev" aria-label="Previous step"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="ibtn" id="next" aria-label="Next step"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="ibtn" id="theme" aria-label="Switch light or dark theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      </div>
+    </div>
+    <div class="rail-wrap" id="railWrap"><nav class="rail" id="rail" aria-label="Project pipeline"><div class="rail-track"></div><div class="rail-fill" id="railFill"></div></nav></div>
+  </div>
+</header>
+
+<main id="stage">
+
+<!-- 1 ─ IDEA -->
+<section class="step" id="s-idea" data-title="The idea" hidden>
+  <div class="grid g-hero">
+    <div class="hero" style="display:flex;flex-direction:column;gap:22px;justify-content:center">
+      <div class="eyebrow rv">Step 01 <span>· Framing</span></div>
+      <h1 class="rv" style="--i:1">Most apps tell you what you did. <em>Ours tells you when to stop.</em></h1>
+      <p class="lede rv" style="--i:2">An AI coach that watches you train with your <strong>phone camera</strong> and <strong>smartwatch</strong>. It recognizes the exercise, checks your form, and compares today's session with <strong>your own past sessions</strong>. When fatigue builds up, it tells you to stop before you get hurt.</p>
+      <div class="flow3 rv" style="--i:3">
+        <div class="src p"><b>Phone camera</b><span>Body skeleton, 18 joints, 30 fps</span></div>
+        <div class="src w"><b>Galaxy Watch 7</b><span>Heart rate + wrist motion</span></div>
+        <div class="src d"><b>One decision</b><span>Per rep, in real time</span></div>
+      </div>
+      <div class="verdicts rv" style="--i:4" id="verdicts">
+        <span class="pill ok">Keep going</span><span class="pill warn">Fix your form</span><span class="pill stop">Stop, risk of injury</span>
+      </div>
+    </div>
+    <div class="panel rv" style="--i:2">
+      <div class="viz" style="min-height:330px"><canvas id="cvIdea"></canvas><span class="tag">MM-Fit · w00 · squats · real keypoints</span></div>
+      <div id="ideaHr"></div>
+      <div class="cap" style="display:flex;justify-content:space-between"><span>Heart rate, whole session w00</span><span class="mono" id="ideaHrNow"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN · research questions -->
+<section class="step" id="s-rq" data-title="Questions" hidden>
+  <div class="eyebrow rv">Step 02 <span>· The questions</span></div>
+  <h2 class="rv" style="--i:1">What we want to answer</h2>
+  <div class="grid g2">
+    <div class="panel rq2 rv" style="--i:2"><span class="k">RQ1</span><p>Can a model trained on public data <b>recognize the exercise and count reps</b> on someone it has never seen?</p></div>
+    <div class="panel rq2 rv" style="--i:3"><span class="k">RQ2</span><p>Does the watch's <b>heart rate</b> detect fatigue better than movement alone?</p></div>
+    <div class="panel rq2 rv hl" style="--i:4"><span class="k">RQ3</span><p>Does comparing you with <b>your own past sessions</b> warn earlier than a general model?</p></div>
+    <div class="panel rq2 rv" style="--i:5"><span class="k">RQ4</span><p>Does it still work on <b>our own phone and Galaxy Watch 7</b>, outside the dataset?</p></div>
+  </div>
+  <p class="lede rv" style="--i:6">RQ2 and RQ3 are our contribution: using the watch's vital data and personal history to decide <strong>when to stop</strong>.</p>
+</section>
+
+<!-- MAIN · existing apps -->
+<section class="step" id="s-existing" data-title="Existing apps" hidden>
+  <div class="eyebrow rv">Step 03 <span>· Existing apps</span></div>
+  <h2 class="rv" style="--i:1">What already exists</h2>
+  <div class="panel rv" style="--i:2">
+    <div class="tw"><table class="ex-t">
+      <thead><tr><th>Apps</th><th>Form check</th><th>Heart rate</th><th>Your own history</th><th>Says "stop" during the set</th></tr></thead>
+      <tbody>
+        <tr><td><b>Camera form coaches</b><small>Form Coach, SnapRep, doReps</small></td><td class="y">✓</td><td class="n">✕</td><td class="n">✕</td><td class="n">✕</td></tr>
+        <tr><td><b>Smart home gyms</b><small>Tempo, Tonal · costly hardware</small></td><td class="y">✓</td><td class="n">✕</td><td class="n">✕</td><td class="n">✕</td></tr>
+        <tr><td><b>Bar-speed apps</b><small>Metric VBT · fixed threshold, barbell only</small></td><td class="n">✕</td><td class="n">✕</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td><b>Smartwatches</b><small>WHOOP, Garmin, Galaxy Watch · advice per day</small></td><td class="n">✕</td><td class="y">✓</td><td class="y">✓</td><td class="n">✕</td></tr>
+        <tr class="us"><td><b>Our coach</b><small>phone + watch you already own</small></td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="callout rv" style="--i:3"><p><b>The difference:</b> others check your form <em>or</em> track your heart. We combine form, heart rate and your own history to decide, during the set, when you should stop.</p></div>
+</section>
+
+<!-- MAIN · data overview -->
+<section class="step" id="s-data" data-title="Data" hidden>
+  <div class="eyebrow rv">Step 03 <span>· The data</span></div>
+  <h2 class="rv" style="--i:1">Three datasets, three jobs</h2>
+  <div class="grid g3">
+    <div class="panel dcard rv" style="--i:2">
+      <div class="cap">Job · recognize, count, heart rate</div>
+      <h3>MM-Fit</h3>
+      <p>10 people training while a camera, smartwatches and a phone record them at the same time.</p>
+      <div class="mini"><span><b id="dMM1"></b>sessions</span><span><b id="dMM2"></b>reps</span><span><b id="dMM3"></b>sensor rows</span></div>
+      <p class="muted lack">Missing: no good/bad label on reps.</p>
+    </div>
+    <div class="panel dcard rv" style="--i:3">
+      <div class="cap">Job · good rep or bad rep</div>
+      <h3>EC3D</h3>
+      <p>Squats, lunges and planks done correctly and with 8 named mistakes, in 3D.</p>
+      <div class="mini"><span><b id="dEC1"></b>labelled reps</span><span><b>8</b>mistakes</span><span><b>4</b>people</span></div>
+      <p class="muted lack">Missing: heart rate, and only 4 people.</p>
+    </div>
+    <div class="panel dcard rv" style="--i:4">
+      <div class="cap">Job · fatigue over weeks</div>
+      <h3>Our recordings</h3>
+      <p>The two of us, 3 to 6 weeks, Poco X3 Pro + Galaxy Watch 7, effort score 1–10 after each set.</p>
+      <div class="mini"><span><b>2</b>people</span><span><b>3–6</b>weeks</span><span><b>1–10</b>effort</span></div>
+      <p class="muted lack">The only source that follows the same person over time.</p>
+    </div>
+  </div>
+  <div class="callout rv" style="--i:5"><p><b>Who guarantees the reps are correct?</b> In EC3D, every mistake was performed on instruction and each 3D sequence was checked by hand. MM-Fit is never used to judge form.</p></div>
+</section>
+
+<!-- MAIN · how it works -->
+<section class="step" id="s-how" data-title="How it works" hidden>
+  <div class="eyebrow rv">Step 04 <span>· How it works</span></div>
+  <h2 class="rv" style="--i:1">From the gym floor to the alert</h2>
+  <div class="scene rv" style="--i:2" id="scene">
+    <div class="sc sc-dev" data-s="0">
+      <svg viewBox="0 0 130 200" aria-hidden="true"><path d="M70 36 L128 6 M70 36 L128 92" class="cone"/><line x1="55" y1="118" x2="22" y2="196"/><line x1="55" y1="118" x2="88" y2="196"/><line x1="55" y1="118" x2="55" y2="196"/><rect x="30" y="14" width="50" height="104" rx="9" class="ph"/><circle cx="55" cy="30" r="6" class="lens"/><circle cx="72" cy="104" r="4" class="rec"/></svg>
+      <div class="sc-cap"><b>Phone camera</b><span>films you</span></div>
+    </div>
+    <div class="arr"></div>
+    <div class="sc sc-person" data-s="0">
+      <div class="viz"><canvas id="cvHow"></canvas></div>
+      <div class="sc-cap"><b>You + Galaxy Watch 7</b><span>heart rate, wrist motion</span></div>
+    </div>
+    <div class="arr"></div>
+    <div class="sc sc-laptop">
+      <div class="screen">
+        <div class="mchip" data-s="1"><small>Model 1</small>Squats · rep 7</div>
+        <div class="mchip" data-s="2"><small>Model 2</small>Rep 7 · knees inward</div>
+        <div class="mchip" data-s="3"><small>Model 3</small>Fatigue rising</div>
+      </div>
+      <div class="lbase"></div>
+      <div class="sc-cap"><b>Laptop</b><span>runs our 3 models</span></div>
+    </div>
+    <div class="arr"></div>
+    <div class="sc sc-say">
+      <div class="bubble" id="howSay">"Push your knees out."</div>
+      <div class="sc-cap"><b>Voice feedback</b><span>in under a second</span></div>
+    </div>
+  </div>
+  <div class="stages rv" style="--i:3">
+    <div class="stage" data-s="0"><span class="sn">1</span><b>Capture</b><p>The phone films you; each frame becomes a skeleton of 18 joints. The watch sends heart rate and wrist motion.</p></div>
+    <div class="stage" data-s="1"><span class="sn">2</span><b>Model 1 · what & how many</b><p>Reads the skeleton and wrist motion: which exercise, and where each rep starts and ends.</p></div>
+    <div class="stage" data-s="2"><span class="sn">3</span><b>Model 2 · good or bad</b><p>Takes each rep cut out by Model 1 and judges it: good, or which mistake.</p></div>
+    <div class="stage" data-s="3"><span class="sn">4</span><b>Model 3 · when to stop</b><p>Combines rep speed, form and heart rate, and compares them with your past sessions.</p></div>
+  </div>
+  <p class="note rv" style="--i:4">Big data side: Kafka carries the live streams (≈ 300 messages/s) from the devices to the laptop; Spark processes every stored session to build each person's history.</p>
+</section>
+
+<!-- MAIN · model 1 -->
+<section class="step" id="s-model1" data-title="Model 1" hidden>
+  <div class="eyebrow rv">Step 05 <span>· Model 1</span></div>
+  <h2 class="rv" style="--i:1">Model 1: what are you doing, and how many reps?</h2>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:2">
+      <div class="viz" style="min-height:330px"><canvas id="cvM1"></canvas><span class="tag" id="m1Tag"></span></div>
+      <div class="m1out"><div><span class="cap">Exercise</span><b id="m1Ex"></b></div><div><span class="cap">Reps in this set</span><b id="m1Reps"></b></div></div>
+      <p class="note">Real MM-Fit skeletons, cycling through the 10 exercises.</p>
+    </div>
+    <div class="io rv" style="--i:3">
+      <div class="ioi"><span class="cap">Input</span><p>The <b>skeleton</b> from the phone camera (18 joints, 30 times per second) and the <b>wrist motion</b> from the watch, 3 seconds at a time.</p></div>
+      <div class="ioi"><span class="cap">The model</span><p>A small neural network we train on MM-Fit. We compare three types: 1D-CNN, LSTM, small Transformer.</p></div>
+      <div class="ioi"><span class="cap">Output</span><p>The <b>exercise</b> (10 types) and the <b>start and end of every rep</b>.</p></div>
+      <div class="ioi pass"><span class="cap">Passes to Model 2</span><p>Each rep, cut out and ready to be judged.</p></div>
+      <div class="stats" id="m1Stats"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN · model 2 -->
+<section class="step" id="s-model2" data-title="Model 2" hidden>
+  <div class="eyebrow rv">Step 06 <span>· Model 2</span></div>
+  <h2 class="rv" style="--i:1">Model 2: was that rep done right?</h2>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:2">
+      <div class="seg-ctl" id="m2Err"></div>
+      <div class="grid g2" style="gap:10px">
+        <div class="viz" style="min-height:280px"><canvas id="cvM2a"></canvas><span class="tag">correct</span></div>
+        <div class="viz" style="min-height:280px"><canvas id="cvM2b"></canvas><span class="tag" id="m2Tag"></span></div>
+      </div>
+      <p class="note">Real EC3D reps in 3D, same person. Click a mistake to compare.</p>
+    </div>
+    <div class="io rv" style="--i:3">
+      <div class="ioi"><span class="cap">Input</span><p><b>One rep</b>, cut out by Model 1.</p></div>
+      <div class="ioi"><span class="cap">The model</span><p>A graph network on the skeleton: joints are nodes, bones are edges, and it learns how they move together during the rep.</p></div>
+      <div class="ioi"><span class="cap">Output</span><p><b>Good rep</b>, or <b>which mistake</b>: knees inward, not low enough, back bent…</p></div>
+      <div class="ioi"><span class="cap">Trained on</span><p>EC3D: mistakes performed on purpose and checked by hand.</p></div>
+      <div class="ioi pass"><span class="cap">Passes to Model 3</span><p>A form score for every rep.</p></div>
+      <div class="stats" id="m2Stats"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN · model 3 -->
+<section class="step" id="s-model3" data-title="Model 3" hidden>
+  <div class="eyebrow rv">Step 07 <span>· Model 3 · our contribution</span></div>
+  <h2 class="rv" style="--i:1">Model 3: are you about to get hurt?</h2>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:2">
+      <div class="cap">Already visible in MM-Fit: reps get slower inside a set</div>
+      <div id="repChart2"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap" id="repLegend2"></div>
+      <div class="stats" id="m3Stats"></div>
+    </div>
+    <div class="io rv" style="--i:3">
+      <div class="ioi"><span class="cap">Input</span><p>Rep speed and depth <b>(Model 1)</b>, form score <b>(Model 2)</b>, <b>heart rate</b> (watch), and <b>your past sessions</b>.</p></div>
+      <div class="ioi"><span class="cap">The model</span><p>An LSTM or Transformer over the sequence of reps, comparing today with your own history.</p></div>
+      <div class="ioi"><span class="cap">How it learns without injury labels</span><p>Later reps in a set are more tired than early ones; our effort scores (1–10) confirm it.</p></div>
+      <div class="ioi pass"><span class="cap">Output</span><p><span class="pill ok">Keep going</span> <span class="pill warn">Slow down</span> <span class="pill stop">Stop</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN · proof & limits -->
+<section class="step" id="s-proof" data-title="Proof & limits" hidden>
+  <div class="eyebrow rv">Step 09 <span>· Proof & limits</span></div>
+  <h2 class="rv" style="--i:1">How we'll prove it</h2>
+  <div class="panel rv" style="--i:2">
+    <div class="tw"><table>
+      <thead><tr><th>Question</th><th>Test</th><th>Measured by</th></tr></thead>
+      <tbody>
+        <tr><td><b>RQ1</b> recognition</td><td>Train on some people, test on people never seen</td><td>F1 per exercise, reps off per set</td></tr>
+        <tr><td><b>RQ2</b> heart rate</td><td>Model 3 with vs without heart rate</td><td>How many reps earlier it warns</td></tr>
+        <tr><td><b>RQ3</b> personal history</td><td>General model vs personal baseline</td><td>Early warnings, false alarms per session</td></tr>
+        <tr><td><b>RQ4</b> real devices</td><td>Run live on our phone + watch</td><td>Same metrics vs dataset results</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="grid g2">
+    <div class="panel rv" style="--i:3"><div class="cap">What we don't claim</div>
+      <ul class="list"><li>No dataset has injury labels: we predict <b>fatigue and form breakdown</b>, the warning signs.</li><li>Our own data covers 2 people: a <b>proof of concept</b>, not a medical tool.</li><li>All tools are free: Python, PyTorch, MediaPipe, Kafka, Spark.</li></ul></div>
+    <div class="callout rv" style="--i:4;justify-content:center"><div class="q" style="font-size:clamp(24px,3vw,34px)">Most apps tell you what you did. Ours tells you when to stop.</div><p>Thank you. Questions?</p></div>
+  </div>
+</section>
+
+<!-- BACKUP · objectives & feedback -->
+<section class="step" id="s-questions" data-title="Objectives & research questions" hidden>
+  <div class="eyebrow rv">Step 02 <span>· Framing</span></div>
+  <h2 class="rv" style="--i:1">Objectives & research questions</h2>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:2">
+      <div class="cap">Objectives</div>
+      <ol class="ol">
+        <li><div><b>Recognize the exercise</b><span>From camera and watch data, 10 exercises + "no activity"</span></div></li>
+        <li><div><b>Count repetitions</b><span>Automatically, per set</span></div></li>
+        <li><div><b>Judge every rep</b><span>Good form or bad form, and which error</span></div></li>
+        <li><div><b>Detect fatigue</b><span>Within a set and across weeks, from heart rate and movement quality</span></div></li>
+        <li><div><b>Say stop</b><span>A clear alert when injury risk becomes too high</span></div></li>
+      </ol>
+    </div>
+    <div class="rv" style="--i:3">
+      <div class="cap" style="margin-bottom:4px">Research questions</div>
+      <div class="rq"><div class="k">RQ1</div><p class="q">Does a model trained on public data recognize exercises and count reps on people it has never seen?</p><p class="how">Train on MM-Fit, test on sessions from unseen people.</p><div class="tagrow"><span class="chip">macro-F1</span><span class="chip">rep-count error</span></div></div>
+      <div class="rq"><div class="k">RQ2</div><p class="q">Does the watch's heart rate improve fatigue detection compared with movement alone?</p><p class="how">Same fatigue model, trained with and without the HR stream.</p><div class="tagrow"><span class="chip"><i class="c-hr"></i>with vs without HR</span></div></div>
+      <div class="rq"><div class="k">RQ3</div><p class="q">Can a personal baseline (your own past sessions) predict form breakdown earlier than a general model?</p><p class="how">Our main contribution. We measure how many reps before the breakdown the alert fires.</p><div class="tagrow"><span class="chip">warning lead time</span><span class="chip">false alarms / session</span></div></div>
+      <div class="rq"><div class="k">RQ4</div><p class="q">How well do models trained on the dataset work on our own Poco X3 Pro + Galaxy Watch 7?</p><p class="how">Run live on our devices, compare with the dataset results.</p><div class="tagrow"><span class="chip">dataset → real devices</span></div></div>
+    </div>
+  </div>
+  <div class="panel rv" style="--i:4">
+    <div class="cap">What we changed after the first feedback</div>
+    <div class="fb">
+      <div class="h">Feedback</div><div class="h">Our answer</div>
+      <div>"Comparing live frames to the dataset is not training."</div><div>We train three models ourselves: recognition, form check, fatigue and risk.</div>
+      <div>"Camera + watch beating watch alone is obvious."</div><div>Fusion is only a baseline check. The real questions are about heart rate (RQ2) and personal history (RQ3).</div>
+      <div>"Posture detection alone already exists."</div><div>We reuse an existing pose estimator and put our training effort on fatigue and risk.</div>
+      <div>"Use the watch's vital data, be useful in real life."</div><div>Heart rate is a core input of Model 3, and the output is a safety alert.</div>
+      <div>"Who guarantees the dataset reps are correct?"</div><div>Nobody, for MM-Fit. That's why form labels come from EC3D, recorded correct and incorrect on purpose (step 04).</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 ─ MM-FIT -->
+<section class="step" id="s-mmfit" data-title="MM-Fit dataset" hidden>
+  <div class="eyebrow rv">Step 03 <span>· Data</span></div>
+  <h2 class="rv" style="--i:1">Main dataset: MM-Fit</h2>
+  <p class="lede rv" style="--i:2">Public, free (mmfit.github.io). People train while a camera, two smartwatches, a phone and an earbud record them at the same time. <strong>Every number below is read from the files in our project folder.</strong></p>
+  <div class="stats rv" style="--i:3" id="mmStats"></div>
+  <div class="rv" style="--i:4">
+    <div class="tabs" role="tablist" id="mmTabs">
+      <button class="tab" role="tab" aria-selected="true" data-tab="files">Files & raw values</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="ex">Exercises</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="sess">Sessions</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="labels">Labels</button>
+    </div>
+    <div class="tabpane" data-pane="files">
+      <div class="grid g-side">
+        <div class="panel"><div class="cap">Session w00, click a file</div><div class="picker" id="filePick"></div></div>
+        <div class="panel">
+          <div class="decode" id="fileDecode"></div>
+          <p id="fileExplain" style="font-size:14px"></p>
+          <div class="tw" id="fileTable"></div>
+          <p class="note" id="fileNote"></p>
+        </div>
+      </div>
+    </div>
+    <div class="tabpane" data-pane="ex" hidden>
+      <div class="grid g2">
+        <div class="panel"><div class="cap">Sets per exercise (all 21 sessions), click one</div><div class="bars" id="exBars"></div></div>
+        <div class="panel">
+          <div class="viz" style="min-height:300px"><canvas id="cvEx"></canvas><span class="tag" id="exTag"></span></div>
+          <div class="cap">Left-wrist watch acceleration |a| (m/s²), same 8 seconds</div>
+          <div id="exAcc"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tabpane" data-pane="sess" hidden>
+      <div class="grid g-side">
+        <div class="panel"><div class="cap">21 workout sessions, click one</div><div class="sess" id="sessGrid"></div></div>
+        <div class="panel" id="sessDetail"></div>
+      </div>
+    </div>
+    <div class="tabpane" data-pane="labels" hidden>
+      <div class="grid g-side">
+        <div class="panel"><div class="cap">w00_labels.csv</div><div class="tw tall" id="labTable"></div></div>
+        <div class="panel">
+          <h3>What the labels give us</h3>
+          <ul class="list">
+            <li>One row = <b>one set</b>: start frame, end frame, rep count, exercise.</li>
+            <li>Frames are video frames at 30 fps. Every sensor file has the same <span class="mono">frame</span> column, so this is how all the modalities are synced.</li>
+            <li>The rep <b>count</b> is given, but not where each rep starts.</li>
+          </ul>
+          <h3 style="margin-top:6px">What is missing</h3>
+          <ul class="list">
+            <li><b>No form label.</b> Nobody marked a rep as good or bad.</li>
+            <li><b>No injury or effort label.</b></li>
+            <li>Heart rate is missing in <b id="noHrCount"></b> sessions (<span class="mono" id="noHrList"></span>).</li>
+          </ul>
+          <p class="note">These gaps are why we add two more sources (next step).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 ─ OTHER DATA -->
+<section class="step" id="s-ec3d" data-title="EC3D dataset" hidden>
+  <div class="eyebrow rv">Step 04 <span>· Data</span></div>
+  <h2 class="rv" style="--i:1">Form dataset: EC3D</h2>
+  <p class="lede rv" style="--i:2">Exercise Correction in 3D (EPFL, Zhao et al., ACCV 2022). Free, direct download, no request. <strong>Every number below is read from <span class="mono">data_3D.pickle</span> in our project folder.</strong></p>
+  <div class="callout rv" style="--i:3">
+    <div class="q">"Who guarantees the reps are correct?"</div>
+    <p>For MM-Fit, nobody does, so we never use it to judge form. In EC3D, each person performed every motion correctly or with one specific mistake <em>on instruction</em>, and a researcher checked every 3D sequence by hand. Each sequence is <strong>one rep with one label</strong>, which MM-Fit doesn't have.</p>
+  </div>
+  <div class="stats rv" style="--i:4" id="ecStats"></div>
+  <div class="rv" style="--i:5">
+    <div class="tabs" role="tablist" id="ecTabs">
+      <button class="tab" role="tab" aria-selected="true" data-tab="cmp">Correct vs mistake</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="evid">Is the mistake measurable?</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="raw">Files & raw values</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="cnt">Labels & counts</button>
+    </div>
+    <div class="tabpane" data-pane="cmp">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div class="seg-ctl" id="ecEx"></div>
+        <div class="seg-ctl" id="ecErr"></div>
+      </div>
+      <div class="grid g2">
+        <div class="panel"><div class="viz" style="min-height:340px"><canvas id="cvCorrect"></canvas><span class="tag" id="tagCorrect"></span></div></div>
+        <div class="panel"><div class="viz" style="min-height:340px"><canvas id="cvWrong"></canvas><span class="tag" id="tagWrong"></span></div></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px">
+        <label for="yaw" class="cap">Camera angle</label>
+        <input type="range" id="yaw" min="0" max="360" value="35" style="flex:1;min-width:160px;accent-color:var(--accent)">
+        <button class="ibtn" id="spin">Auto-rotate</button>
+      </div>
+      <p class="note" style="margin-top:10px">Same person (Sena), one rep each, real 3D joints. Because EC3D is 3D, we can render it from <b>any camera angle</b>: free data augmentation, and a way to match whatever angle our phone films from.</p>
+    </div>
+    <div class="tabpane" data-pane="evid" hidden>
+      <div class="grid g-side">
+        <div class="panel">
+          <div class="cap">One simple measurement per mistake, all 4 people</div>
+          <div id="ecEvid"></div>
+          <p class="note">Bars: middle 50 % of reps; dot: median. Computed by us from the 3D joints, one value per rep.</p>
+        </div>
+        <div class="panel">
+          <div class="cap">Quick baseline: train on 3 people, test on the 4th</div>
+          <div class="tw"><table><thead><tr><th>Exercise</th><th class="num">Accuracy</th><th class="num">Chance</th><th class="num">Per person</th></tr></thead><tbody id="ecBase"></tbody></table></div>
+          <p style="font-size:14px">A random forest on 6 hand-made measurements, built tonight, already beats chance on a person it never saw. The EC3D authors' graph network reaches <b>90.9 %</b>. Our deep model must beat our own baseline, so we have a fair point of comparison.</p>
+          <p class="note">Squat scores range from <b id="ecWorst"></b> to <b id="ecBest"></b> depending on the person tested. People squat differently, which is another argument for personal baselines.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tabpane" data-pane="raw" hidden>
+      <div class="grid g2">
+        <div class="panel">
+          <div class="cap">data_3D.pickle → <span class="mono">labels</span>, shape (29 789, 5)</div>
+          <div class="tw"><table><thead><tr><th>exercise</th><th>subject</th><th>mistake code</th><th>rep #</th><th>frame</th></tr></thead><tbody id="ecRawL"></tbody></table></div>
+          <div class="cap">mistake codes (from the authors' code)</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="ecCodes"></div>
+        </div>
+        <div class="panel">
+          <div class="cap">data_3D.pickle → <span class="mono">poses</span>, shape (29 789, 3, 25), first frame</div>
+          <div class="tw tall"><table><thead><tr><th>#</th><th>joint</th><th class="num">x</th><th class="num">y</th><th class="num">z (up)</th></tr></thead><tbody id="ecRawP"></tbody></table></div>
+          <p class="note">Already normalized by the authors: mid-hip at (0, 0, 0), trunk upright, bone lengths equalized. We apply the same normalization to MM-Fit and to our live data so the three sources match.</p>
+        </div>
+      </div>
+      <div class="tw" style="margin-top:14px"><table><thead><tr><th>File</th><th class="num">Size</th><th>Contents</th><th>Use</th></tr></thead><tbody>
+        <tr><td class="mono">data_3D.pickle</td><td class="num">21.4 MB</td><td>labels + 3D skeletons</td><td class="yes">train Model 2</td></tr>
+        <tr><td class="mono">data.pickle</td><td class="num">961 MB</td><td>camera parameters + 2D and 3D skeletons from 4 GoPro views</td><td class="part">real 2D views, to check our 3D→2D projection</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="tabpane" data-pane="cnt" hidden>
+      <div class="grid g2">
+        <div class="panel"><div class="cap">Reps per label</div><div class="bars" id="ecCounts"></div></div>
+        <div class="panel"><div class="cap">Reps per person</div><div class="bars" id="ecSubj"></div>
+          <p class="note">The authors' paper reports 362 sequences; the file has <b id="ecReps2"></b> (including <span id="ecUnk"></span> squats labelled "unknown", which we leave out).</p>
+          <p class="note">Rep length: <span id="ecLen"></span> frames at 30 fps.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="step" id="s-moredata" data-title="Our recordings" hidden>
+  <div class="eyebrow rv">Step 05 <span>· Data</span></div>
+  <h2 class="rv" style="--i:1">Our own recordings, and who covers what</h2>
+  <p class="lede rv" style="--i:2">No public dataset follows the <strong>same person over weeks</strong> with heart rate and effort scores. Model 3 needs exactly that, so we record it ourselves.</p>
+  <div class="grid g3">
+    <div class="panel rv" style="--i:3"><div class="cap">Fatigue · ours</div><h3>Our own recordings</h3><p>Both of us, for 3 to 6 weeks: Poco X3 Pro camera + Galaxy Watch 7, and a 1–10 effort score (RPE) after every set.</p><p class="muted" style="font-size:13px">A within-person design: each of us is compared with our own history.</p></div>
+    <div class="panel rv" style="--i:4"><div class="cap">Form · our test set</div><h3>Our labelled reps</h3><p>Squats and lunges done correctly and with the EC3D mistakes, filmed with our phone.</p><p class="muted" style="font-size:13px">Tests Model 2 on our camera, our angle, our bodies.</p></div>
+    <div class="panel rv" style="--i:5"><div class="cap">Extension · requested</div><h3>Fitness-AQA</h3><p>Back squat, barbell row, overhead press in real gym videos, errors labelled by expert trainers. Access by request form.</p><p class="muted" style="font-size:13px">Used only if access arrives. Nothing depends on it.</p></div>
+  </div>
+  <div class="panel rv" style="--i:6">
+    <div class="cap">Which source covers what</div>
+    <div class="tw"><table>
+      <thead><tr><th>Source</th><th>Exercise label</th><th>Per-rep form label</th><th>Heart rate</th><th>Same person, many sessions</th><th>Effort score</th></tr></thead>
+      <tbody>
+        <tr><td><b>MM-Fit</b></td><td class="yes">yes, 10</td><td class="no">no</td><td class="part" id="covHr">18 / 21</td><td class="no">no</td><td class="no">no</td></tr>
+        <tr><td><b>EC3D</b></td><td class="yes">yes, 3</td><td class="yes">yes, 8 mistakes</td><td class="no">no</td><td class="no">no</td><td class="no">no</td></tr>
+        <tr><td><b>Fitness-AQA</b> <span class="muted">(requested)</span></td><td class="yes">yes, 3</td><td class="yes">yes, expert</td><td class="no">no</td><td class="no">no</td><td class="no">no</td></tr>
+        <tr><td><b>Our recordings</b></td><td class="yes">yes</td><td class="part">test set</td><td class="yes">yes</td><td class="yes">3–6 weeks</td><td class="yes">RPE 1–10</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="panel rv" style="--i:7">
+    <div class="cap">Planned format of our recordings, one row per rep</div>
+    <div class="tw"><table><thead><tr><th>session_id</th><th>user</th><th>date</th><th>exercise</th><th>set</th><th>rep</th><th>frame_start</th><th>frame_end</th><th>joints_xy[18×2]</th><th>hr_bpm</th><th>wrist_acc_xyz</th><th>rpe_set</th></tr></thead>
+    <tbody><tr><td colspan="12" class="muted">Recording starts after validation, in the same format as MM-Fit so everything goes through one pipeline.</td></tr></tbody></table></div>
+  </div>
+</section>
+
+<!-- 5 ─ CAPTURE -->
+<section class="step" id="s-capture" data-title="Capture" hidden>
+  <div class="eyebrow rv">Step 05 <span>· Pipeline</span></div>
+  <h2 class="rv" style="--i:1">Capture: two devices people already own</h2>
+  <p class="lede rv" style="--i:2">In our setup the phone is on a tripod filming, not in a pocket. So we keep only the MM-Fit streams that match our two devices, and drop the rest.</p>
+  <div class="grid g2">
+    <div class="panel rv" style="--i:3">
+      <div class="cap">Our devices</div>
+      <div class="blk p"><b>Poco X3 Pro · camera</b><span>video 30 fps → body keypoints</span></div>
+      <div class="blk h"><b>Galaxy Watch 7 · heart rate</b><span>≈ 1 Hz, bpm</span></div>
+      <div class="blk w"><b>Galaxy Watch 7 · accelerometer + gyroscope</b><span>wrist motion, x/y/z</span></div>
+      <p class="note">Every sample is time-stamped on capture, so the streams can be aligned later.</p>
+    </div>
+    <div class="panel rv" style="--i:4">
+      <div class="cap">MM-Fit stream ↔ our device</div>
+      <div class="tw"><table>
+        <thead><tr><th>MM-Fit file</th><th>Rate (measured)</th><th>Our equivalent</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">pose_2d</td><td class="num">30 fps</td><td>Phone camera + pose estimator</td><td class="yes">keep</td></tr>
+          <tr><td class="mono">sw_l_hr</td><td class="num">≈ 1 Hz</td><td>Watch heart rate</td><td class="yes">keep</td></tr>
+          <tr><td class="mono">sw_l_acc / gyr</td><td class="num">100 Hz</td><td>Watch IMU</td><td class="yes">keep</td></tr>
+          <tr><td class="mono">sw_r_*</td><td class="num">100 Hz</td><td>Second watch</td><td class="no">drop (one watch)</td></tr>
+          <tr><td class="mono">sp_r_*</td><td class="num">≈ 200 Hz</td><td>Phone in pocket</td><td class="no">drop (phone films)</td></tr>
+          <tr><td class="mono">eb_l_*</td><td class="num">≈ 90 Hz</td><td>Earbud</td><td class="no">drop</td></tr>
+          <tr><td class="mono">pose_3d</td><td class="num">30 fps</td><td>Depth camera</td><td class="no">drop (2D phone)</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 ─ POSE -->
+<section class="step" id="s-pose" data-title="Pose extraction" hidden>
+  <div class="eyebrow rv">Step 06 <span>· Pipeline</span></div>
+  <h2 class="rv" style="--i:1">Pose extraction: video → skeleton</h2>
+  <p class="lede rv" style="--i:2">Each frame becomes 18 joints with (x, y) pixel coordinates. <strong>We do not train this part.</strong> Pose estimation already exists, so we reuse MediaPipe or YOLO-Pose and spend our training on what is new.</p>
+  <div class="grid g2">
+    <div class="panel rv" style="--i:3">
+      <div class="viz" style="min-height:380px"><canvas id="cvPose"></canvas><span class="tag" id="poseTag"></span></div>
+      <p class="note">Click a joint in the table to locate it on the skeleton.</p>
+    </div>
+    <div class="panel rv" style="--i:4">
+      <div class="cap">One real frame from w00_pose_2d.npy</div>
+      <div class="tw tall" id="poseTable"></div>
+      <p class="note">MM-Fit uses the 18-joint OpenPose layout. MediaPipe outputs 33 landmarks, so we map them onto the same 18 joints so that live data matches training data.</p>
+    </div>
+  </div>
+</section>
+
+<section class="step" id="s-angle" data-title="Camera angle" hidden>
+  <div class="eyebrow rv">Backup <span>· Pipeline</span></div>
+  <h2 class="rv" style="--i:1">Where to put the phone</h2>
+  <p class="lede rv" style="--i:2">The pose estimator finds the joints from any angle, but <strong>what it can see changes with the angle</strong>. We tested it on EC3D: a simulated phone at every angle around the person, and a quick classifier that only sees that 2D view.</p>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:3">
+      <div class="cap">Phone position, seen from above</div>
+      <svg viewBox="0 0 300 230" class="topview" role="img" aria-label="Recommended phone position: 45 degrees in front of the person">
+        <circle cx="150" cy="130" r="88" class="ring"/>
+        <path d="M150 130 L150 52" class="face"/><polygon points="150,44 144,56 156,56" class="facehead"/>
+        <circle cx="150" cy="130" r="16" class="body"/>
+        <text x="150" y="134" text-anchor="middle" class="t">you</text>
+        <g class="cam warn"><rect x="138" y="22" width="24" height="14" rx="3"/><text x="150" y="16" text-anchor="middle">0° front</text></g>
+        <g class="cam ok"><rect x="200" y="56" width="24" height="14" rx="3" transform="rotate(45 212 63)"/><text x="232" y="48" text-anchor="start">45° best</text></g>
+        <g class="cam warn"><rect x="232" y="123" width="24" height="14" rx="3"/><text x="262" y="160" text-anchor="middle">90° side</text></g>
+      </svg>
+      <ul class="list">
+        <li><b>About 45° in front of you</b>, so both knees and your depth are visible at once.</li>
+        <li>Phone at <b>hip height</b>, <b>2–3 m</b> away, whole body in the frame.</li>
+        <li><b>Same spot every session</b>, so a change in your numbers means fatigue, not a moved camera.</li>
+      </ul>
+    </div>
+    <div class="panel rv" style="--i:4">
+      <div class="cap">Mistake recognized on an unseen person, by camera angle</div>
+      <div id="angleChart"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><span class="chip"><i class="c-pose"></i>Squat</span><span class="chip"><i class="c-imu"></i>Lunge</span></div>
+      <p style="font-size:14px" id="angleTxt"></p>
+      <div class="cap" style="margin-top:6px">Real cameras in EC3D (OpenPose, 4 cameras around the person)</div>
+      <p style="font-size:14px">The camera facing the person sees all 25 joints in about half the squat and lunge frames. The three angled cameras <b>never</b> see all 25, and the far arm is hidden in up to 75 % of frames. In real life a pure side view also hides the far leg, which our simulation ignores, so side views are even worse than the chart shows.</p>
+      <p class="note">Quick test with a random forest on 2D joint positions, 4 people, train on 3 and test on the 4th. Front and back give the same 2D outline, which is why 0° and 180° match.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ─ STREAMING & BIG DATA -->
+<section class="step" id="s-stream" data-title="Streaming & big data" hidden>
+  <div class="eyebrow rv">Step 07 <span>· Big data</span></div>
+  <h2 class="rv" style="--i:1">Streaming with Kafka, history with Spark</h2>
+  <p class="lede rv" style="--i:2">Live: three high-frequency streams go through Kafka to the models. Offline: every session is stored, and Spark processes the full history to build each person's baseline.</p>
+  <div class="panel rv" style="--i:3"><div style="overflow-x:auto"><svg class="stream" id="streamSvg" viewBox="0 0 960 300" style="min-width:720px;width:100%"></svg></div></div>
+  <div class="grid g3">
+    <div class="panel rv" style="--i:4"><div class="cap">topic · pose.keypoints</div><pre class="mono" id="msgPose" style="margin:0;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere"></pre></div>
+    <div class="panel rv" style="--i:5"><div class="cap">topic · watch.imu</div><pre class="mono" id="msgImu" style="margin:0;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere"></pre></div>
+    <div class="panel rv" style="--i:6"><div class="cap">topic · watch.hr</div><pre class="mono" id="msgHr" style="margin:0;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere"></pre></div>
+  </div>
+  <div class="stats rv" style="--i:7" id="bigStats"></div>
+</section>
+
+<!-- 8 ─ CLEANING -->
+<section class="step" id="s-clean" data-title="Cleaning & sync" hidden>
+  <div class="eyebrow rv">Step 08 <span>· Big data</span></div>
+  <h2 class="rv" style="--i:1">Cleaning, syncing, windowing</h2>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:2">
+      <div class="cap">Spark job, per session</div>
+      <ol class="ol">
+        <li><div><b>Join on frame number</b><span>Every file shares the video frame index, so pose, IMU and HR line up</span></div></li>
+        <li><div><b>Resample to 30 Hz</b><span>Watch IMU 100 Hz → video clock; HR 1 Hz interpolated</span></div></li>
+        <li><div><b>Normalize the body</b><span>Center joints on the hips, divide by torso length, so height and camera distance don't matter</span></div></li>
+        <li><div><b>Standardize signals</b><span>z-score per session and per channel</span></div></li>
+        <li><div><b>Cut windows</b><span>3 s (90 frames), 50 % overlap → <b class="mono" id="winCount"></b> windows from MM-Fit</span></div></li>
+        <li><div><b>Mask missing data</b><span>No HR in <span id="noHr2"></span> → the model sees a mask instead of fake values</span></div></li>
+      </ol>
+    </div>
+    <div class="panel rv" style="--i:3">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="cap">Watch |acceleration|, first 5 s of a squat set (w00)</div>
+        <div class="seg-ctl" id="cleanCtl"><button aria-pressed="true" data-v="raw">1 · Raw</button><button aria-pressed="false" data-v="res">2 · Resampled</button><button aria-pressed="false" data-v="z">3 · Standardized</button></div>
+      </div>
+      <div id="cleanChart"></div>
+      <p class="note" id="cleanNote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 ─ MODEL 1 -->
+<section class="step" id="s-m1" data-title="Model 1 · Recognition" hidden>
+  <div class="eyebrow rv">Step 09 <span>· Models</span></div>
+  <h2 class="rv" style="--i:1">Model 1: which exercise, how many reps</h2>
+  <p class="lede rv" style="--i:2">Trained from scratch on MM-Fit windows. Two encoders, one per device, merged into one decision.</p>
+  <div class="panel rv" style="--i:3">
+    <div class="arch">
+      <div class="col"><div class="blk p"><b>Pose window</b><span>90 × 18 × 2</span></div><div class="blk w"><b>Watch IMU window</b><span>90 × 6</span></div></div>
+      <div class="arr"></div>
+      <div class="col"><div class="blk p"><b>Pose encoder</b><span>1D-CNN / LSTM / Transformer</span></div><div class="blk w"><b>IMU encoder</b><span>1D-CNN / LSTM / Transformer</span></div></div>
+      <div class="arr"></div>
+      <div class="col"><div class="blk a"><b>Fusion</b><span>concat + attention</span></div></div>
+      <div class="arr"></div>
+      <div class="col"><div class="blk"><b>Exercise</b><span>11 classes (10 + none)</span></div><div class="blk"><b>Rep count</b><span>per set</span></div></div>
+    </div>
+  </div>
+  <div class="grid g3">
+    <div class="panel rv" style="--i:4"><div class="cap">Architectures we compare</div><ul class="list"><li>1D-CNN (fast baseline)</li><li>LSTM</li><li>Small Transformer</li></ul></div>
+    <div class="panel rv" style="--i:5"><div class="cap">Metrics</div><ul class="list"><li>Accuracy and F1 per exercise</li><li>Rep-count error (reps off per set)</li></ul></div>
+    <div class="panel rv" style="--i:6"><div class="cap">Baseline check, not a claim</div><p style="font-size:14px">Camera only vs watch only vs both. Fusion should win; we run it to verify the pipeline, not as a research result.</p></div>
+  </div>
+  <div class="panel rv" style="--i:7">
+    <div class="cap">Already tested on MM-Fit · rep counting from the skeleton</div>
+    <div class="stats" id="repEval"></div>
+    <p style="font-size:14px">A simple hip-height detector already counts squat and lunge reps almost perfectly. So <b>rep counting is not our research claim</b>. What it gives us is reliable rep boundaries, and that is what makes per-rep fatigue measures (Model 3) trustworthy. The model is needed for exercises where the hips don't move (curls, presses) and for the watch-only case.</p>
+  </div>
+</section>
+
+<!-- 10 ─ MODEL 2 -->
+<section class="step" id="s-m2" data-title="Model 2 · Form check" hidden>
+  <div class="eyebrow rv">Step 10 <span>· Models</span></div>
+  <h2 class="rv" style="--i:1">Model 2: good rep or bad rep</h2>
+  <p class="lede rv" style="--i:2">The skeleton is a graph: joints are nodes, bones are edges. A graph network learns how that graph moves over one rep.</p>
+  <div class="panel rv" style="--i:3">
+    <div class="arch">
+      <div class="col"><div class="blk p"><b>One rep</b><span>T × 18 joints × 2</span></div></div>
+      <div class="arr"></div>
+      <div class="col"><div class="blk p"><b>ST-GCN</b><span>space-time graph conv</span></div><div class="blk p"><b>or LSTM</b><span>on joint angles</span></div></div>
+      <div class="arr"></div>
+      <div class="col"><div class="blk a"><b>Form score</b><span>0 = bad · 1 = good</span></div></div>
+      <div class="arr"></div>
+      <div class="col"><div class="blk"><b>Error type</b><span>e.g. knees in, shallow depth</span></div></div>
+    </div>
+  </div>
+  <div class="grid g4">
+    <div class="panel rv" style="--i:4"><div class="cap">Training plan</div><ol class="ol"><li><div><b>Pre-train on EC3D</b><span>clean lab recordings, 3D projected to 2D like our phone</span></div></li><li><div><b>Test on our own reps</b><span>squats and lunges filmed with our phone, correct and with the same mistakes</span></div></li><li><div><b>Optional: Fitness-AQA</b><span>real gym footage, if our access request is accepted</span></div></li></ol></div>
+    <div class="panel rv" style="--i:5"><div class="cap">Metric that matters</div><p style="font-size:14px"><b>Recall on bad reps.</b> Missing a bad rep is the worst mistake a safety coach can make; a false "fix your form" is only annoying.</p></div>
+    <div class="panel rv" style="--i:6"><div class="cap">Already tested on EC3D</div><p style="font-size:14px">A quick baseline built tonight reaches <b id="m2base"></b> on a person it never saw (step 04, "Is the mistake measurable?"). The authors' graph network reaches 90.9 %. That range is our target.</p></div>
+    <div class="panel rv" style="--i:7"><div class="cap">Output goes to Model 3</div><p style="font-size:14px">The form score of every rep becomes one of the fatigue signals. Form that slowly degrades across a set is an early warning.</p></div>
+  </div>
+</section>
+
+<!-- 11 ─ MODEL 3 -->
+<section class="step" id="s-m3" data-title="Model 3 · Fatigue & risk" hidden>
+  <div class="eyebrow rv">Step 11 <span>· Models · our contribution</span></div>
+  <h2 class="rv" style="--i:1">Model 3: fatigue and injury risk</h2>
+  <p class="lede rv" style="--i:2">No public dataset has injury labels. But inside every set, <strong>later reps are more tired than early ones</strong>. We tested that idea on MM-Fit before this presentation.</p>
+  <div class="grid g2">
+    <div class="panel rv" style="--i:3">
+      <div class="cap">Rep duration inside each squat set, session w00</div>
+      <div id="repChart"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap" id="repLegend"></div>
+    </div>
+    <div class="panel rv" style="--i:4">
+      <div class="cap">Same check on all 21 sessions</div>
+      <div class="stats" id="slowStats"></div>
+      <p style="font-size:14px">Squats clearly slow down at the end of a set. Lunges don't, at least with this simple hip-height detector. <b>Speed alone is not enough</b>, so the model also uses range of motion, form score and heart rate.</p>
+      <p class="note">Rep times are detected from hip height in the 2D pose: our quick analysis, not an MM-Fit label. Last 3 reps compared with the first 3.</p>
+    </div>
+  </div>
+  <div class="grid g-side">
+    <div class="panel rv" style="--i:5">
+      <div class="cap">How it learns without injury labels</div>
+      <ol class="ol">
+        <li><div><b>Weak labels</b><span>Rep position in the set (early = fresh, late = tired)</span></div></li>
+        <li><div><b>Fatigue signals</b><span>Speed loss, smaller range of motion, form score drop, heart rate rising and recovering slower</span></div></li>
+        <li><div><b>Personal baseline</b><span>Each signal is compared with <i>your</i> past sessions of the same exercise, not with the average person</span></div></li>
+        <li><div><b>Confirmation</b><span>Our 1–10 effort scores check that the predicted fatigue matches what we felt</span></div></li>
+      </ol>
+      <p class="note">Architecture: LSTM or Transformer over the sequence of reps, one personal baseline per user.</p>
+    </div>
+    <div class="panel rv" style="--i:6">
+      <div class="cap">Heart rate across session w00, sets shaded</div>
+      <div id="hrChart"></div>
+      <p class="note">Heart rate rises during sets and recovers between them. How fast it recovers, compared with your usual, is a fatigue signal that the camera can't see.</p>
+      <p style="font-size:14px" id="hrSpread"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 ─ FEEDBACK DEMO -->
+<section class="step" id="s-demo" data-title="Feedback" hidden>
+  <div class="eyebrow rv">Step 12 <span>· Output</span></div>
+  <h2 class="rv" style="--i:1">Feedback: keep going, fix it, or stop</h2>
+  <p class="lede rv" style="--i:2">A replay of a real squat set from MM-Fit. Each rep is timed from the skeleton and compared with the first reps. Press <strong>Play set</strong>.</p>
+  <div class="demo rv" style="--i:3">
+    <div class="panel">
+      <div class="viz" style="min-height:360px"><canvas id="cvDemo"></canvas><span class="tag" id="demoTag">frame —</span></div>
+      <div style="display:flex;gap:8px"><button class="ibtn" id="demoPlay">Play set</button><button class="ibtn" id="demoReset">Restart</button></div>
+    </div>
+    <div class="panel">
+      <div class="readouts">
+        <div class="ro"><div class="cap">Reps</div><div class="v" id="dReps">0</div></div>
+        <div class="ro"><div class="cap">Last rep</div><div class="v" id="dDur">–</div></div>
+        <div class="ro"><div class="cap" style="color:var(--hr)">Heart rate</div><div class="v" id="dHr">–</div></div>
+      </div>
+      <div class="cap">Rep duration (s)</div>
+      <div class="repbars" id="dBars"></div>
+      <div class="cap" style="display:flex;justify-content:space-between"><span>Slowdown vs first 2 reps</span><span class="mono" id="dPct">0 %</span></div>
+      <div class="meter"><i id="dNeedle"></i></div>
+      <div class="msg ok" id="dMsg">Ready</div>
+      <p class="note">Thresholds (+10 % warn, +25 % stop) are placeholders to show the behaviour; the trained Model 3 replaces them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 ─ EVALUATION -->
+<section class="step" id="s-eval" data-title="Evaluation" hidden>
+  <div class="eyebrow rv">Step 13 <span>· Output</span></div>
+  <h2 class="rv" style="--i:1">How we check that it works</h2>
+  <p class="lede rv" style="--i:2">Always tested on people the model never saw. We reuse MM-Fit's official split by person, so our numbers stay comparable with the paper.</p>
+  <div class="panel rv" style="--i:3">
+    <div class="tw"><table>
+      <thead><tr><th>Model</th><th>Metrics</th><th>Benchmark</th><th>Answers</th></tr></thead>
+      <tbody>
+        <tr><td><b>1 · Recognition</b></td><td>Accuracy, F1 per exercise, rep-count error</td><td>1D-CNN vs LSTM vs Transformer · camera / watch / both</td><td>RQ1</td></tr>
+        <tr><td><b>2 · Form check</b></td><td>Precision & recall on bad reps</td><td>ST-GCN vs LSTM on joint angles</td><td>input to RQ3</td></tr>
+        <tr><td><b>3 · Fatigue & risk</b></td><td>Warning lead time (reps before breakdown), false alarms per session, agreement with effort scores</td><td>with vs without HR · general vs personal baseline</td><td>RQ2, RQ3</td></tr>
+        <tr><td><b>All, live</b></td><td>Same metrics on our own sessions</td><td>MM-Fit results vs Poco X3 Pro + Galaxy Watch 7</td><td>RQ4</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="grid g3">
+    <div class="panel rv" style="--i:4"><div class="cap">Split</div><p style="font-size:14px">Train, validation and test by person. No one appears in two splits.</p></div>
+    <div class="panel rv" style="--i:5"><div class="cap">Small-data fixes</div><p style="font-size:14px">MM-Fit has 10 people: skeleton augmentation (rotation, scaling, time-warping) plus our own recordings.</p></div>
+    <div class="panel rv" style="--i:6"><div class="cap">Final test</div><p style="font-size:14px">Run everything live on our phone and watch, and compare with the dataset numbers.</p></div>
+  </div>
+</section>
+
+<section class="step" id="s-defense" data-title="Hard questions" hidden>
+  <div class="eyebrow rv">Step 15 <span>· Defense</span></div>
+  <h2 class="rv" style="--i:1">Hard questions, and our answers</h2>
+  <p class="lede rv" style="--i:2">The weak points we expect to be challenged on. Each answer says what we concede, what we do about it, and the <strong>evidence from our own data</strong>.</p>
+  <div class="rv" style="--i:3;display:flex;gap:8px;flex-wrap:wrap" id="qaFilter"></div>
+  <div class="rv" style="--i:4" id="qa"></div>
+</section>
+
+<!-- WRAP-UP -->
+<section class="step" id="s-wrap" data-title="Tools, limits, references" hidden>
+  <div class="eyebrow rv">Step 14 <span>· Wrap-up</span></div>
+  <h2 class="rv" style="--i:1">Tools, limits, references</h2>
+  <div class="grid g2">
+    <div class="panel rv" style="--i:2">
+      <div class="cap">Tools, all free</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip">Python</span><span class="chip">PyTorch</span><span class="chip">MediaPipe / YOLO-Pose</span><span class="chip">Apache Kafka</span><span class="chip">Apache Spark</span><span class="chip">pandas · NumPy</span><span class="chip">Poco X3 Pro</span><span class="chip">Galaxy Watch 7</span>
+      </div>
+      <div class="cap" style="margin-top:8px">Limits</div>
+      <ul class="list">
+        <li>No public dataset has real injury labels: we predict fatigue and form breakdown, the warning signs of injury.</li>
+        <li>MM-Fit has only 10 people: augmentation and our own recordings.</li>
+        <li>Our own data covers two people. It is a proof of concept, not a medical tool.</li>
+      </ul>
+    </div>
+    <div class="callout rv" style="--i:3;justify-content:center">
+      <div class="q" style="font-size:clamp(24px,3vw,34px)">A rep counter that becomes a coach that protects you.</div>
+      <p>Three models we train ourselves, two devices people already own, and a personal history that turns "you did 10 reps" into "stop now".</p>
+    </div>
+  </div>
+  <div class="panel rv" style="--i:4">
+    <div class="cap">References</div>
+    <ul class="refs">
+      <li><b>Strömbäck, D., Huang, S., Radu, V. (2020).</b> <i>MM-Fit: Multimodal Deep Learning for Automatic Exercise Logging across Sensing Devices.</i> Proc. ACM IMWUT. <span>Our main dataset; reference results for Model 1.</span></li>
+      <li><b>Zhao, Z. et al. (2022).</b> <i>3D Pose Based Feedback for Physical Exercises.</i> ACCV. <span>EC3D dataset: correct and incorrect squats, lunges, planks.</span></li>
+      <li><b>Parmar, P., Gharat, A., Rhodin, H. (2022).</b> <i>Domain Knowledge-Informed Self-Supervised Representations for Workout Form Assessment.</i> ECCV. <span>Fitness-AQA dataset, expert-labelled form errors.</span></li>
+      <li><b>Yan, S., Xiong, Y., Lin, D. (2018).</b> <i>Spatial Temporal Graph Convolutional Networks for Skeleton-Based Action Recognition.</i> AAAI. <span>ST-GCN, candidate architecture for Model 2.</span></li>
+      <li><b>Ordóñez, F. J., Roggen, D. (2016).</b> <i>Deep Convolutional and LSTM Recurrent Neural Networks for Multimodal Wearable Activity Recognition.</i> Sensors. <span>DeepConvLSTM, baseline for sensor encoders.</span></li>
+      <li><b>Sánchez-Medina, L., González-Badillo, J. J. (2011).</b> <i>Velocity Loss as an Indicator of Neuromuscular Fatigue during Resistance Training.</i> Med. Sci. Sports Exerc. <span>Supports rep speed loss as a fatigue signal (Model 3).</span></li>
+      <li><b>Lugaresi, C. et al. (2019).</b> <i>MediaPipe: A Framework for Building Perception Pipelines.</i> arXiv:1906.08172. <span>Pose estimator we reuse.</span></li>
+      <li><b>Dritsas, E. et al. (2025).</b> <i>Applying Machine Learning on Big Data With Apache Spark.</i> IEEE Access. <span>Methodological reference for the big data pipeline.</span></li>
+    </ul>
+  </div>
+</section>
+
+<div class="foot" id="foot"></div>
+</main>
+
+<script src="mmfit_data.js"></script>
+<script src="ec3d_data.js"></script>
+<script src="angle_data.js"></script>
+<script>
+"use strict";
+const D = MMFIT, E = EC3D;
+const COURSE = "Deep Learning & Big Data · Project validation";
+// the talk itself: t = seconds planned per slide (total 8:30, leaves margin under 10:00)
+const MAIN = [
+  {id:"idea", group:"Framing", lbl:"The idea", sp:0, t:50},
+  {id:"rq", lbl:"Questions", sp:0, t:50},
+  {id:"existing", lbl:"Existing apps", sp:0, t:40},
+  {id:"data", group:"Data", lbl:"Data", sp:0, t:80},
+  {id:"how", group:"System", lbl:"How it works", sp:0, t:80},
+  {id:"model1", group:"Models", lbl:"Model 1", sp:1, t:40},
+  {id:"model2", lbl:"Model 2", sp:1, t:50},
+  {id:"model3", lbl:"Model 3", sp:1, t:60, key:true},
+  {id:"demo", group:"Results", lbl:"Live replay", sp:1, t:50},
+  {id:"proof", lbl:"Proof & limits", sp:1, t:50},
+];
+// backup slides for the questions
+const BACKUP = [
+  {id:"defense", group:"Q&A", lbl:"Hard questions", key:true},
+  {id:"mmfit", group:"Data", lbl:"MM-Fit files"},
+  {id:"ec3d", lbl:"EC3D in 3D"},
+  {id:"moredata", lbl:"Our recordings"},
+  {id:"questions", group:"Framing", lbl:"Objectives & feedback"},
+  {id:"capture", group:"Pipeline", lbl:"Capture"},
+  {id:"pose", lbl:"Pose"},
+  {id:"angle", lbl:"Camera angle"},
+  {id:"stream", group:"Big data", lbl:"Kafka + Spark"},
+  {id:"clean", lbl:"Cleaning"},
+  {id:"m1", group:"Model details", lbl:"M1"},
+  {id:"m2", lbl:"M2"},
+  {id:"m3", lbl:"M3"},
+  {id:"eval", group:"Proof", lbl:"Evaluation"},
+  {id:"wrap", lbl:"References"},
+];
+const EX = {squats:"Squats",pushups:"Push-ups",dumbbell_shoulder_press:"Shoulder press",lunges:"Lunges",dumbbell_rows:"Dumbbell rows",situps:"Sit-ups",tricep_extensions:"Triceps extensions",bicep_curls:"Biceps curls",lateral_shoulder_raises:"Lateral raises",jumping_jacks:"Jumping jacks"};
+const BONES = [[1,0],[0,14],[14,16],[0,15],[15,17],[1,2],[2,3],[3,4],[1,5],[5,6],[6,7],[1,8],[8,9],[9,10],[1,11],[11,12],[12,13]];
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const fmt = n => n.toLocaleString("en-US");
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+$("#course").textContent = COURSE;
+
+
+/* ---------------- theme ---------------- */
+try { const t = localStorage.getItem("awc-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+$("#theme").onclick = () => {
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  const t = dark ? "light" : "dark";
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("awc-theme", t); } catch (e) {}
+};
+
+/* ---------------- chart helper ---------------- */
+function ticks(a, b, n = 5) {
+  const raw = (b - a) / n, mag = 10 ** Math.floor(Math.log10(raw)), e = raw / mag;
+  const st = (e >= 7.5 ? 10 : e >= 3.5 ? 5 : e >= 1.5 ? 2 : 1) * mag, out = [];
+  for (let v = Math.ceil(a / st) * st; v <= b + 1e-9; v += st) out.push(+v.toFixed(6));
+  return out;
+}
+function chart(o) {
+  const W = o.w || 640, H = o.h || 220, m = Object.assign({l: 44, r: 14, t: 12, b: 30}, o.m || {});
+  const [x0, x1] = o.x, [y0, y1] = o.y;
+  const X = v => m.l + (v - x0) / (x1 - x0) * (W - m.l - m.r), Y = v => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.label || "chart"}">`;
+  (o.bands || []).forEach(b => s += `<rect class="${b.cls || "f-band"}" x="${X(b.a)}" y="${m.t}" width="${Math.max(1, X(b.b) - X(b.a))}" height="${H - m.t - m.b}"><title>${b.title || ""}</title></rect>`);
+  s += `<g class="grid">`;
+  const yt = o.yTicks || ticks(y0, y1, 4), xt = o.xTicks || ticks(x0, x1, 6);
+  yt.forEach(v => s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/>`);
+  s += `</g>`;
+  yt.forEach(v => s += `<text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${(o.yFmt || (v => v))(v)}</text>`);
+  xt.forEach(v => s += `<text x="${X(v)}" y="${H - m.b + 18}" text-anchor="middle">${(o.xFmt || (v => v))(v)}</text>`);
+  s += `<line class="axis" x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}"/>`;
+  if (o.xLabel) s += `<text x="${W - m.r}" y="${H - 2}" text-anchor="end">${o.xLabel}</text>`;
+  (o.series || []).forEach(se => {
+    const d = se.pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join("");
+    s += `<path class="ln ${se.cls} ${se.draw === false ? "" : "draw"}" d="${d}" style="stroke-width:${se.w || 2};${se.op ? "opacity:" + se.op : ""}"/>`;
+    if (se.dots) se.pts.forEach(p => s += `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3.2" class="${se.dotCls}"/>`);
+  });
+  if (o.cursor != null) s += `<line id="${o.cursorId}" x1="${X(o.cursor)}" x2="${X(o.cursor)}" y1="${m.t}" y2="${H - m.b}" style="stroke:var(--ink);stroke-width:1.5"/>`;
+  s += `</svg>`;
+  return {svg: s, X, Y};
+}
+function mountChart(el, o) {
+  const c = chart(o); el.innerHTML = c.svg;
+  el.querySelectorAll("path.draw").forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength())));
+  return c;
+}
+
+/* ---------------- skeleton player ---------------- */
+const players = [];
+class Skel {
+  constructor(canvas, frames, opt = {}) {
+    this.c = canvas; this.ctx = canvas.getContext("2d"); this.opt = opt; this.i = 0; this.acc = 0; this.playing = opt.autoplay !== false; this.hi = null;
+    this.set(frames); players.push(this);
+    new ResizeObserver(() => this.fit()).observe(canvas.parentElement); this.fit();
+  }
+  set(frames) {
+    this.f = frames; this.i = 0; this.acc = 0;
+    let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
+    frames.forEach(([xs, ys]) => xs.forEach((x, j) => { const y = ys[j]; if (!x && !y) return; a = Math.min(a, x); b = Math.max(b, x); c = Math.min(c, y); d = Math.max(d, y); }));
+    this.bb = [a, b, c, d]; this.draw();
+  }
+  fit() { const r = this.c.parentElement.getBoundingClientRect(), k = devicePixelRatio || 1; this.c.width = r.width * k; this.c.height = r.height * k; this.k = k; this.draw(); }
+  visible() { return this.c.offsetParent !== null; }
+  tick(dt) {
+    if (!this.playing || !this.f.length) return;
+    this.acc += dt; const step = 1000 / (this.opt.fps || 15);
+    while (this.acc >= step) { this.acc -= step; this.i++; if (this.i >= this.f.length) { if (this.opt.loop === false) { this.i = this.f.length - 1; this.playing = false; this.opt.onEnd && this.opt.onEnd(); break; } this.i = 0; this.opt.onLoop && this.opt.onLoop(); } this.opt.onFrame && this.opt.onFrame(this.i); }
+    this.draw();
+  }
+  draw() {
+    const ctx = this.ctx, W = this.c.width, H = this.c.height; if (!W || !this.f.length) return;
+    ctx.clearRect(0, 0, W, H);
+    const [a, b, c, d] = this.bb, pad = 30 * this.k, s = Math.min((W - 2 * pad) / (b - a || 1), (H - 2 * pad) / (d - c || 1));
+    const ox = (W - (b - a) * s) / 2, oy = (H - (d - c) * s) / 2;
+    const P = (x, y) => [ox + (x - a) * s, oy + (y - c) * s];
+    const [xs, ys] = this.f[this.i];
+    ctx.strokeStyle = css("--line"); ctx.lineWidth = 1 * this.k; ctx.beginPath(); ctx.moveTo(pad, oy + (d - c) * s + 6 * this.k); ctx.lineTo(W - pad, oy + (d - c) * s + 6 * this.k); ctx.stroke();
+    ctx.lineCap = "round"; ctx.lineWidth = 4 * this.k; ctx.strokeStyle = css("--ink");
+    BONES.forEach(([p, q]) => { if ((!xs[p] && !ys[p]) || (!xs[q] && !ys[q])) return; const A = P(xs[p], ys[p]), B = P(xs[q], ys[q]); ctx.globalAlpha = (p >= 14 || q >= 14) ? .35 : 1; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.stroke(); });
+    ctx.globalAlpha = 1;
+    xs.forEach((x, j) => { if (!x && !ys[j]) return; const [px, py] = P(x, ys[j]); const big = j === this.hi; ctx.fillStyle = big ? css("--hr") : css("--pose"); ctx.beginPath(); ctx.arc(px, py, (big ? 8 : (j === 8 || j === 11) ? 5.5 : 4) * this.k, 0, 7); ctx.fill(); });
+    if (this.hi != null) { const [px, py] = P(xs[this.hi], ys[this.hi]); ctx.fillStyle = css("--ink"); ctx.font = `${12 * this.k}px IBM Plex Mono, monospace`; ctx.fillText(this.hiLabel || D.joints[this.hi], px + 12 * this.k, py - 8 * this.k); }
+  }
+}
+let last = performance.now();
+function loop(t) {
+  const dt = Math.min(100, t - last); last = t;
+  if (ecSpin && players.some(p => p instanceof Skel3D && p.visible())) { ecYaw = (ecYaw + dt * .015) % 360; const y = $("#yaw"); if (y) y.value = Math.round(ecYaw); }
+  players.forEach(p => p.visible() && p.tick(dt)); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+const toXY = frames => frames.map(f => f.length === 3 ? [f[1], f[2]] : f);
+
+/* ---------------- step inits ---------------- */
+const inited = {};
+const init = {
+  idea() {
+    new Skel($("#cvIdea"), D.skeleton, {fps: 15});
+    const hr = D.hr, xs = hr.map(p => p[0] / 1800);
+    mountChart($("#ideaHr"), {h: 110, m: {l: 34, b: 24, t: 6}, x: [0, Math.ceil(Math.max(...xs))], y: [60, 150], yTicks: [80, 120], xFmt: v => v + " min",
+      series: [{pts: hr.map(p => [p[0] / 1800, p[1]]), cls: "s-hr"}], bands: D.labels.map(l => ({a: l[0] / 1800, b: l[1] / 1800, title: EX[l[3]]})), label: "Heart rate during session w00"});
+    $("#ideaHrNow").textContent = Math.round(Math.min(...hr.map(p => p[1]))) + "–" + Math.round(Math.max(...hr.map(p => p[1]))) + " bpm";
+    const pills = $$("#verdicts .pill"); let k = 0;
+    const cyc = () => { pills.forEach((p, i) => p.classList.toggle("lit", i === k)); k = (k + 1) % 3; };
+    cyc(); setInterval(cyc, 2200);
+  },
+  mmfit() {
+    const S = D.summary;
+    $("#mmStats").innerHTML = [[S.sessions, "workout sessions"], [S.minutes, "minutes recorded"], [S.sets, "sets"], [fmt(S.reps), "repetitions"], [(S.rows / 1e6).toFixed(1) + " M", "sensor rows"], [S.gb + " GB", "on disk (.npy)"], [S.with_hr + " / " + S.sessions, "sessions with heart rate"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+    // tabs
+    $$("#mmTabs .tab").forEach(t => t.onclick = () => {
+      $$("#mmTabs .tab").forEach(x => x.setAttribute("aria-selected", x === t));
+      $$("#s-mmfit .tabpane").forEach(p => p.hidden = p.dataset.pane !== t.dataset.tab);
+      if (t.dataset.tab === "ex" && !exPlayer) initEx();
+      if (t.dataset.tab === "sess" && !sessDone) initSess();
+    });
+    // files
+    const FILES = {
+      sw_l_acc: {d: "smartwatch, left wrist, accelerometer", cols: ["frame", "timestamp_ms", "x", "y", "z"], u: "m/s²", rate: "100 Hz", ex: "Wrist acceleration in 3 axes. Gravity (≈ 9.8 m/s²) is included."},
+      sw_l_gyr: {d: "smartwatch, left wrist, gyroscope", cols: ["frame", "timestamp_ms", "x", "y", "z"], u: "rad/s", rate: "100 Hz", ex: "How fast the wrist rotates around each axis."},
+      sw_l_hr: {d: "smartwatch, left wrist, heart rate", cols: ["frame", "timestamp_ms", "bpm"], u: "bpm", rate: "≈ 1 Hz", ex: "Heart rate from the watch's optical sensor, about one value per second."},
+      sp_r_acc: {d: "smartphone, right pocket, accelerometer", cols: ["frame", "timestamp_ms", "x", "y", "z"], u: "m/s²", rate: "≈ 200 Hz", ex: "Phone motion. We drop it: in our setup the phone films instead."},
+      eb_l_acc: {d: "earbud, left ear, accelerometer", cols: ["frame", "timestamp_ms", "x", "y", "z"], u: "m/s²", rate: "≈ 90 Hz", ex: "Head motion from an earbud. Not used in our setup."},
+      pose_2d: {d: "2D body pose from video", cols: ["joint", "x (px)", "y (px)"], u: "pixels", rate: "30 fps", ex: "Array of shape (2, frames, 19): x and y, then the frame number + 18 joints."},
+      pose_3d: {d: "3D body pose", cols: ["joint", "x", "y", "z"], u: "3D", rate: "30 fps", ex: "Array of shape (3, frames, 18): x, y, z, then the frame number + 17 joints."},
+      labels: {d: "set annotations", cols: ["start_frame", "end_frame", "reps", "exercise"], u: "", rate: "per set", ex: "One row per set. This is the only ground truth MM-Fit gives."},
+    };
+    const pick = $("#filePick");
+    pick.innerHTML = Object.entries(FILES).map(([k, f], i) => `<button class="pick" aria-pressed="${i === 0}" data-k="${k}"><span class="fn">w00_${k}${k === "labels" ? ".csv" : ".npy"}</span><span class="fd">${f.rate}</span></button>`).join("");
+    const show = k => {
+      const f = FILES[k]; $$("#filePick .pick").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === k));
+      const parts = k === "labels" ? [["w00", "workout 00"], ["labels", "set annotations"]] : k.startsWith("pose") ? [["w00", "workout 00"], ["pose", "camera skeleton"], [k.slice(5), k.endsWith("2d") ? "2D, pixels" : "3D"]]
+        : [["w00", "workout 00"], [k.slice(0, 2), {sw: "smartwatch", sp: "smartphone", eb: "earbud"}[k.slice(0, 2)]], [k[3], k[3] === "l" ? "left" : "right"], [k.slice(5), {acc: "accelerometer", gyr: "gyroscope", hr: "heart rate"}[k.slice(5)]]];
+      $("#fileDecode").innerHTML = parts.map(([b, s]) => `<div class="seg"><b>${b}</b><span>${s}</span></div>`).join("");
+      $("#fileExplain").textContent = f.ex;
+      let rows;
+      if (k === "labels") rows = D.labels.slice(0, 8).map(r => [r[0], r[1], r[2], EX[r[3]]]);
+      else if (k === "pose_2d") rows = D.joints.map((j, i) => [j, D.raw.pose_2d.x[i], D.raw.pose_2d.y[i]]);
+      else if (k === "pose_3d") rows = D.raw.pose_3d.x.map((x, i) => ["joint " + i, x, D.raw.pose_3d.y[i], D.raw.pose_3d.z[i]]);
+      else rows = D.raw[k];
+      const num = v => typeof v === "number";
+      $("#fileTable").className = "tw" + (rows.length > 10 ? " tall" : "");
+      $("#fileTable").innerHTML = `<table><thead><tr>${f.cols.map((c, i) => `<th class="${i ? "num" : ""}">${c}</th>`).join("")}</tr></thead><tbody>${rows.map((r, ri) => `<tr style="animation-delay:${ri * 30}ms">${r.map((v, i) => `<td class="${num(v) ? "num" : ""}">${num(v) ? (Number.isInteger(v) ? v : v.toFixed(i >= 2 || k.startsWith("pose") ? (k.startsWith("pose") ? 1 : 3) : 0)) : v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+      const sess = D.sessions[0];
+      $("#fileNote").textContent = k === "labels" ? `w00 has ${sess.sets} sets in total; first 8 shown.` : k.startsWith("pose") ? `Frame ${D.raw[k].frame}, the first frame of the first squat set.` : `First 8 rows at the start of the first squat set (frame ${D.labels[0][0]}). Unit: ${f.u}. Shared "frame" column = sync key.`;
+    };
+    pick.onclick = e => { const b = e.target.closest(".pick"); if (b) show(b.dataset.k); };
+    show("sw_l_acc");
+    // labels tab
+    $("#labTable").innerHTML = `<table><thead><tr><th class="num">start</th><th class="num">end</th><th class="num">reps</th><th>exercise</th></tr></thead><tbody>${D.labels.map(r => `<tr><td class="num">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td>${EX[r[3]]}</td></tr>`).join("")}</tbody></table>`;
+    const noHr = D.sessions.filter(s => !s.hr).map(s => s.id);
+    $("#noHrCount").textContent = noHr.length; $("#noHrList").textContent = noHr.join(", ");
+  },
+  moredata() { $("#covHr").textContent = `${D.summary.with_hr} / ${D.summary.sessions} sessions`; },
+  ec3d() { initEC3D(); },
+  angle() {
+    const A = ANGLE, s = A.Squat, l = A.Lunge;
+    mountChart($("#angleChart"), {h: 240, x: [0, 180], y: [0, 80], xTicks: [0, 45, 90, 135, 180], yTicks: [0, 20, 40, 60, 80], xFmt: v => v + "°", yFmt: v => v + " %",
+      series: [{pts: s.angles.map((a, i) => [a, s.acc[i]]), cls: "s-pose", dots: true, dotCls: "f-pose"}, {pts: l.angles.map((a, i) => [a, l.acc[i]]), cls: "s-imu", dots: true, dotCls: "f-imu"},
+               {pts: [[0, s.chance], [180, s.chance]], cls: "s-muted", w: 1, op: .6, draw: false}],
+      bands: [{a: 30, b: 60, cls: "f-band", title: "best zone"}], label: "Accuracy by camera angle"});
+    const best = s.angles[s.acc.indexOf(Math.max(...s.acc))];
+    $("#angleTxt").innerHTML = `Squat mistakes are easiest to see around <b>${best}°</b> (${Math.max(...s.acc)} %) and hardest from the side (${s.acc[s.angles.indexOf(90)]} % at 90°, ${Math.min(...s.acc)} % at worst). Lunges barely depend on the angle (${Math.min(...l.acc)}–${Math.max(...l.acc)} %). Grey line: chance for squats (${s.chance} %).`;
+  },
+  data() {
+    const S = D.summary;
+    $("#dMM1").textContent = S.sessions; $("#dMM2").textContent = fmt(S.reps); $("#dMM3").textContent = (S.rows / 1e6).toFixed(1) + " M";
+    $("#dEC1").textContent = E.summary.reps;
+  },
+  how() {
+    const sk = new Skel($("#cvHow"), D.skeleton, {fps: 15}); sk.hi = 7; sk.hiLabel = "watch";
+    const says = [["Recording…", ""], ["Squats · rep 7", ""], ["Push your knees out.", "warn"], ["Stop the set. Risk of injury.", "stop"]];
+    let s = 0;
+    const set = k => {
+      s = k; $$("#s-how [data-s]").forEach(e => e.classList.toggle("on", +e.dataset.s === k));
+      const b = $("#howSay"); b.textContent = `"${says[k][0]}"`; b.className = "bubble " + says[k][1];
+    };
+    $$("#s-how .stage").forEach(e => e.onclick = () => set(+e.dataset.s));
+    set(0); setInterval(() => { if ($("#scene").offsetParent) set((s + 1) % 4); }, 2600);
+  },
+  model1() {
+    const ex = D.exercises.map(e => e.name); let k = 0;
+    const clip = n => D.clips[n].frames.slice(0, 50);
+    const show = () => { const n = ex[k]; $("#m1Ex").textContent = EX[n]; $("#m1Reps").textContent = D.clips[n].reps; $("#m1Tag").textContent = `MM-Fit · ${EX[n]} · ${k + 1}/10`; };
+    const sk = new Skel($("#cvM1"), clip(ex[0]), {fps: 10, onLoop: () => { k = (k + 1) % ex.length; sk.set(clip(ex[k])); show(); }});
+    show();
+    const R = D.repeval;
+    $("#m1Stats").innerHTML = [[`${R.squats.exact} / ${R.squats.sets}`, "squat sets: reps counted exactly by a first simple test"], [`${R.lunges.exact} / ${R.lunges.sets}`, "lunge sets counted exactly"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+  },
+  model2() {
+    const errs = ["Knees inward", "Not low enough", "Front bent", "Feet too wide"]; let err = errs[0];
+    const a = new Skel3D($("#cvM2a"), "--ok"), b = new Skel3D($("#cvM2b"), "--stop");
+    const show = () => {
+      $("#m2Err").innerHTML = errs.map(e => `<button aria-pressed="${e === err}" data-err="${e}">${e}</button>`).join("");
+      const c = E.clips["Squat|Correct"], w = E.clips["Squat|" + err], bd = bounds3d([c, w]);
+      a.set(c, bd); b.set(w, bd); $("#m2Tag").textContent = err.toLowerCase();
+    };
+    $("#m2Err").onclick = e => { const x = e.target.closest("button"); if (x) { err = x.dataset.err; show(); } };
+    show();
+    const B = E.baseline;
+    $("#m2Stats").innerHTML = [[`${B.Squat.acc} %`, `squat, new person (chance ${B.Squat.chance} %)`], [`${B.Plank.acc} %`, `plank, new person (chance ${B.Plank.chance} %)`], ["90.9 %", "EC3D authors' result: our target"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+  },
+  model3() {
+    repChart("#repChart2", "#repLegend2");
+    const SD = D.slowdown, H = D.hrstats;
+    $("#m3Stats").innerHTML = [[`${SD.squats.slower} / ${SD.squats.sets}`, "squat sets end slower"], [`${Math.round(H.min_high)}–${Math.round(H.max_high)}`, "peak heart rate across people (bpm): no single threshold fits"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+  },
+  defense() { initDefense(); },
+  m1() {
+    const R = D.repeval;
+    $("#repEval").innerHTML = [[`${R.squats.exact} / ${R.squats.sets}`, "squat sets counted exactly"], [`${R.lunges.exact} / ${R.lunges.sets}`, "lunge sets counted exactly"], [R.squats.mae.toFixed(2), "mean error, reps per squat set"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+  },
+  m2() { const B = E.baseline; $("#m2base").textContent = `${B.Squat.acc} % (squat), ${B.Lunge.acc} % (lunge), ${B.Plank.acc} % (plank)`; },
+  pose() {
+    const fr = [[D.raw.pose_2d.x, D.raw.pose_2d.y]];
+    const sk = new Skel($("#cvPose"), fr, {autoplay: false});
+    $("#poseTag").textContent = `w00 · frame ${D.raw.pose_2d.frame}`;
+    $("#poseTable").innerHTML = `<table><thead><tr><th>#</th><th>joint</th><th class="num">x (px)</th><th class="num">y (px)</th></tr></thead><tbody>${D.joints.map((j, i) => `<tr data-j="${i}" style="cursor:pointer;animation-delay:${i * 25}ms"><td class="mono">${i}</td><td>${j.replace("_", " ")}</td><td class="num">${D.raw.pose_2d.x[i].toFixed(1)}</td><td class="num">${D.raw.pose_2d.y[i].toFixed(1)}</td></tr>`).join("")}</tbody></table>`;
+    $("#poseTable").onclick = e => { const tr = e.target.closest("tr[data-j]"); if (!tr) return; sk.hi = +tr.dataset.j; $$("#poseTable tr").forEach(r => r.style.background = r === tr ? "var(--accent-soft)" : ""); sk.draw(); };
+    sk.hi = 4; sk.draw();
+  },
+  stream() {
+    const svg = $("#streamSvg");
+    const box = (x, y, w, h, t, s, k) => `<rect class="${k || ""}" x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/><text x="${x + 14}" y="${y + 24}">${t}</text>${s ? `<text class="s" x="${x + 14}" y="${y + 42}">${s}</text>` : ""}`;
+    let s = "";
+    const lanes = [[60, "Phone · keypoints", "30 msg/s", "var(--pose)"], [140, "Watch · IMU", "100 msg/s", "var(--imu)"], [220, "Watch · heart rate", "1 msg/s", "var(--hr)"]];
+    lanes.forEach(([y, t, r, c], i) => {
+      s += `<path id="lp${i}" d="M190 ${y + 6} L330 ${y + 6}"/>`;
+      s += box(10, y - 22, 180, 56, t, r);
+      for (let k = 0; k < (i === 2 ? 1 : 3); k++) s += reduced ? "" : `<circle r="5" fill="${c}"><animateMotion dur="${1.2 + i * .3}s" begin="${k * .4}s" repeatCount="indefinite"><mpath href="#lp${i}"/></animateMotion></circle>`;
+    });
+    s += box(330, 30, 200, 236, "Kafka", "3 topics, buffered", "k");
+    ["pose.keypoints", "watch.imu", "watch.hr"].forEach((t, i) => s += `<text class="s" x="350" y="${100 + i * 70}">▸ ${t}</text>`);
+    s += `<path id="lo1" d="M530 90 L640 90"/><path id="lo2" d="M530 210 L640 210"/>`;
+    s += box(640, 56, 150, 66, "Live models", "M1 → M2 → M3");
+    s += box(640, 176, 150, 66, "Archive", "Parquet, per session");
+    s += `<path d="M790 89 L830 89"/>` + box(830, 56, 120, 66, "Feedback", "voice, < 1 s");
+    s += `<path d="M790 209 L830 209"/>` + box(830, 176, 120, 66, "Spark batch", "history");
+    s += `<path class="back" d="M890 176 L890 148 L715 148 L715 122"/><text class="s" x="725" y="142">personal baselines</text>`;
+    if (!reduced) s += `<circle r="5" fill="var(--accent)"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath href="#lo1"/></animateMotion></circle><circle r="5" fill="var(--muted)"><animateMotion dur="1.9s" repeatCount="indefinite"><mpath href="#lo2"/></animateMotion></circle>`;
+    svg.innerHTML = s;
+    const p = D.raw.pose_2d, a = D.raw.sw_l_acc[0], h = D.raw.sw_l_hr[0];
+    $("#msgPose").textContent = JSON.stringify({session: "w00", frame: p.frame, joints: 18, x: p.x.slice(0, 3).concat(["…"]), y: p.y.slice(0, 3).concat(["…"])}, null, 1);
+    $("#msgImu").textContent = JSON.stringify({session: "w00", frame: a[0], ts: a[1], acc: a.slice(2).map(v => +v.toFixed(3)), gyr: D.raw.sw_l_gyr[0].slice(2).map(v => +v.toFixed(3))}, null, 1);
+    $("#msgHr").textContent = JSON.stringify({session: "w00", frame: h[0], ts: h[1], bpm: h[2]}, null, 1);
+    const S = D.summary;
+    $("#bigStats").innerHTML = [[(S.rows / 1e6).toFixed(1) + " M", "rows in MM-Fit alone"], [S.gb + " GB", "raw .npy files"], ["≈ 300", "messages per second, live"], ["Parquet", "partitioned by person / session"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+  },
+  clean() {
+    const C = D.clean;
+    $("#winCount").textContent = "≈ " + fmt(Math.round(D.summary.minutes * 60 / 1.5 / 100) * 100);
+    $("#noHr2").textContent = D.sessions.filter(s => !s.hr).map(s => s.id).join(", ");
+    const views = {
+      raw: () => ({y: [Math.floor(Math.min(...C.raw)), Math.ceil(Math.max(...C.raw))], series: [{pts: C.t_raw.map((t, i) => [t, C.raw[i]]), cls: "s-imu", w: 1.2}], note: `${C.raw.length} samples at ${C.raw_hz} Hz. Noisy, and on a different clock than the video.`}),
+      res: () => ({y: [Math.floor(Math.min(...C.raw)), Math.ceil(Math.max(...C.raw))], series: [{pts: C.t_raw.map((t, i) => [t, C.raw[i]]), cls: "s-muted", w: 1, op: .35, draw: false}, {pts: C.t_new.map((t, i) => [t, C.smooth[i]]), cls: "s-imu", w: 2.4}], note: `${C.smooth.length} samples at 30 Hz, one per video frame, lightly smoothed. Grey = raw.`}),
+      z: () => ({y: [-3, 3], series: [{pts: C.t_new.map((t, i) => [t, C.z[i]]), cls: "s-imu", w: 2.4}], note: "Mean 0, standard deviation 1. Every person and every sensor now lives on the same scale."}),
+    };
+    const draw = v => { const o = views[v](); mountChart($("#cleanChart"), {h: 260, x: [0, 5], y: o.y, series: o.series, xFmt: v => v + " s", label: "Watch acceleration magnitude"}); $("#cleanNote").textContent = o.note; };
+    $("#cleanCtl").onclick = e => { const b = e.target.closest("button"); if (!b) return; $$("#cleanCtl button").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(b.dataset.v); };
+    draw("raw");
+  },
+  m3() {
+    repChart("#repChart", "#repLegend");
+    const sd = D.slowdown;
+    $("#slowStats").innerHTML = [[`${sd.squats.slower} / ${sd.squats.sets}`, "squat sets end slower"], [`+${sd.squats.median_pct} %`, "median squat slowdown"], [`${sd.lunges.slower} / ${sd.lunges.sets}`, "lunge sets end slower"], [`+${sd.lunges.median_pct} %`, "median lunge slowdown"]]
+      .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+    const hr = D.hr;
+    mountChart($("#hrChart"), {h: 220, x: [0, Math.ceil(hr[hr.length - 1][0] / 1800)], y: [60, 150], xFmt: v => v + " min", yFmt: v => v,
+      series: [{pts: hr.map(p => [p[0] / 1800, p[1]]), cls: "s-hr"}], bands: D.labels.map(l => ({a: l[0] / 1800, b: l[1] / 1800, title: EX[l[3]] + ", " + l[2] + " reps"})), label: "Heart rate, session w00"});
+    const H = D.hrstats;
+    $("#hrSpread").innerHTML = `Across MM-Fit sessions, the lowest heart rate ranges from <b>${Math.round(H.min_low)} to ${Math.round(H.max_low)} bpm</b> and the peak from <b>${Math.round(H.min_high)} to ${Math.round(H.max_high)} bpm</b>. No single threshold fits everyone, so each person is compared with their own history.`;
+  },
+  demo() { initDemo(); },
+};
+
+/* exercises tab */
+let exPlayer = null;
+function initEx() {
+  const ex = D.exercises, max = Math.max(...ex.map(e => e.sets));
+  $("#exBars").innerHTML = ex.map((e, i) => `<button class="bar" data-ex="${e.name}" aria-pressed="${e.name === "squats"}"><span class="bl">${EX[e.name]}</span><span class="bt"><i style="width:${e.sets / max * 100}%;animation-delay:${i * 50}ms"></i></span><span class="bn">${e.sets} · ${e.reps}r</span></button>`).join("");
+  const showEx = name => {
+    const c = D.clips[name];
+    $$("#exBars .bar").forEach(b => b.setAttribute("aria-pressed", b.dataset.ex === name));
+    $("#exTag").textContent = `${EX[name]} · w00 · first 8 s of set 1`;
+    if (!exPlayer) exPlayer = new Skel($("#cvEx"), c.frames, {fps: 10, onFrame: i => moveCur(i)}); else exPlayer.set(c.frames);
+    const mx = Math.ceil(Math.max(...c.acc) + 1), mn = Math.floor(Math.min(...c.acc) - 1);
+    exChart = mountChart($("#exAcc"), {h: 130, m: {l: 34, b: 24, t: 6}, x: [0, 8], y: [mn, mx], yTicks: ticks(mn, mx, 3), xFmt: v => v + " s", series: [{pts: c.acc.map((v, i) => [i / 10, v]), cls: "s-imu"}], cursor: 0, cursorId: "exCur", label: "Watch acceleration"});
+  };
+  let exChart;
+  const moveCur = i => { const l = $("#exCur"); if (l && exChart) { const x = exChart.X(i * 3 / 30); l.setAttribute("x1", x); l.setAttribute("x2", x); } };
+  $("#exBars").onclick = e => { const b = e.target.closest(".bar"); if (b) showEx(b.dataset.ex); };
+  showEx("squats");
+}
+
+/* sessions tab */
+let sessDone = false;
+function initSess() {
+  sessDone = true;
+  $("#sessGrid").innerHTML = D.sessions.map((s, i) => `<button class="ses" data-i="${i}" aria-pressed="${i === 0}" style="animation:rise .4s ${i * 25}ms both"><b>${s.id}</b><small>${s.minutes} min · ${s.sets} sets</small><span class="hrb ${s.hr ? "" : "no"}">${s.hr ? "♥ " + Math.round(s.hr[0]) + "–" + Math.round(s.hr[1]) : "no HR file"}</span></button>`).join("");
+  const dec = f => { const m = f.match(/^w\d+_(.+)\.(npy|csv)$/)[1]; if (m === "labels") return "set annotations"; if (m.startsWith("pose")) return "pose " + m.slice(5).toUpperCase(); const [dv, side, sen, extra] = m.split("_"); return `${{sw: "watch", sp: "phone", eb: "earbud"}[dv]} · ${side === "l" ? "left" : "right"} · ${{acc: "accel", gyr: "gyro", mag: "magnet.", hr: "heart rate"}[sen]}${extra != null ? " (2nd)" : ""}`; };
+  const show = i => {
+    const s = D.sessions[i];
+    $$("#sessGrid .ses").forEach(b => b.setAttribute("aria-pressed", +b.dataset.i === i));
+    $("#sessDetail").innerHTML = `<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h3 style="font:800 28px var(--f-display);font-stretch:80%">${s.id}</h3><span class="muted">${s.minutes} min · ${s.sets} sets · ${s.reps} reps · ${s.mb} MB · ${fmt(s.rows)} rows</span></div>
+      ${s.hr ? `<span class="pill ok" style="align-self:flex-start">Heart rate ${s.hr[0]}–${s.hr[1]} bpm</span>` : `<span class="pill warn" style="align-self:flex-start">No heart-rate file: HR will be masked</span>`}
+      <div class="tw tall"><table><thead><tr><th>file</th><th>contents</th></tr></thead><tbody>${s.files.map(f => `<tr><td class="mono">${f}</td><td>${dec(f)}</td></tr>`).join("")}</tbody></table></div>`;
+  };
+  $("#sessGrid").onclick = e => { const b = e.target.closest(".ses"); if (b) show(+b.dataset.i); };
+  show(0);
+}
+
+/* demo */
+function initDemo() {
+  const dm = D.demo, frames = dm.frames, rf = dm.rep_frames;
+  const durs = rf.slice(1).map((f, i) => (f - rf[i]) / 30);
+  const base = (durs[0] + durs[1]) / 2, maxD = Math.max(...durs) * 1.1;
+  const hrAt = f => { const h = dm.hr; for (let i = 1; i < h.length; i++) if (h[i][0] >= f) { const [a, va] = h[i - 1], [b, vb] = h[i]; return va + (vb - va) * (f - a) / (b - a); } return h[h.length - 1][1]; };
+  let done = 0;
+  const state = pct => pct < 10 ? "ok" : pct < 25 ? "warn" : "stop";
+  const reset = () => { done = 0; $("#dBars").innerHTML = durs.map(() => `<div style="visibility:hidden"></div>`).join(""); $("#dReps").textContent = "0"; $("#dDur").textContent = "–"; $("#dPct").textContent = "0 %"; $("#dNeedle").style.left = "0%"; setMsg("ok", "Ready"); };
+  let worst = "ok";
+  const setMsg = (s, t) => { const m = $("#dMsg"); m.className = "msg " + s; m.textContent = t; };
+  const onFrame = i => {
+    const f = frames[i][0];
+    $("#demoTag").textContent = `w00 · frame ${f}`;
+    $("#dHr").textContent = Math.round(hrAt(f));
+    while (done < durs.length && f >= rf[done + 1]) {
+      const d = durs[done], pct = Math.round((d / base - 1) * 100), st = done < 2 ? "ok" : state(pct);
+      const bar = $("#dBars").children[done];
+      bar.style.visibility = "visible"; bar.style.height = (d / maxD * 100) + "%"; bar.style.background = `var(--${st})`; bar.innerHTML = `<span>${d.toFixed(2)}</span>`;
+      done++;
+      $("#dReps").textContent = done; $("#dDur").textContent = d.toFixed(2) + "s";
+      $("#dPct").textContent = (pct > 0 ? "+" : "") + pct + " %";
+      $("#dNeedle").style.left = Math.max(0, Math.min(99, pct / 35 * 100)) + "%";
+      if (st === "stop" || worst === "stop") { worst = "stop"; setMsg("stop", `Stop the set. Reps are ${pct}% slower than your first ones.`); }
+      else if (st === "warn") { worst = "warn"; setMsg("warn", `Reps slowing down (+${pct}%). Control the descent.`); }
+      else setMsg("ok", done < 2 ? "Measuring your pace…" : "Good pace. Keep going.");
+    }
+  };
+  const sk = new Skel($("#cvDemo"), toXY(frames), {fps: 15, autoplay: false, loop: false, onFrame, onEnd: () => $("#demoPlay").textContent = "Play set"});
+  reset(); onFrame(0);
+  $("#demoPlay").onclick = () => {
+    if (!sk.playing && sk.i >= frames.length - 1) { sk.i = 0; worst = "ok"; reset(); }
+    sk.playing = !sk.playing; $("#demoPlay").textContent = sk.playing ? "Pause" : "Play set";
+  };
+  $("#demoReset").onclick = () => { sk.i = 0; sk.acc = 0; worst = "ok"; reset(); onFrame(0); sk.draw(); sk.playing = true; $("#demoPlay").textContent = "Pause"; };
+}
+
+/* rep duration inside each squat set of w00 (used on the Model 3 slide and its backup) */
+function repChart(el, leg) {
+  const sq = D.fatigue.filter(f => f.ex === "squats"), cls = ["s-muted", "s-imu", "s-hr"], col = ["var(--muted)", "var(--imu)", "var(--hr)"];
+  mountChart($(el), {h: 240, x: [1, 9], y: [1.2, 2], xTicks: [1, 2, 3, 4, 5, 6, 7, 8, 9], yTicks: [1.2, 1.4, 1.6, 1.8, 2], xFmt: v => "rep " + v, yFmt: v => v.toFixed(1) + "s",
+    series: sq.map((f, i) => ({pts: f.rep_s.map((d, j) => [j + 1, d]), cls: cls[i], dots: true, dotCls: ["f-muted", "f-imu", "f-hr"][i]})), label: "Rep duration per squat set"});
+  $(leg).innerHTML = sq.map((f, i) => `<span class="chip"><i style="background:${col[i]}"></i>Set ${i + 1}: ${f.rep_s[0].toFixed(2)} s → ${f.rep_s[f.rep_s.length - 1].toFixed(2)} s</span>`).join("");
+}
+
+/* ---------------- EC3D: 3D skeleton viewer ---------------- */
+let ecYaw = 35, ecSpin = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+function bounds3d(clips) { let R = 0, z0 = 1e9, z1 = -1e9; clips.forEach(c => c.forEach(([xs, ys, zs]) => xs.forEach((x, j) => { R = Math.max(R, Math.hypot(x, ys[j])); z0 = Math.min(z0, zs[j]); z1 = Math.max(z1, zs[j]); }))); return {R, z0, z1}; }
+class Skel3D {
+  constructor(canvas, color) {
+    this.c = canvas; this.ctx = canvas.getContext("2d"); this.color = color; this.f = []; this.i = 0; this.acc = 0; this.playing = true;
+    players.push(this); new ResizeObserver(() => this.fit()).observe(canvas.parentElement); this.fit();
+  }
+  set(frames, bounds) { this.f = frames; this.b = bounds; this.i = 0; this.draw(); }
+  fit() { const r = this.c.parentElement.getBoundingClientRect(), k = devicePixelRatio || 1; this.c.width = r.width * k; this.c.height = r.height * k; this.k = k; this.draw(); }
+  visible() { return this.c.offsetParent !== null; }
+  tick(dt) { if (!this.f.length) return; this.acc += dt; while (this.acc >= 33.3) { this.acc -= 33.3; this.i = (this.i + 1) % this.f.length; } this.draw(); }
+  draw() {
+    const ctx = this.ctx, W = this.c.width, H = this.c.height; if (!W || !this.f.length) return;
+    ctx.clearRect(0, 0, W, H);
+    const {R, z0, z1} = this.b, yaw = ecYaw * Math.PI / 180, pitch = 14 * Math.PI / 180;
+    const sc = Math.min(W / (2.3 * R), H / ((z1 - z0) * 1.25 + R * .5)), cx = W / 2, cy = H / 2 + (z1 + z0) / 2 * sc;
+    const P = (x, y, z) => { const sx = x * Math.cos(yaw) - y * Math.sin(yaw), d = x * Math.sin(yaw) + y * Math.cos(yaw); return [cx + sx * sc, cy - (z * Math.cos(pitch) - d * Math.sin(pitch)) * sc]; };
+    ctx.strokeStyle = css("--line"); ctx.lineWidth = 1 * this.k;
+    for (let v = -R; v <= R + 1e-9; v += R / 2) { ctx.beginPath(); ctx.moveTo(...P(v, -R, z0)); ctx.lineTo(...P(v, R, z0)); ctx.moveTo(...P(-R, v, z0)); ctx.lineTo(...P(R, v, z0)); ctx.stroke(); }
+    const [xs, ys, zs] = this.f[this.i];
+    ctx.lineCap = "round"; ctx.lineWidth = 4 * this.k; ctx.strokeStyle = css("--ink");
+    E.bones.forEach(([a, b]) => { ctx.globalAlpha = (a >= 15 || b >= 15) && b < 19 ? .35 : 1; ctx.beginPath(); ctx.moveTo(...P(xs[a], ys[a], zs[a])); ctx.lineTo(...P(xs[b], ys[b], zs[b])); ctx.stroke(); });
+    ctx.globalAlpha = 1; ctx.fillStyle = css(this.color);
+    xs.forEach((x, j) => { const [px, py] = P(x, ys[j], zs[j]); ctx.beginPath(); ctx.arc(px, py, (j === 8 ? 5.5 : 3.6) * this.k, 0, 7); ctx.fill(); });
+  }
+}
+function tabs(root) {
+  $$(root + " .tabs .tab").forEach(t => t.onclick = () => {
+    $$(root + " .tabs .tab").forEach(x => x.setAttribute("aria-selected", x === t));
+    $$(root + " .tabpane").forEach(p => p.hidden = p.dataset.pane !== t.dataset.tab);
+  });
+}
+function initEC3D() {
+  const S = E.summary;
+  $("#ecStats").innerHTML = [[S.reps, "labelled reps"], [fmt(S.frames), "frames"], [S.subjects, "people"], [S.joints, "3D joints per frame"], ["8", "named mistakes + correct"], [(S.frames_per_rep[1] / 30).toFixed(1) + " s", "median rep length"]]
+    .map(([n, u]) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`).join("");
+  tabs("#s-ec3d");
+  // compare viewer
+  const good = new Skel3D($("#cvCorrect"), "--ok"), bad = new Skel3D($("#cvWrong"), "--stop");
+  const exs = ["Squat", "Lunge", "Plank"]; let ex = "Squat", err = "Knees inward";
+  const bounds = clips => { let R = 0, z0 = 1e9, z1 = -1e9; clips.forEach(c => c.forEach(([xs, ys, zs]) => xs.forEach((x, j) => { R = Math.max(R, Math.hypot(x, ys[j])); z0 = Math.min(z0, zs[j]); z1 = Math.max(z1, zs[j]); }))); return {R, z0, z1}; };
+  const show = () => {
+    const errs = Object.keys(E.clips).filter(k => k.startsWith(ex + "|") && !k.endsWith("|Correct")).map(k => k.split("|")[1]);
+    if (!errs.includes(err)) err = errs[0];
+    $("#ecEx").innerHTML = exs.map(e => `<button aria-pressed="${e === ex}" data-ex="${e}">${e}</button>`).join("");
+    $("#ecErr").innerHTML = errs.map(e => `<button aria-pressed="${e === err}" data-err="${e}">${e}</button>`).join("");
+    const c = E.clips[ex + "|Correct"], w = E.clips[ex + "|" + err], b = bounds([c, w]);
+    good.set(c, b); bad.set(w, b);
+    $("#tagCorrect").textContent = `${ex} · correct · ${c.length} frames`; $("#tagWrong").textContent = `${ex} · ${err.toLowerCase()} · ${w.length} frames`;
+  };
+  $("#ecEx").onclick = e => { const b = e.target.closest("button"); if (b) { ex = b.dataset.ex; show(); } };
+  $("#ecErr").onclick = e => { const b = e.target.closest("button"); if (b) { err = b.dataset.err; show(); } };
+  show();
+  const yaw = $("#yaw");
+  yaw.oninput = () => { ecYaw = +yaw.value; ecSpin = false; $("#spin").textContent = "Auto-rotate"; };
+  $("#spin").onclick = () => { ecSpin = !ecSpin; $("#spin").textContent = ecSpin ? "Stop rotation" : "Auto-rotate"; };
+  $("#spin").textContent = ecSpin && !reduced ? "Stop rotation" : "Auto-rotate"; if (reduced) ecSpin = false;
+  // evidence
+  $("#ecEvid").innerHTML = E.evidence.map(ev => {
+    const lo = Math.min(ev.correct[0], ev.error[0]), hi = Math.max(ev.correct[4], ev.error[4]), pad = (hi - lo) * .08 || .01;
+    const X = v => 8 + (v - lo + pad) / (hi - lo + 2 * pad) * 384;
+    const box = (q, y, cls) => `<line x1="${X(q[0])}" x2="${X(q[4])}" y1="${y}" y2="${y}" style="stroke:var(${cls});stroke-width:1.5"/><rect x="${X(q[1])}" y="${y - 6}" width="${Math.max(2, X(q[3]) - X(q[1]))}" height="12" rx="3" style="fill:var(${cls});opacity:.28"/><circle cx="${X(q[2])}" cy="${y}" r="5" style="fill:var(${cls})"/>`;
+    const f = v => Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(2);
+    return `<div style="padding:10px 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b style="font-size:14px">${ev.ex} · ${ev.err}</b><span class="muted" style="font-size:12.5px">${ev.feat}</span></div>
+      <svg class="chart" viewBox="0 0 400 46" role="img" aria-label="${ev.err} vs correct">${box(ev.correct, 13, "--ok")}${box(ev.error, 33, "--stop")}</svg>
+      <div class="mono" style="font-size:12px;display:flex;gap:14px;flex-wrap:wrap"><span style="color:var(--ok)">correct ${f(ev.correct[2])} (n=${ev.nc})</span><span style="color:var(--stop)">${ev.err.toLowerCase()} ${f(ev.error[2])} (n=${ev.ne})</span></div></div>`;
+  }).join("");
+  const subj = Object.keys(S.per_subject).sort();
+  $("#ecBase").innerHTML = Object.entries(E.baseline).map(([k, v]) => `<tr><td><b>${k}</b></td><td class="num">${v.acc} %</td><td class="num">${v.chance} %</td><td class="num">${v.per_subject.map((a, i) => `<span title="${subj[i]}">${Math.round(a)}</span>`).join(" · ")}</td></tr>`).join("");
+  const sq = E.baseline.Squat.per_subject;
+  $("#ecWorst").textContent = Math.min(...sq) + " %"; $("#ecBest").textContent = Math.max(...sq) + " %";
+  // raw
+  $("#ecRawL").innerHTML = E.raw_labels.map(r => `<tr>${r.map((v, i) => `<td class="${i >= 2 ? "num" : ""}">${v}</td>`).join("")}</tr>`).join("");
+  $("#ecCodes").innerHTML = ["1 Correct", "2 Feet too wide", "3 Knees inward", "4 Not low enough", "5 Front bent", "6 Knee passes toe", "7 Arched back", "8 Hunched back", "10 Unknown"].map((c, i) => `<span class="chip">${c}</span>`).join("");
+  const rp = E.raw_pose;
+  $("#ecRawP").innerHTML = E.joints.map((j, i) => `<tr><td class="mono">${i}</td><td>${j.replace(/_/g, " ")}</td><td class="num">${rp.x[i].toFixed(4)}</td><td class="num">${rp.y[i].toFixed(4)}</td><td class="num">${rp.z[i].toFixed(4)}</td></tr>`).join("");
+  // counts
+  const all = Object.entries(E.counts).flatMap(([ex, c]) => Object.entries(c).map(([l, n]) => [ex, l, n]));
+  const mx = Math.max(...all.map(a => a[2]));
+  $("#ecCounts").innerHTML = all.map(([ex, l, n], i) => `<div class="bar" style="cursor:default"><span class="bl">${ex} · ${l}</span><span class="bt"><i style="width:${n / mx * 100}%;animation-delay:${i * 40}ms;background:var(${l === "Correct" ? "--ok" : l === "Unknown" ? "--muted" : "--stop"})"></i></span><span class="bn">${n}</span></div>`).join("");
+  const ms = Math.max(...Object.values(S.per_subject));
+  $("#ecSubj").innerHTML = subj.map((s, i) => `<div class="bar" style="cursor:default"><span class="bl">${s}</span><span class="bt"><i style="width:${S.per_subject[s] / ms * 100}%;animation-delay:${i * 60}ms"></i></span><span class="bn">${S.per_subject[s]}</span></div>`).join("");
+  $("#ecReps2").textContent = S.reps; $("#ecUnk").textContent = E.counts.Squat.Unknown;
+  $("#ecLen").textContent = `${S.frames_per_rep[0]} to ${S.frames_per_rep[2]}, median ${S.frames_per_rep[1]}`;
+}
+
+/* ---------------- defense: hard questions ---------------- */
+function initDefense() {
+  const B = E.baseline, R = D.repeval, SD = D.slowdown, H = D.hrstats, S = D.summary, ES = E.summary;
+  const ev = n => E.evidence.find(e => e.err === n);
+  const f2 = v => Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(2);
+  const QA = [
+    ["Data", "EC3D has only 4 people. Isn't that far too small?",
+      "Yes, 4 people is small.",
+      "We use EC3D only for the form model, and we test it the strictest way: train on 3 people, test on the 4th. We add augmentation (any 3D camera angle, scaling, time-warping) and our own filmed reps as an extra test set.",
+      `${ES.reps} labelled reps. Our quick baseline on an unseen person: squat ${B.Squat.acc} % (chance ${B.Squat.chance} %), lunge ${B.Lunge.acc} % (chance ${B.Lunge.chance} %), plank ${B.Plank.acc} % (chance ${B.Plank.chance} %). The authors reach 90.9 % with a graph network on the same data.`],
+    ["Data", "The mistakes are acted. Real mistakes are more subtle.",
+      "True. Acted mistakes are clearer than natural ones.",
+      "Acting is exactly what guarantees the labels, which answers \"who guarantees the reps are correct?\". To check the real-world gap we test on our own reps, and on Fitness-AQA (real gyms, expert labels) if our access request is accepted.",
+      `Each mistake moves a measurable quantity. Knees inward: knee width ${f2(ev("Knees inward").error[2])} × hip width vs ${f2(ev("Knees inward").correct[2])} when correct. Feet too wide: ${f2(ev("Feet too wide").error[2])} vs ${f2(ev("Feet too wide").correct[2])}. Front bent: trunk angle ${f2(ev("Front bent").error[2])}° vs ${f2(ev("Front bent").correct[2])}°.`],
+    ["Claims", "You have no injury labels, so you can't predict injuries.",
+      "Correct, and we don't claim to.",
+      "We detect fatigue and form breakdown, which are known warning signs, and the output is a recommendation to stop, not a diagnosis. Rep speed loss is an established fatigue marker in strength training (Sánchez-Medina & González-Badillo, 2011).",
+      "No public dataset has injury labels. This is written in our limits slide."],
+    ["Method", "Using \"later rep = more tired\" as a label is circular.",
+      "Weak labels are noisy.",
+      "It is a hypothesis we test, not an assumption. We check it against our own effort scores (RPE 1–10), and Model 3 combines several signals instead of trusting rep position alone.",
+      `We already see where it holds and where it doesn't: squats end slower in ${SD.squats.slower} of ${SD.squats.sets} sets (median +${SD.squats.median_pct} %), lunges only in ${SD.lunges.slower} of ${SD.lunges.sets} (+${SD.lunges.median_pct} %).`],
+    ["Method", "Your rep timings could just be noise.",
+      "",
+      "Rep boundaries come from hip height in the skeleton, and we checked them against MM-Fit's labelled rep counts.",
+      `Exact rep count in ${R.squats.exact} of ${R.squats.sets} squat sets and ${R.lunges.exact} of ${R.lunges.sets} lunge sets.`],
+    ["Method", "Why a personal baseline instead of one general model?",
+      "",
+      "Because people differ a lot, and a fixed threshold would be wrong for most of them. RQ3 compares general vs personal directly; if the general model wins, that is a result too.",
+      `In MM-Fit, the lowest heart rate ranges from ${Math.round(H.min_low)} to ${Math.round(H.max_low)} bpm and the peak from ${Math.round(H.min_high)} to ${Math.round(H.max_high)} bpm. In EC3D, the same squat baseline scores from ${Math.min(...B.Squat.per_subject)} % to ${Math.max(...B.Squat.per_subject)} % depending on the person.`],
+    ["Data", "Two people over a few weeks is not a dataset.",
+      "It is a proof of concept, with no claims about the general population.",
+      "A personal baseline needs many sessions of the same person, which no public dataset provides. So the generic models are trained on public data, and the personal part is a within-person study: each of us is compared with our own history, and results are reported per person.",
+      `MM-Fit has ${S.sessions} sessions across 10 people; EC3D has one session per person. Neither covers weeks of the same person.`],
+    ["Big data", "3.8 GB is not big data.",
+      "The volume of our proof of concept is moderate.",
+      "The difficulty is velocity and variety: four streams at 1 to 100 Hz to synchronize live, about 300 messages per second per user, and a history that grows with every session. Kafka and Spark scale by adding users, without changing the design (Dritsas et al., 2025).",
+      `MM-Fit alone: ${(S.rows / 1e6).toFixed(1)} M sensor rows from ${S.minutes} minutes of training.`],
+    ["Method", "Your datasets don't match: 2D with 18 joints, 3D with 25 joints, MediaPipe with 33.",
+      "",
+      "Everything is converted to one 18-joint 2D skeleton and normalized the way EC3D already is (hips at the origin, trunk upright, equal bone lengths). EC3D's 3D poses are projected to 2D from many virtual camera angles, which also matches whatever angle our phone films from.",
+      "See the 3D viewer in the EC3D step: the same rep can be rendered from any angle."],
+    ["Method", "Smartwatch heart rate is inaccurate during exercise.",
+      "Optical heart rate lags and drops out during fast wrist movement.",
+      "We use slow trends (how much HR rises per set, how fast it recovers between sets), not beat-level values. RQ2 measures whether HR helps at all; \"it doesn't help\" would be a valid finding.",
+      `MM-Fit's heart rate also comes from a wrist watch, about 1 value per second, available in ${S.with_hr} of ${S.sessions} sessions.`],
+    ["Claims", "Camera + watch beating watch alone is obvious.",
+      "Agreed.",
+      "It is a sanity check of the pipeline, not a research claim. Our questions are about heart rate (RQ2) and personal history (RQ3).",
+      ""],
+    ["Claims", "What is new compared with the MM-Fit and EC3D papers?",
+      "",
+      "MM-Fit recognizes exercises and counts reps. EC3D classifies and corrects form. Neither uses heart rate or a person's own history to decide when to stop. Our contribution is Model 3, plus combining all three into one safety decision.",
+      ""],
+    ["Feasibility", "Why train from scratch instead of fine-tuning a big pretrained model?",
+      "",
+      "The inputs are small (36 numbers per frame for the skeleton, 6 for the watch), so small models train on a laptop or free Colab. Training our own models is the point of the course; the pose estimator is the only pretrained part, as advised.",
+      ""],
+    ["Feasibility", "Can this really run live?",
+      "Not measured yet.",
+      "The phone only films; pose estimation and the three models run on the PC. Our target is under 1 second from the end of a rep to the spoken feedback, measured as part of RQ4.",
+      ""],
+  ];
+  const cats = ["All", ...new Set(QA.map(q => q[0]))];
+  let cat = "All";
+  const render = () => {
+    $("#qaFilter").innerHTML = cats.map(c => `<button class="chip" style="cursor:pointer;${c === cat ? "background:var(--accent);color:var(--surface);border-color:var(--accent)" : ""}" data-c="${c}">${c}${c === "All" ? " · " + QA.length : ""}</button>`).join("");
+    $("#qa").innerHTML = QA.filter(q => cat === "All" || q[0] === cat).map((q, i) => `<details class="qa" style="animation:rise .4s ${i * 40}ms both"><summary><span class="chip">${q[0]}</span><span>${q[1]}</span></summary><div class="qa-b">
+      ${q[2] ? `<div><div class="cap">We concede</div><p>${q[2]}</p></div>` : ""}
+      <div><div class="cap">Our answer</div><p>${q[3]}</p></div>
+      ${q[4] ? `<div class="qa-e"><div class="cap">Evidence</div><p>${q[4]}</p></div>` : ""}</div></details>`).join("");
+  };
+  $("#qaFilter").onclick = e => { const b = e.target.closest("[data-c]"); if (b) { cat = b.dataset.c; render(); } };
+  render();
+}
+
+/* ---------------- navigation: main talk + backup slides ---------------- */
+const rail = $("#rail");
+const pad2 = n => String(n).padStart(2, "0");
+const mmss = s => Math.floor(s / 60) + ":" + pad2(Math.round(s % 60));
+let track = "main", cur = -1;
+const list = () => track === "main" ? MAIN : BACKUP;
+function renderRail() {
+  $$("#rail .st").forEach(e => e.remove());
+  rail.insertAdjacentHTML("beforeend", list().map((s, i, a) => {
+    const grp = s.group || "";
+    const num = track === "main" ? pad2(i + 1) : "A" + (i + 1);
+    return `<button class="st${s.key ? " key" : ""}" data-i="${i}" aria-label="${s.lbl}">${grp ? `<span class="grp">${grp}</span>` : ""}<span class="dot">${num}</span><span class="lbl">${s.lbl}</span></button>`;
+  }).join(""));
+  $("#trackBtn").hidden = track === "main";
+  document.body.classList.toggle("is-backup", track === "backup");
+}
+function setTrack(t) { if (t === track) return; track = t; cur = -1; renderRail(); }
+function go(i, push = true) {
+  const L = list();
+  i = Math.max(0, Math.min(L.length - 1, i)); if (i === cur) return;
+  const dir = i > cur ? "in-r" : "in-l", first = cur === -1;
+  $$("section.step").forEach(s => { s.hidden = true; s.classList.remove("in-r", "in-l"); });
+  const st = L[i], sec = $("#s-" + st.id); sec.hidden = false;
+  const eb = sec.querySelector(".eyebrow");
+  if (eb && eb.firstChild) eb.firstChild.textContent = (track === "main" ? "Step " + pad2(i + 1) : "Appendix A" + (i + 1)) + " ";
+  if (!reduced && !first) { void sec.offsetWidth; sec.classList.add(dir); }
+  cur = i;
+  if (!inited[st.id] && init[st.id]) { inited[st.id] = 1; init[st.id](); }
+  $$(".st").forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("done", k < i); b.setAttribute("aria-current", k === i ? "step" : "false"); });
+  const btn = $$(".st")[i];
+  $("#railFill").style.width = (btn.offsetLeft + btn.offsetWidth / 2) + "px";
+  const wrap = $("#railWrap"); wrap.scrollTo({left: btn.offsetLeft - wrap.clientWidth / 2 + btn.offsetWidth / 2, behavior: reduced ? "auto" : "smooth"});
+  $("#counter").textContent = (track === "main" ? pad2(i + 1) : "A" + (i + 1)) + " / " + (track === "main" ? pad2(L.length) : "A" + L.length);
+  const p = L[i - 1], n = L[i + 1];
+  $("#foot").innerHTML = (p ? `<button class="navbtn" data-go="${i - 1}"><small>← Previous</small><b>${p.lbl}</b></button>` : "")
+    + (n ? `<button class="navbtn next" data-go="${i + 1}"><small>Next <span class="kbd">→</span></small><b>${n.lbl}</b></button>`
+         : "");
+  if (push) try { history.replaceState(null, "", "#" + st.id); } catch (e) {}
+  if (!first && push) window.scrollTo({top: 0, behavior: reduced ? "auto" : "smooth"});
+}
+function goId(id) {
+  const m = MAIN.findIndex(s => s.id === id);
+  if (m >= 0) { setTrack("main"); go(m); } else { setTrack("backup"); go(Math.max(0, BACKUP.findIndex(s => s.id === id))); }
+}
+rail.onclick = e => { const b = e.target.closest(".st"); if (b) go(+b.dataset.i); };
+$("#foot").onclick = e => { const b = e.target.closest("[data-go]"); if (b) go(+b.dataset.go); };
+document.addEventListener("click", e => { const b = e.target.closest("[data-goto]"); if (b) goId(b.dataset.goto); });
+$("#prev").onclick = () => go(cur - 1); $("#next").onclick = () => go(cur + 1);
+$(".brand").ondblclick = () => { setTrack(track === "main" ? "backup" : "main"); go(0); };
+$("#trackBtn").onclick = () => { setTrack(track === "main" ? "backup" : "main"); go(0); };
+
+/* presenter timer: 8:30 planned, 10:00 hard limit */
+let t0 = null, tInt = null;
+const PLAN = MAIN.reduce((a, s) => a + s.t, 0);
+function timerToggle() {
+  const el = $("#timer");
+  if (tInt) { clearInterval(tInt); tInt = null; t0 = null; el.textContent = "Timer"; el.className = "ibtn"; el.hidden = true; return; }
+  t0 = Date.now(); el.className = "ibtn run"; el.hidden = false;
+  const upd = () => { const s = (Date.now() - t0) / 1000; el.textContent = mmss(s) + " / 10:00"; el.classList.toggle("late", s > PLAN); el.classList.toggle("over", s > 600); };
+  upd(); tInt = setInterval(upd, 500);
+}
+$("#timer").onclick = timerToggle;
+$("#timer").title = `Planned talk: ${mmss(PLAN)}. Press T to start or reset.`;
+
+addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea,select")) return;
+  if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); go(cur + 1); }
+  else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(cur - 1); }
+  else if (e.key === "Home") go(0); else if (e.key === "End") go(list().length - 1);
+  else if (e.key === "b" || e.key === "B") { setTrack(track === "main" ? "backup" : "main"); go(0); }
+  else if (e.key === "t" || e.key === "T") timerToggle();
+  else if (e.key === "f") { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (_) {} }
+});
+addEventListener("resize", () => { const b = $$(".st")[cur]; if (b) $("#railFill").style.width = (b.offsetLeft + b.offsetWidth / 2) + "px"; });
+renderRail();
+const startId = location.hash.slice(1);
+if (startId && BACKUP.some(s => s.id === startId)) { setTrack("backup"); go(BACKUP.findIndex(s => s.id === startId), false); }
+else go(Math.max(0, MAIN.findIndex(s => s.id === startId)), false);
+</script>

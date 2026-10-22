@@ -1,0 +1,19 @@
+[project]
+name = "awc"
+version = "0.1.0"
+description = "AI Workout Coach: exercise recognition, form check and fatigue risk from a phone camera and a smartwatch"
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = [
+    "data: tests that need the real MM-Fit and EC3D datasets",
+]

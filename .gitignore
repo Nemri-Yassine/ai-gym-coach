@@ -1,0 +1,31 @@
+# datasets: too big for git, see data/README.md to download them
+data/raw/*
+!data/raw/own_recordings/
+data/raw/own_recordings/*
+!data/raw/own_recordings/.gitkeep
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+*.npy
+*.pickle
+*.parquet
+
+# trained models and experiment outputs
+models/*
+!models/.gitkeep
+experiments/**/checkpoints/
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# local tools and archives
+.claude/
+*.zip
+.DS_Store
+Thumbs.db
