@@ -1,0 +1,8 @@
+{
+  "runtime_s": {
+    "local[1]": 57.7,
+    "local[2]": 40.92,
+    "local[4]": 37.05
+  },
+  "n_sessions": 21
+}
