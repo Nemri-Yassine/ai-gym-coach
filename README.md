@@ -16,17 +16,23 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 |---|---|---|
 | 0 | Project proposal and validation presentation | ✅ Done · Oct 7, 2026 |
 | 1 | Project structure, git, dataset loaders | ✅ Done · Oct 7, 2026 |
-| 2 | Data pipeline: sync streams, normalize skeletons, cut windows (Spark → Parquet) | ⏳ Next |
-| 3 | Model 1: exercise recognition + rep counting (MM-Fit) | ⬜ |
-| 4 | Model 2: form check, good rep or which mistake (EC3D) | ⬜ |
-| 5 | Our own recordings: phone + Galaxy Watch 7 capture, Kafka streaming | ⬜ |
-| 6 | Model 3: fatigue and risk with personal baseline (our contribution) | ⬜ |
-| 7 | Live coach: models running on live streams, voice feedback | ⬜ |
-| 8 | Evaluation and benchmarks (RQ1–RQ4) | ⬜ |
-| 9 | Final report and demo | ⬜ |
+| 1.1 | Environment, Spark helper, run tracking | ✅ Done · Oct 22, 2026 |
+| 1.2 | Capture decision, recorder, recording protocol | ✅ Code done · Oct 22, 2026 · sessions not recorded yet |
+| 1.3 | Spark sync of MM-Fit to Parquet | ✅ Done · Oct 22, 2026 |
+| 1.4 | One skeleton for every source, Model 1 windows | ✅ Done · Oct 22, 2026 |
+| 1.5 | Model 1 benchmark and rep counting | ✅ Done · Oct 22, 2026 |
+| 1.6 | Week 1 validation package | ✅ Done · Oct 22, 2026 |
+| 2.1 | EC3D rep dataset for Model 2 | ⏳ Next |
+| 2.2–3.5 | Model 2, Kafka, Model 3, live coach, report | ⬜ |
 
 ### Log
 
+- **2026-10-22 · Step 1.6.** Validation package in `reports/week1.md`. Best Model 1 is a transformer on pose + watch IMU: macro-F1 **0.880** on people it has never seen (target 0.85), accuracy 0.950. Rep counting macro MAE **1.35** (target 0.50): squats 0.28, bicep curls 5.07. Spark sync of 1,460,366 rows: 57.7 s / 40.9 s / 37.1 s on 1 / 2 / 4 cores.
+- **2026-10-22 · Step 1.5.** Nine Model 1 runs in `reports/m1_benchmark.md`. Unseen macro-F1 from 0.746 (LSTM, IMU only) to 0.880 (transformer, both). Rep counting on all 616 MM-Fit sets in `reports/rep_counting.md`.
+- **2026-10-22 · Step 1.4.** 32,421 windows of 90 frames (train 15,756, val 3,468, test seen 5,411, test unseen 7,786). All 11 classes are in the train split. `non_activity` is 11,628 of the train windows.
+- **2026-10-22 · Step 1.3.** Synced Parquet: 21 sessions, 1,460,366 rows, 99.8% of frames have watch IMU, 81.1% have heart rate (w05, w10 and w18 have none).
+- **2026-10-22 · Step 1.2.** Recorder and protocol are in place. Heart-rate source is not chosen yet: the phone and the watch were not connected, so no latency was measured. Own sessions recorded: **0**.
+- **2026-10-22 · Step 1.1.** Temurin 17.0.20.1, Hadoop winutils 3.3.6, Spark helper, experiment folders. `pytest`: 26 passed.
 - **2026-10-22 · Planning.** Three-week implementation plan with tests and acceptance checks per step (`docs/PLAN.md`, rebuild the PDF with `python scripts/docs/build_plan_pdf.py`).
 - **2026-10-07 · Step 1.** Clean project structure, `awc` Python package, MM-Fit and EC3D loaders, data sanity tests, analysis scripts moved to `scripts/analysis/`; one-page overview in `reports/Project_Structure.pdf`.
 - **2026-10-07 · Step 0.** Validation presentation (`presentation/index.html`) and briefing (`reports/AI_Workout_Coach_Briefing.pdf`). First measurements on the real data, see *Results so far*.
@@ -106,7 +112,17 @@ python -m venv .venv
 .venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 pip install -e .                # makes `import awc` work everywhere
-python -m pytest                # checks that the datasets are in place
+python -m pytest                # data tests skip when data/raw is absent
+```
+
+Spark also needs **Java 17** (`JAVA_HOME`) and **Hadoop winutils** for Windows (`HADOOP_HOME=C:\hadoop`, with `bin\winutils.exe` and `bin\hadoop.dll`). Spark scratch files go to `C:\awc_tmp`, not into this OneDrive folder. Details are in `docs/decisions.md`.
+
+Week 1 demo, from the project root with the venv active:
+
+```bash
+python -m awc.bigdata.build_interim --sessions w00 --cores local[2]
+python -m awc.training.train_m1 --arch cnn --inputs both --quick
+python scripts/eval_rep_counting.py
 ```
 
 ## Results so far
@@ -114,7 +130,9 @@ python -m pytest                # checks that the datasets are in place
 First measurements (quick tests, not final results):
 
 - **Fatigue is visible**: in 45 of 64 MM-Fit squat sets, the last reps are slower than the first ones.
-- **Rep counting from the skeleton**: exact in 63/64 squat sets and 62/62 lunge sets.
+- **Rep counting from the skeleton** (early hip-height check): exact in 63/64 squat sets and 62/62 lunge sets.
+- **Model 1** (step 1.5, the real benchmark): transformer on pose + IMU, macro-F1 0.880 and accuracy 0.950 on MM-Fit people never seen in training. Table in `reports/m1_benchmark.md`.
+- **Rep counting** (step 1.5, PCA of the skeleton): macro MAE 1.35 reps per set across 616 sets. Squats 0.28. Bicep curls 5.07 and lunges 3.10 miss the 0.50 target. Table in `reports/rep_counting.md`.
 - **Form mistakes on an unseen person** (random forest, train on 3 people, test on the 4th): squat 53 %, lunge 82 %, plank 90 % (chance 20–33 %). EC3D authors: 90.9 %.
 - **Camera angle**: squat mistakes are best recognized at about 45° in front (71 %), vs ~55 % from the front or the side.
 
