@@ -1,0 +1,20 @@
+arch=lstm inputs=pose epochs=30 quick=False
+epoch 1 train_loss 1.1521 val_macro_f1 0.5793
+epoch 2 train_loss 0.4227 val_macro_f1 0.6593
+epoch 3 train_loss 0.2701 val_macro_f1 0.7144
+epoch 4 train_loss 0.2017 val_macro_f1 0.7460
+epoch 5 train_loss 0.1203 val_macro_f1 0.7706
+epoch 6 train_loss 0.1084 val_macro_f1 0.8129
+epoch 7 train_loss 0.1188 val_macro_f1 0.6864
+epoch 8 train_loss 0.1272 val_macro_f1 0.8119
+epoch 9 train_loss 0.0901 val_macro_f1 0.8179
+epoch 10 train_loss 0.0893 val_macro_f1 0.8352
+epoch 11 train_loss 0.0567 val_macro_f1 0.8172
+epoch 12 train_loss 0.0494 val_macro_f1 0.8210
+epoch 13 train_loss 0.0683 val_macro_f1 0.8041
+epoch 14 train_loss 0.0379 val_macro_f1 0.8665
+epoch 15 train_loss 0.0523 val_macro_f1 0.7952
+epoch 16 train_loss 0.0687 val_macro_f1 0.8416
+epoch 17 train_loss 0.0338 val_macro_f1 0.8157
+epoch 18 train_loss 0.0294 val_macro_f1 0.8607
+epoch 19 train_loss 0.0466 val_macro_f1 0.8401

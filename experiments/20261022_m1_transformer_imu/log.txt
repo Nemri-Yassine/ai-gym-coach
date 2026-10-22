@@ -1,0 +1,17 @@
+arch=transformer inputs=imu epochs=30 quick=False
+epoch 1 train_loss 0.8390 val_macro_f1 0.6591
+epoch 2 train_loss 0.2245 val_macro_f1 0.7294
+epoch 3 train_loss 0.1268 val_macro_f1 0.7959
+epoch 4 train_loss 0.0823 val_macro_f1 0.8440
+epoch 5 train_loss 0.0648 val_macro_f1 0.8345
+epoch 6 train_loss 0.0628 val_macro_f1 0.7972
+epoch 7 train_loss 0.0539 val_macro_f1 0.8632
+epoch 8 train_loss 0.0406 val_macro_f1 0.8600
+epoch 9 train_loss 0.0325 val_macro_f1 0.8471
+epoch 10 train_loss 0.0587 val_macro_f1 0.8610
+epoch 11 train_loss 0.0323 val_macro_f1 0.8728
+epoch 12 train_loss 0.0251 val_macro_f1 0.8660
+epoch 13 train_loss 0.0357 val_macro_f1 0.8335
+epoch 14 train_loss 0.0494 val_macro_f1 0.8441
+epoch 15 train_loss 0.0499 val_macro_f1 0.8435
+epoch 16 train_loss 0.0415 val_macro_f1 0.8716

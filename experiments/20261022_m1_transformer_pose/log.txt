@@ -1,0 +1,17 @@
+arch=transformer inputs=pose epochs=30 quick=False
+epoch 1 train_loss 0.8374 val_macro_f1 0.7525
+epoch 2 train_loss 0.1261 val_macro_f1 0.7883
+epoch 3 train_loss 0.0860 val_macro_f1 0.7895
+epoch 4 train_loss 0.0457 val_macro_f1 0.8074
+epoch 5 train_loss 0.0420 val_macro_f1 0.8533
+epoch 6 train_loss 0.0364 val_macro_f1 0.8277
+epoch 7 train_loss 0.0475 val_macro_f1 0.8648
+epoch 8 train_loss 0.0255 val_macro_f1 0.8313
+epoch 9 train_loss 0.0266 val_macro_f1 0.8525
+epoch 10 train_loss 0.0360 val_macro_f1 0.8304
+epoch 11 train_loss 0.0371 val_macro_f1 0.8847
+epoch 12 train_loss 0.0250 val_macro_f1 0.8820
+epoch 13 train_loss 0.0297 val_macro_f1 0.8294
+epoch 14 train_loss 0.0349 val_macro_f1 0.8803
+epoch 15 train_loss 0.0252 val_macro_f1 0.8692
+epoch 16 train_loss 0.0328 val_macro_f1 0.8056

@@ -1,0 +1,18 @@
+arch=cnn inputs=imu epochs=30 quick=False
+epoch 1 train_loss 0.6099 val_macro_f1 0.8078
+epoch 2 train_loss 0.1321 val_macro_f1 0.7543
+epoch 3 train_loss 0.0678 val_macro_f1 0.8693
+epoch 4 train_loss 0.0648 val_macro_f1 0.8690
+epoch 5 train_loss 0.0500 val_macro_f1 0.8748
+epoch 6 train_loss 0.0429 val_macro_f1 0.8429
+epoch 7 train_loss 0.0381 val_macro_f1 0.8775
+epoch 8 train_loss 0.0516 val_macro_f1 0.8512
+epoch 9 train_loss 0.0426 val_macro_f1 0.9010
+epoch 10 train_loss 0.0319 val_macro_f1 0.9052
+epoch 11 train_loss 0.0238 val_macro_f1 0.8921
+epoch 12 train_loss 0.0219 val_macro_f1 0.9155
+epoch 13 train_loss 0.0250 val_macro_f1 0.9058
+epoch 14 train_loss 0.0218 val_macro_f1 0.8811
+epoch 15 train_loss 0.0309 val_macro_f1 0.9049
+epoch 16 train_loss 0.0318 val_macro_f1 0.8958
+epoch 17 train_loss 0.0226 val_macro_f1 0.8858

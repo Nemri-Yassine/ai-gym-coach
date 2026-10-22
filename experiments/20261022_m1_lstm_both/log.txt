@@ -1,0 +1,11 @@
+arch=lstm inputs=both epochs=30 quick=False
+epoch 1 train_loss 0.9227 val_macro_f1 0.7317
+epoch 2 train_loss 0.2150 val_macro_f1 0.8104
+epoch 3 train_loss 0.1724 val_macro_f1 0.8434
+epoch 4 train_loss 0.1064 val_macro_f1 0.8617
+epoch 5 train_loss 0.0740 val_macro_f1 0.9055
+epoch 6 train_loss 0.0712 val_macro_f1 0.8994
+epoch 7 train_loss 0.1005 val_macro_f1 0.9009
+epoch 8 train_loss 0.1044 val_macro_f1 0.8542
+epoch 9 train_loss 0.0774 val_macro_f1 0.8703
+epoch 10 train_loss 0.0941 val_macro_f1 0.8943

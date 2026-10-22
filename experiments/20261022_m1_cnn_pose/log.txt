@@ -1,0 +1,9 @@
+arch=cnn inputs=pose epochs=30 quick=False
+epoch 1 train_loss 0.4098 val_macro_f1 0.7897
+epoch 2 train_loss 0.0533 val_macro_f1 0.8229
+epoch 3 train_loss 0.0466 val_macro_f1 0.8766
+epoch 4 train_loss 0.0490 val_macro_f1 0.8223
+epoch 5 train_loss 0.0334 val_macro_f1 0.8375
+epoch 6 train_loss 0.0259 val_macro_f1 0.8731
+epoch 7 train_loss 0.0280 val_macro_f1 0.8541
+epoch 8 train_loss 0.0294 val_macro_f1 0.8517

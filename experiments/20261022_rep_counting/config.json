@@ -1,0 +1,7 @@
+{
+  "fps": 30,
+  "signal": "pca+smooth9",
+  "prominence": 0.3,
+  "min_seconds": 0.6,
+  "git_commit": null
+}

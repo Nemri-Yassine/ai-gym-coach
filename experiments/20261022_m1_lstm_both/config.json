@@ -1,0 +1,11 @@
+{
+  "model": "m1",
+  "arch": "lstm",
+  "inputs": "both",
+  "epochs": 30,
+  "batch": 128,
+  "lr": 0.001,
+  "seed": 42,
+  "quick": false,
+  "git_commit": null
+}
