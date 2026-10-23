@@ -6,6 +6,8 @@ An AI coach that watches you train with a **phone camera** and a **smartwatch** 
 
 Course project · Deep Learning & Big Data · 2026–2027
 
+**Team:** Yassine Nemri ([@Nemri-Yassine](https://github.com/Nemri-Yassine)) · Iheb Lamouchi ([@iheblam](https://github.com/iheblam))
+
 ---
 
 ## Progress
