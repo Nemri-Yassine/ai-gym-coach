@@ -1,0 +1,11 @@
+{
+  "dataset": "RepCount-A test",
+  "pose_model": "pose_landmarker_full",
+  "checkpoints": [
+    "m1_transformer_both",
+    "m1_transformer_pose",
+    "m1_cnn_both"
+  ],
+  "min_detected": 0.5,
+  "git_commit": "b2ae3362112886bbb8da1b712c81ea177cf8186e"
+}

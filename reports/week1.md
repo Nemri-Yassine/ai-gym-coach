@@ -38,6 +38,16 @@ PCA of the 36 joint coordinates, smoothed, peaks at least 0.6 s apart. **616** s
 
 Squats, rows, presses, jacks, raises and tricep extensions are within ±1 rep on at least 98% of sets. Bicep curls are never within ±1: the main component is not one clean peak per curl. Lunges are the other miss (exact on 29% of sets). An earlier hip-height counter was exact on squats and lunges; this one is exercise-agnostic, which is what the plan asked for, and it pays for that on arm work and lunges. Figure: `reports/figures/rep_counting_mae.png`.
 
+## Public videos instead of our sessions (added 2026-10-23)
+
+We had no time to record this week, so the camera half of the pipeline was tested on 135 public gym videos from the RepCount-A test split: MediaPipe skeleton, pose only, people and cameras never seen in training. Full report: `reports/public_videos.md`.
+
+- **Model 1** on 78 videos of squats, pushups, situps and jumping jacks: the pose-only transformer gets **80.8%** of videos right (71.8% of 3-second windows). Squats are the weakest (62.5%).
+- The best MM-Fit model (transformer, pose + IMU) drops to **67.9%** when the watch is missing, even though it was trained with IMU dropout. For live use without a watch IMU, the pose-only model is the better choice.
+- **Rep counting**: MAE 1.22 on squats, 2.05 on situps, 3.23 on jumping jacks, 8.19 on pushups. These videos are long and include pauses and talking, so errors are larger than on MM-Fit.
+
+This does not replace our own sessions for Model 3: no heart rate, no RPE, and not the same person over several weeks.
+
 ## Our sessions
 
 **0 recorded.** The recorder (`scripts/record_session.py`) and `docs/recording_protocol.md` are in place. Pulsoid, HypeRate and Sensor Logger are implemented. None was tried on the Poco X3 Pro or the Galaxy Watch 7, so there is no latency number and the heart-rate choice is still open (`docs/decisions.md`). Week 3 still needs at least 6 normal sessions and 2 form sessions per person. Recording has to start before Model 3.

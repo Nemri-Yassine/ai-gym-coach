@@ -29,6 +29,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-10-23 · Public videos (stand-in for step 1.2 sessions).** 135 RepCount-A gym videos through MediaPipe → Model 1 → rep counter (`reports/public_videos.md`). Pose-only transformer: 80.8% of videos right on squats, pushups, situps and jumping jacks. The pose + IMU transformer falls to 67.9% without the watch. Rep counting MAE: squats 1.22, pushups 8.19. Own recordings are still needed before week 3.
 - **2026-10-22 · Step 1.6.** Validation package in `reports/week1.md`. Best Model 1 is a transformer on pose + watch IMU: macro-F1 **0.880** on people it has never seen (target 0.85), accuracy 0.950. Rep counting macro MAE **1.35** (target 0.50): squats 0.28, bicep curls 5.07. Spark sync of 1,460,366 rows: 57.7 s / 40.9 s / 37.1 s on 1 / 2 / 4 cores.
 - **2026-10-22 · Step 1.5.** Nine Model 1 runs in `reports/m1_benchmark.md`. Unseen macro-F1 from 0.746 (LSTM, IMU only) to 0.880 (transformer, both). Rep counting on all 616 MM-Fit sets in `reports/rep_counting.md`.
 - **2026-10-22 · Step 1.4.** 32,421 windows of 90 frames (train 15,756, val 3,468, test seen 5,411, test unseen 7,786). All 11 classes are in the train split. `non_activity` is 11,628 of the train windows.

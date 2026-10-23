@@ -8,10 +8,14 @@ RAW = DATA / "raw"
 MMFIT_DIR = RAW / "mm-fit"              # w00 … w20, one folder per workout session
 EC3D_DIR = RAW / "ec3d"                 # data_3D.pickle, data.pickle
 OWN_DIR = RAW / "own_recordings"        # our phone + Galaxy Watch 7 sessions
+REPCOUNT_DIR = RAW / "repcount"         # RepCount-A test split (Lance), public gym videos with rep counts
 INTERIM = DATA / "interim"              # synced, cleaned, normalized (Parquet)
 PROCESSED = DATA / "processed"          # model-ready windows and per-rep tensors
 
 MODELS = ROOT / "models"                # trained checkpoints
+POSE_MODEL = MODELS / "pose_landmarker_full.task"   # MediaPipe Pose Landmarker (pretrained, downloaded)
+POSE_MODEL_URL = ("https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
+                  "pose_landmarker_full/float16/latest/pose_landmarker_full.task")
 EXPERIMENTS = ROOT / "experiments"      # one folder per experiment: config + metrics
 REPORTS = ROOT / "reports"
 FIGURES = REPORTS / "figures"
