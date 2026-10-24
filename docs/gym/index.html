@@ -88,6 +88,7 @@ input[type=text],input[type=password],select{width:100%;background:var(--bg);bor
     <p class="sub" id="hrHelp"></p>
     <input type="password" id="pulsoidToken" placeholder="Pulsoid access token" hidden autocomplete="off">
     <button class="btn" id="hrConnect">Connect heart rate</button>
+    <button class="btn" id="hrConnectAll" hidden>Can't see the watch? Show all Bluetooth devices</button>
     <div class="status"><span class="dot" id="hrDot"></span><span id="hrStatus">not connected</span></div>
   </section>
 
@@ -200,7 +201,7 @@ const HR_HELP = {
   pulsoid: "Pulsoid app running on the watch, internet on the phone, and your personal access token.",
   none: "Video and sets only. Heart rate can be added later from a Samsung Health export.",
 };
-seg("#hrSeg", v => { S.hrSource = v; $("#pulsoidToken").hidden = v !== "pulsoid"; $("#hrConnect").hidden = v === "none"; $("#hrHelp").textContent = HR_HELP[v]; ready(); });
+seg("#hrSeg", v => { S.hrSource = v; $("#hrConnectAll").hidden = true; $("#pulsoidToken").hidden = v !== "pulsoid"; $("#hrConnect").hidden = v === "none"; $("#hrHelp").textContent = HR_HELP[v]; ready(); });
 $("#hrHelp").textContent = HR_HELP.bluetooth;
 $("#pulsoidToken").value = store.get("awc_pulsoid") || "";
 
@@ -224,9 +225,11 @@ setInterval(() => {                       // samples in the last minute: shows t
   if (S.hrSource !== "none" && S.hr.length && last > 10 && $("#hrStatus").textContent.startsWith("streaming")) hrState("wait", "no value for 10 s, reconnecting…");
 }, 1000);
 
-async function connectBluetooth() {
+async function connectBluetooth(all = false) {
   hrState("wait", "choose the watch…");
-  const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ["heart_rate"] }] });
+  const device = await navigator.bluetooth.requestDevice(all
+    ? { acceptAllDevices: true, optionalServices: ["heart_rate"] }   // apps that do not advertise the service
+    : { filters: [{ services: ["heart_rate"] }] });
   S.bt = device; S.hrDevice = device.name || "BLE heart rate";
   device.addEventListener("gattserverdisconnected", () => reconnectBluetooth());
   await subscribeBluetooth(device);
@@ -271,8 +274,19 @@ $("#hrConnect").onclick = async () => {
     if (DEMO) return connectDemoHr();
     if (S.hrSource === "bluetooth") await connectBluetooth();
     else if (S.hrSource === "pulsoid") connectPulsoid();
-  } catch (e) { hrState("bad", e.name === "NotFoundError" ? "no watch selected" : e.message); }
+  } catch (e) { btError(e); }
 };
+$("#hrConnectAll").onclick = async () => {
+  try { await connectBluetooth(true); } catch (e) { btError(e); }
+};
+function btError(e) {
+  $("#hrConnectAll").hidden = S.hrSource !== "bluetooth";
+  const msg = String(e.message || "");
+  if (/service|uuid/i.test(msg)) hrState("bad", "that device does not send heart rate: is Heart for Bluetooth broadcasting on the watch?");
+  else if (e.name === "NotFoundError") hrState("bad", "no watch selected: check the list below, or tap Show all Bluetooth devices");
+  else if (e.name === "NetworkError") hrState("bad", "could not connect: keep the watch screen on and try again");
+  else hrState("bad", `${e.name}: ${e.message}`);
+}
 
 function demoStream() {
   const c = document.createElement("canvas"); c.width = 480; c.height = 640;
