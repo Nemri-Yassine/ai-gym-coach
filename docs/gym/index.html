@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1016">
+<title>AWC Gym Recorder</title>
+<style>
+/* Gym recorder: one-handed, dark, huge touch targets. Camera on top, controls in the thumb zone. */
+:root{
+  --bg:#0B1016; --panel:#141C25; --line:#26313C; --ink:#EEF2F6; --muted:#8C9AA7;
+  --accent:#7393FF; --rec:#FF5A5F; --ok:#4CC487; --warn:#EFB043;
+  --f:"Archivo","Arial Narrow",system-ui,sans-serif; --b:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --m:ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 var(--b)}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+h1{font:800 26px/1 var(--f);text-transform:uppercase;letter-spacing:.02em;margin:4px 0 0}
+h1 b{color:var(--accent)}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.lbl{font:600 11px var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;background:none;border:0;padding:12px 8px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0B1016}
+input[type=text],input[type=password],select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px}
+.btn{border:0;border-radius:12px;padding:15px 16px;font-weight:700;font-size:17px;background:var(--line)}
+.btn.primary{background:var(--accent);color:#0B1016}
+.btn.big{font:800 24px/1 var(--f);text-transform:uppercase;padding:24px;letter-spacing:.03em}
+.btn.rec{background:var(--rec);color:#fff}
+.btn.ok{background:var(--ok);color:#0B1016}
+.btn:disabled{opacity:.4}
+.status{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
+.dot.on{background:var(--ok)} .dot.bad{background:var(--rec)} .dot.wait{background:var(--warn)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.check input{width:22px;height:22px;flex:none;margin-top:1px}
+
+/* recording screen */
+.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;max-height:58vh;width:100%}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.hud{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:10px}
+.hud .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pill{background:rgba(11,16,22,.72);border-radius:999px;padding:6px 12px;font:700 14px var(--m)}
+.pill.rec{background:var(--rec);color:#fff;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.55}}
+.bpm{background:rgba(11,16,22,.72);border-radius:14px;padding:6px 12px;text-align:right}
+.bpm b{font:800 40px/1 var(--f);color:var(--rec)}
+.bpm small{display:block;font:600 11px var(--m);color:var(--muted)}
+.timer{align-self:center;font:800 54px/1 var(--f);text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.grid10{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.grid10 button{padding:16px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);font:800 20px var(--f)}
+.grid10 button[aria-pressed="true"]{background:var(--accent);color:#0B1016;border-color:var(--accent)}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:56px;height:56px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font:800 26px var(--f)}
+.stepper b{font:800 40px/1 var(--f);min-width:70px;text-align:center}
+.list{font:13px var(--m);color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;max-width:90vw;z-index:9}
+.warnbox{border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:10px;font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- 1 · setup -->
+<main class="wrap" id="setup">
+  <div>
+    <h1>AWC <b>Gym Recorder</b></h1>
+    <p class="sub">Phone camera + Galaxy Watch heart rate, on one clock. Saves to Downloads.</p>
+  </div>
+  <div class="warnbox" id="support" hidden></div>
+
+  <section class="card">
+    <span class="lbl">Who is training</span>
+    <div class="seg" id="userSeg"><button data-v="yassine" aria-pressed="true">Yassine</button><button data-v="partner" aria-pressed="false">Partner</button></div>
+    <span class="lbl">Session id</span>
+    <input type="text" id="sessionId" value="s01" autocomplete="off">
+  </section>
+
+  <section class="card">
+    <span class="lbl">Heart rate source</span>
+    <div class="seg" id="hrSeg"><button data-v="bluetooth" aria-pressed="true">Watch · Bluetooth</button><button data-v="pulsoid" aria-pressed="false">Pulsoid</button><button data-v="none" aria-pressed="false">None</button></div>
+    <p class="sub" id="hrHelp"></p>
+    <input type="password" id="pulsoidToken" placeholder="Pulsoid access token" hidden autocomplete="off">
+    <button class="btn" id="hrConnect">Connect heart rate</button>
+    <div class="status"><span class="dot" id="hrDot"></span><span id="hrStatus">not connected</span></div>
+  </section>
+
+  <section class="card">
+    <span class="lbl">Camera</span>
+    <label class="check"><input type="checkbox" id="placed"> <span>Phone about <b>45° in front</b>, at <b>hip height</b>, <b>2–3 m</b> away, whole body visible, same spot as last time.</span></label>
+    <button class="btn" id="camStart">Start camera</button>
+    <div class="status"><span class="dot" id="camDot"></span><span id="camStatus">off</span></div>
+  </section>
+
+  <button class="btn primary big" id="go" disabled>Start session</button>
+  <p class="sub">Unsaved sessions are kept on this phone. <button class="btn" id="resume" hidden style="padding:6px 10px;font-size:14px">Export last session</button></p>
+</main>
+
+<!-- 2 · session -->
+<main class="wrap" id="session" hidden>
+  <div class="cam">
+    <video id="preview" autoplay playsinline muted></video>
+    <div class="hud">
+      <div class="top">
+        <span class="pill" id="setPill">set 1 · ready</span>
+        <div class="bpm"><b id="bpm">--</b><small id="bpmInfo">bpm</small></div>
+      </div>
+      <div class="timer" id="timer">0:00</div>
+      <div class="top"><span class="pill" id="restPill">rest</span><span class="pill" id="hrRate">HR 0/min</span></div>
+    </div>
+  </div>
+  <button class="btn big ok" id="setBtn">Start set</button>
+
+  <section class="card" id="details" hidden>
+    <span class="lbl">Exercise</span>
+    <div class="seg" id="exSeg"><button data-v="squats" aria-pressed="true">Squats</button><button data-v="lunges" aria-pressed="false">Lunges</button></div>
+    <select id="exOther" aria-label="Other exercise">
+      <option value="">Other exercise…</option>
+      <option>pushups</option><option>situps</option><option>bicep_curls</option><option>tricep_extensions</option>
+      <option>dumbbell_rows</option><option>jumping_jacks</option><option>dumbbell_shoulder_press</option><option>lateral_shoulder_raises</option>
+    </select>
+    <span class="lbl">Reps done</span>
+    <div class="stepper"><button id="repMinus" aria-label="One rep less">−</button><b id="reps">10</b><button id="repPlus" aria-label="One rep more">+</button></div>
+    <span class="lbl">Effort, RPE 1–10</span>
+    <div class="grid10" id="rpeGrid"></div>
+    <span class="lbl">Form</span>
+    <select id="form">
+      <option value="correct">correct</option>
+      <option>knees inward</option><option>not low enough</option><option>front bent</option><option>feet too wide</option>
+      <option>knee passes toe</option><option>arched back</option><option>hunched back</option>
+    </select>
+    <button class="btn primary big" id="saveSet" disabled>Save set</button>
+  </section>
+
+  <section class="card">
+    <span class="lbl">Saved sets</span>
+    <div class="list" id="setList"><span>none yet</span></div>
+  </section>
+  <button class="btn" id="finish">Finish session and export</button>
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+/* Everything is stamped with the phone clock (Date.now(), epoch ms): video frames, heart rate, set marks.
+   scripts/import_phone_session.py turns the downloads into data/raw/own_recordings/<user>/<date>_<session>/. */
+const $ = s => document.querySelector(s);
+const DEMO = new URLSearchParams(location.search).has("demo");
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const epoch = t => Math.round(performance.timeOrigin + t);   // performance time -> epoch ms
+
+const S = {
+  user: "yassine", sessionId: "s01", hrSource: "bluetooth", token: "",
+  stream: null, recorder: null, chunks: [], mime: "", frames: [], recStart: null,
+  hr: [], hrDevice: "", setStart: null, sets: [], rpe: null, reps: 10, exercise: "squats",
+  startedAt: null, wake: null, restSince: null, bt: null,
+};
+
+function toast(msg, ms = 2600) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, ms); }
+function seg(id, cb) {
+  const el = $(id);
+  el.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    cb(b.dataset.v);
+  });
+}
+const today = () => new Date().toISOString().slice(0, 10);
+const base = () => `awc_${S.user}_${today()}_${S.sessionId}`;
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+/* ---------- support check ---------- */
+(function support() {
+  const missing = [];
+  if (!navigator.mediaDevices?.getUserMedia) missing.push("camera access");
+  if (typeof MediaRecorder === "undefined") missing.push("video recording");
+  if (!navigator.bluetooth) missing.push("Web Bluetooth (watch over Bluetooth will not work; use Pulsoid or None)");
+  if (!window.isSecureContext) missing.push("a secure https page");
+  if (missing.length && !DEMO) { $("#support").hidden = false; $("#support").textContent = "This browser lacks: " + missing.join(", ") + ". Use Chrome on Android."; }
+  const saved = store.get("awc_session");
+  if (saved && saved.sets && saved.sets.length && !saved.exported) $("#resume").hidden = false;
+  const lastId = store.get("awc_last_id");
+  if (lastId) $("#sessionId").value = lastId.replace(/(\d+)$/, n => String(+n + 1).padStart(n.length, "0"));
+})();
+
+/* ---------- setup ---------- */
+seg("#userSeg", v => S.user = v);
+const HR_HELP = {
+  bluetooth: "On the watch, open Heart for Bluetooth and start broadcasting, then tap Connect and pick the watch.",
+  pulsoid: "Pulsoid app running on the watch, internet on the phone, and your personal access token.",
+  none: "Video and sets only. Heart rate can be added later from a Samsung Health export.",
+};
+seg("#hrSeg", v => { S.hrSource = v; $("#pulsoidToken").hidden = v !== "pulsoid"; $("#hrConnect").hidden = v === "none"; $("#hrHelp").textContent = HR_HELP[v]; ready(); });
+$("#hrHelp").textContent = HR_HELP.bluetooth;
+$("#pulsoidToken").value = store.get("awc_pulsoid") || "";
+
+function hrState(state, text) {
+  $("#hrDot").className = "dot " + (state === "on" ? "on" : state === "bad" ? "bad" : state === "wait" ? "wait" : "");
+  $("#hrStatus").textContent = text;
+  ready();
+}
+function onBpm(bpm, measuredAt) {
+  if (!(bpm >= 30 && bpm <= 230)) return;
+  const t = Date.now();
+  S.hr.push(measuredAt ? [t, bpm, measuredAt] : [t, bpm]);
+  $("#bpm").textContent = Math.round(bpm);
+  if (S.hr.length % 10 === 0) persist();
+}
+setInterval(() => {                       // samples in the last minute: shows the watch is really streaming
+  const n = S.hr.filter(h => h[0] > Date.now() - 60000).length;
+  $("#hrRate").textContent = `HR ${n}/min`;
+  const last = S.hr.length ? (Date.now() - S.hr[S.hr.length - 1][0]) / 1000 : Infinity;
+  $("#bpmInfo").textContent = S.hrSource === "none" ? "no watch" : last < 5 ? "bpm · live" : last === Infinity ? "bpm · waiting" : `bpm · ${Math.round(last)} s old`;
+  if (S.hrSource !== "none" && S.hr.length && last > 10 && $("#hrStatus").textContent.startsWith("streaming")) hrState("wait", "no value for 10 s, reconnecting…");
+}, 1000);
+
+async function connectBluetooth() {
+  hrState("wait", "choose the watch…");
+  const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ["heart_rate"] }] });
+  S.bt = device; S.hrDevice = device.name || "BLE heart rate";
+  device.addEventListener("gattserverdisconnected", () => reconnectBluetooth());
+  await subscribeBluetooth(device);
+}
+async function subscribeBluetooth(device) {
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService("heart_rate");
+  const ch = await service.getCharacteristic("heart_rate_measurement");
+  ch.addEventListener("characteristicvaluechanged", e => {
+    const v = e.target.value, flags = v.getUint8(0);
+    onBpm(flags & 1 ? v.getUint16(1, true) : v.getUint8(1));
+  });
+  await ch.startNotifications();
+  hrState("on", `streaming from ${S.hrDevice}`);
+}
+async function reconnectBluetooth(attempt = 1) {
+  if (!S.bt) return;
+  hrState("wait", `watch disconnected, retry ${attempt}…`);
+  try { await subscribeBluetooth(S.bt); toast("Watch reconnected"); }
+  catch (e) { setTimeout(() => reconnectBluetooth(attempt + 1), Math.min(10000, 1000 * attempt)); }
+}
+function connectPulsoid() {
+  const token = $("#pulsoidToken").value.trim();
+  if (!token) { toast("Paste your Pulsoid token first"); return; }
+  store.set("awc_pulsoid", token); S.hrDevice = "Pulsoid";
+  hrState("wait", "connecting to Pulsoid…");
+  let retry = 1;
+  const open = () => {
+    const ws = new WebSocket(`wss://dev.pulsoid.net/api/v1/data/real_time?access_token=${encodeURIComponent(token)}`);
+    ws.onopen = () => { retry = 1; hrState("on", "streaming from Pulsoid"); };
+    ws.onmessage = m => { try { const d = JSON.parse(m.data); onBpm(d.data?.heart_rate ?? d.heart_rate, d.measured_at); } catch (e) {} };
+    ws.onclose = () => { hrState("wait", "Pulsoid connection lost, retrying…"); setTimeout(open, Math.min(10000, 1000 * retry++)); };
+  };
+  open();
+}
+function connectDemoHr() {
+  S.hrDevice = "demo"; hrState("on", "streaming from demo watch");
+  let t = 0; setInterval(() => onBpm(95 + 30 * Math.sin(t++ / 20) + Math.random() * 3), 1000);
+}
+$("#hrConnect").onclick = async () => {
+  try {
+    if (DEMO) return connectDemoHr();
+    if (S.hrSource === "bluetooth") await connectBluetooth();
+    else if (S.hrSource === "pulsoid") connectPulsoid();
+  } catch (e) { hrState("bad", e.name === "NotFoundError" ? "no watch selected" : e.message); }
+};
+
+function demoStream() {
+  const c = document.createElement("canvas"); c.width = 480; c.height = 640;
+  const g = c.getContext("2d"); let f = 0;
+  (function draw() {
+    const d = 60 + 50 * (1 - Math.cos(f / 15));  g.fillStyle = "#222"; g.fillRect(0, 0, 480, 640);
+    g.strokeStyle = "#eee"; g.lineWidth = 10; g.beginPath();
+    g.moveTo(240, 120 + d); g.lineTo(240, 330 + d); g.moveTo(240, 330 + d); g.lineTo(180, 520); g.moveTo(240, 330 + d); g.lineTo(300, 520);
+    g.moveTo(240, 180 + d); g.lineTo(150, 230 + d); g.moveTo(240, 180 + d); g.lineTo(330, 230 + d); g.stroke();
+    g.beginPath(); g.arc(240, 90 + d, 30, 0, 7); g.stroke(); f++; requestAnimationFrame(draw);
+  })();
+  return c.captureStream(30);
+}
+$("#camStart").onclick = async () => {
+  try {
+    S.stream = DEMO ? demoStream() : await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+    });
+    const v = $("#preview"); v.srcObject = S.stream; await v.play().catch(() => {});
+    const st = S.stream.getVideoTracks()[0].getSettings();
+    $("#camDot").className = "dot on";
+    $("#camStatus").textContent = `${st.width || "?"}×${st.height || "?"} at ${Math.round(st.frameRate || 0) || "?"} fps`;
+    S.mime = ["video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find(m => MediaRecorder.isTypeSupported(m)) || "";
+    ready();
+  } catch (e) { $("#camDot").className = "dot bad"; $("#camStatus").textContent = e.name === "NotAllowedError" ? "camera permission refused" : e.message; }
+};
+$("#placed").onchange = ready;
+function ready() {
+  const hrOk = S.hrSource === "none" || $("#hrDot").classList.contains("on") || $("#hrDot").classList.contains("wait");
+  $("#go").disabled = !(S.stream && $("#placed").checked && hrOk);
+}
+
+/* ---------- session ---------- */
+$("#go").onclick = async () => {
+  S.sessionId = ($("#sessionId").value.trim() || "s01").replace(/[^\w-]/g, "");
+  S.startedAt = Date.now(); S.restSince = Date.now();
+  store.set("awc_last_id", S.sessionId);
+  $("#setup").hidden = true; $("#session").hidden = false;
+  try { S.wake = await navigator.wakeLock?.request("screen"); } catch (e) {}
+  document.addEventListener("visibilitychange", async () => { if (document.visibilityState === "visible") try { S.wake = await navigator.wakeLock?.request("screen"); } catch (e) {} });
+  buildRpe(); persist(); tick();
+};
+function tick() {
+  const now = Date.now();
+  if (S.setStart) { $("#timer").textContent = mmss((now - S.setStart) / 1000); }
+  else if (S.restSince) { $("#timer").textContent = mmss((now - S.restSince) / 1000); }
+  requestAnimationFrame(tick);
+}
+function frameLoop() {                    // per-frame capture times while a set is filmed
+  const v = $("#preview");
+  if (!v.requestVideoFrameCallback) return;
+  const cb = (now, meta) => {
+    if (!S.recorder) return;
+    S.frames.push(epoch(meta.captureTime ?? meta.expectedDisplayTime ?? now));
+    v.requestVideoFrameCallback(cb);
+  };
+  v.requestVideoFrameCallback(cb);
+}
+$("#setBtn").onclick = () => S.setStart ? endSet() : startSet();
+function startSet() {
+  if (!$("#details").hidden) { toast("Save the previous set first"); return; }
+  S.chunks = []; S.frames = [];
+  const rec = new MediaRecorder(S.stream, S.mime ? { mimeType: S.mime, videoBitsPerSecond: 4e6 } : { videoBitsPerSecond: 4e6 });
+  rec.ondataavailable = e => e.data.size && S.chunks.push(e.data);
+  rec.onstart = () => { S.recStart = Date.now(); };
+  rec.start(1000);
+  S.recorder = rec; S.setStart = Date.now(); frameLoop();
+  $("#setBtn").textContent = "End set"; $("#setBtn").className = "btn big rec";
+  $("#setPill").textContent = `set ${S.sets.length + 1} · REC`; $("#setPill").className = "pill rec";
+  $("#restPill").textContent = "filming";
+}
+function endSet() {
+  const end = Date.now(), rec = S.recorder;
+  rec.onstop = () => {
+    S.pending = { start_ms: S.setStart, end_ms: end, rec_start_ms: S.recStart, frames: S.frames.slice(), blob: new Blob(S.chunks, { type: rec.mimeType || S.mime || "video/webm" }) };
+    S.recorder = null; S.setStart = null; S.restSince = end;
+    $("#details").hidden = false; $("#saveSet").disabled = S.rpe === null;
+    $("#details").scrollIntoView({ behavior: "smooth" });
+  };
+  rec.stop();
+  $("#setBtn").textContent = "Start set"; $("#setBtn").className = "btn big ok";
+  $("#setPill").textContent = `set ${S.sets.length + 1} · describe`; $("#setPill").className = "pill";
+  $("#restPill").textContent = "rest";
+}
+function buildRpe() {
+  $("#rpeGrid").innerHTML = Array.from({ length: 10 }, (_, i) => `<button data-v="${i + 1}" aria-pressed="false">${i + 1}</button>`).join("");
+}
+$("#rpeGrid").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  S.rpe = +b.dataset.v; $("#rpeGrid").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  $("#saveSet").disabled = !S.pending;
+});
+seg("#exSeg", v => { S.exercise = v; $("#exOther").value = ""; });
+$("#exOther").onchange = e => { if (e.target.value) { S.exercise = e.target.value; $("#exSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", false)); } };
+$("#repMinus").onclick = () => { S.reps = Math.max(1, S.reps - 1); $("#reps").textContent = S.reps; };
+$("#repPlus").onclick = () => { S.reps += 1; $("#reps").textContent = S.reps; };
+
+function download(blob, name) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+$("#saveSet").onclick = () => {
+  const p = S.pending; if (!p || S.rpe === null) return;
+  const n = S.sets.length + 1, ext = p.blob.type.includes("mp4") ? "mp4" : "webm";
+  const file = `${base()}_set${String(n).padStart(2, "0")}.${ext}`;
+  download(p.blob, file);
+  S.sets.push({ set: n, exercise: S.exercise, reps: S.reps, rpe: S.rpe, form_label: $("#form").value,
+                start_ms: p.start_ms, end_ms: p.end_ms, rec_start_ms: p.rec_start_ms, video_file: file,
+                mime: p.blob.type, video_bytes: p.blob.size, frames_ms: p.frames });
+  S.pending = null; S.rpe = null; buildRpe(); $("#form").value = "correct";
+  $("#details").hidden = true; persist(); listSets();
+  $("#setPill").textContent = `set ${S.sets.length + 1} · ready`;
+  toast(`Set ${n} saved (${(p.blob.size / 1e6).toFixed(1)} MB)`);
+};
+function listSets() {
+  $("#setList").innerHTML = S.sets.map(s => `<span>#${s.set} ${s.exercise} · ${s.reps} reps · RPE ${s.rpe} · ${s.form_label} · ${((s.end_ms - s.start_ms) / 1000).toFixed(0)} s · ${s.frames_ms.length} frames</span>`).join("") || "<span>none yet</span>";
+}
+function sessionJson(final) {
+  return {
+    app: "awc-gym-recorder", version: 1, user: S.user, session_id: S.sessionId, date: today(),
+    started_at_ms: S.startedAt, ended_at_ms: final ? Date.now() : null,
+    clock: "phone epoch ms (Date.now) for video frames, heart rate and set marks",
+    camera_position: "45 deg front, hip height, 2-3 m",
+    camera: S.stream ? S.stream.getVideoTracks()[0].getSettings() : null,
+    hr_source: DEMO ? "demo" : S.hrSource, hr_device: S.hrDevice, hr: S.hr, sets: S.sets,
+    user_agent: navigator.userAgent, demo: DEMO,
+  };
+}
+function persist(extra = {}) { store.set("awc_session", Object.assign(sessionJson(false), extra)); }
+$("#finish").onclick = () => {
+  if (S.setStart) { toast("End the set first"); return; }
+  if (S.pending && !confirmFinish()) return;
+  const data = sessionJson(true);
+  download(new Blob([JSON.stringify(data)], { type: "application/json" }), `${base()}_session.json`);
+  store.set("awc_session", Object.assign(data, { exported: true }));
+  toast("Session exported to Downloads", 5000);
+  $("#finish").textContent = "Exported ✓ (tap again to re-export)";
+};
+function confirmFinish() { toast("Save the last set before finishing"); return false; }
+$("#resume").onclick = () => {
+  const saved = store.get("awc_session"); if (!saved) return;
+  download(new Blob([JSON.stringify(saved)], { type: "application/json" }), `awc_${saved.user}_${saved.date}_${saved.session_id}_session.json`);
+  toast("Last session exported");
+};
+</script>
+</body>
+</html>

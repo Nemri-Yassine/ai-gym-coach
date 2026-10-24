@@ -1,6 +1,10 @@
 """Our own recordings: phone video, PC timestamps, watch heart rate, set labels.
 
-A session lives in data/raw/own_recordings/<user>/<YYYY-MM-DD>_<session-id>/.
+A session lives in data/raw/own_recordings/<user>/<YYYY-MM-DD>_<session-id>/, in one of two layouts:
+- PC recorder (scripts/record_session.py): video.mp4 + frames.csv for the whole session.
+- Phone app (docs/gym/, imported by scripts/import_phone_session.py): sets/setNN.mp4 +
+  frames_setNN.csv, one video per set; meta.json has "source": "phone-app".
+Both have hr.csv, sets.csv and meta.json. Every timestamp of one session is on one clock.
 """
 from datetime import date
 from pathlib import Path

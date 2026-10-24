@@ -1,3 +1,5 @@
+> **At the gym, use the phone app** (no laptop needed): see [gym_guide.md](gym_guide.md). The PC recorder below (`scripts/record_session.py`) is for sessions next to a laptop.
+
 # Recording protocol
 
 Two people (Yassine and one partner). Every session is filmed with the same phone placement and labelled on the PC while it happens. Model 3 needs several sessions per person, so recording starts in week 1 and continues through week 3.
