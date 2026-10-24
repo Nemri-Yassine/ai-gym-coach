@@ -1,0 +1,1412 @@
+{
+  "model1": {
+    "m1_transformer_both": {
+      "windows": 1339,
+      "window_accuracy": 0.5414488424197162,
+      "videos": 78,
+      "video_accuracy": 0.6794871794871795,
+      "per_exercise": {
+        "squats": {
+          "videos": 16,
+          "video_accuracy": 0.375
+        },
+        "pushups": {
+          "videos": 16,
+          "video_accuracy": 0.5625
+        },
+        "situps": {
+          "videos": 20,
+          "video_accuracy": 0.85
+        },
+        "jumping_jacks": {
+          "videos": 26,
+          "video_accuracy": 0.8076923076923077
+        }
+      },
+      "window_predictions": {
+        "non_activity": 511,
+        "jumping_jacks": 355,
+        "situps": 231,
+        "pushups": 136,
+        "tricep_extensions": 61,
+        "squats": 27,
+        "dumbbell_shoulder_press": 13,
+        "lateral_shoulder_raises": 4,
+        "lunges": 1
+      },
+      "confusion": [
+        [
+          23,
+          0,
+          0,
+          0,
+          0,
+          9,
+          0,
+          0,
+          0,
+          0,
+          180
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          231,
+          20,
+          16,
+          0,
+          0,
+          0,
+          0,
+          99
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          116,
+          0,
+          0,
+          0,
+          0,
+          0,
+          223
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          1,
+          0,
+          0,
+          0,
+          36,
+          0,
+          355,
+          13,
+          4,
+          9
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "m1_transformer_pose": {
+      "windows": 1339,
+      "window_accuracy": 0.7184466019417476,
+      "videos": 78,
+      "video_accuracy": 0.8076923076923077,
+      "per_exercise": {
+        "squats": {
+          "videos": 16,
+          "video_accuracy": 0.625
+        },
+        "pushups": {
+          "videos": 16,
+          "video_accuracy": 0.8125
+        },
+        "situps": {
+          "videos": 20,
+          "video_accuracy": 0.85
+        },
+        "jumping_jacks": {
+          "videos": 26,
+          "video_accuracy": 0.8846153846153846
+        }
+      },
+      "window_predictions": {
+        "situps": 374,
+        "jumping_jacks": 374,
+        "pushups": 222,
+        "non_activity": 182,
+        "squats": 111,
+        "tricep_extensions": 41,
+        "dumbbell_rows": 12,
+        "bicep_curls": 8,
+        "dumbbell_shoulder_press": 8,
+        "lateral_shoulder_raises": 7
+      },
+      "confusion": [
+        [
+          104,
+          0,
+          8,
+          2,
+          0,
+          14,
+          10,
+          0,
+          1,
+          0,
+          73
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          272,
+          10,
+          4,
+          2,
+          0,
+          7,
+          0,
+          71
+        ],
+        [
+          0,
+          0,
+          0,
+          100,
+          212,
+          0,
+          0,
+          0,
+          0,
+          1,
+          26
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          7,
+          0,
+          0,
+          0,
+          0,
+          23,
+          0,
+          374,
+          0,
+          6,
+          12
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "m1_cnn_both": {
+      "windows": 1339,
+      "window_accuracy": 0.5690814040328603,
+      "videos": 78,
+      "video_accuracy": 0.717948717948718,
+      "per_exercise": {
+        "squats": {
+          "videos": 16,
+          "video_accuracy": 0.1875
+        },
+        "pushups": {
+          "videos": 16,
+          "video_accuracy": 0.8125
+        },
+        "situps": {
+          "videos": 20,
+          "video_accuracy": 0.8
+        },
+        "jumping_jacks": {
+          "videos": 26,
+          "video_accuracy": 0.9230769230769231
+        }
+      },
+      "window_predictions": {
+        "non_activity": 466,
+        "jumping_jacks": 360,
+        "situps": 234,
+        "pushups": 197,
+        "tricep_extensions": 55,
+        "squats": 14,
+        "dumbbell_rows": 7,
+        "lunges": 4,
+        "lateral_shoulder_raises": 2
+      },
+      "confusion": [
+        [
+          6,
+          1,
+          0,
+          1,
+          1,
+          20,
+          2,
+          0,
+          0,
+          1,
+          180
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          7,
+          1,
+          0,
+          233,
+          33,
+          0,
+          5,
+          0,
+          0,
+          0,
+          87
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          163,
+          0,
+          0,
+          0,
+          0,
+          0,
+          174
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          35,
+          0,
+          360,
+          0,
+          1,
+          25
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "rep_counting": {
+    "per_exercise": {
+      "bench_press": {
+        "n": 19,
+        "mae": 6.421052631578948,
+        "exact": 0.10526315789473684,
+        "within_1": 0.3684210526315789
+      },
+      "front_raise": {
+        "n": 17,
+        "mae": 1.1176470588235294,
+        "exact": 0.5294117647058824,
+        "within_1": 0.8235294117647058
+      },
+      "jumping_jacks": {
+        "n": 26,
+        "mae": 3.230769230769231,
+        "exact": 0.3076923076923077,
+        "within_1": 0.8461538461538461
+      },
+      "pull_up": {
+        "n": 19,
+        "mae": 1.5789473684210527,
+        "exact": 0.42105263157894735,
+        "within_1": 0.7368421052631579
+      },
+      "pushups": {
+        "n": 16,
+        "mae": 1.8125,
+        "exact": 0.4375,
+        "within_1": 0.75
+      },
+      "situps": {
+        "n": 20,
+        "mae": 2.05,
+        "exact": 0.25,
+        "within_1": 0.7
+      },
+      "squats": {
+        "n": 18,
+        "mae": 0.7222222222222222,
+        "exact": 0.6666666666666666,
+        "within_1": 0.8333333333333334
+      }
+    },
+    "macro_mae_mmfit_classes": 1.9538728632478632,
+    "macro_mae_all": 2.41901978740214,
+    "videos": [
+      {
+        "video_id": "train3344",
+        "exercise": "situps",
+        "true": 14,
+        "pred": 9
+      },
+      {
+        "video_id": "stu8_42",
+        "exercise": "pushups",
+        "true": 6,
+        "pred": 6
+      },
+      {
+        "video_id": "stu2_39",
+        "exercise": "pull_up",
+        "true": 6,
+        "pred": 3
+      },
+      {
+        "video_id": "train151",
+        "exercise": "bench_press",
+        "true": 3,
+        "pred": 4
+      },
+      {
+        "video_id": "train1615",
+        "exercise": "jumping_jacks",
+        "true": 10,
+        "pred": 9
+      },
+      {
+        "video_id": "train2737",
+        "exercise": "pushups",
+        "true": 3,
+        "pred": 2
+      },
+      {
+        "video_id": "stu3_53",
+        "exercise": "situps",
+        "true": 11,
+        "pred": 11
+      },
+      {
+        "video_id": "stu5_23",
+        "exercise": "jumping_jacks",
+        "true": 52,
+        "pred": 53
+      },
+      {
+        "video_id": "val1244",
+        "exercise": "squats",
+        "true": 1,
+        "pred": 1
+      },
+      {
+        "video_id": "train143",
+        "exercise": "bench_press",
+        "true": 0,
+        "pred": 2
+      },
+      {
+        "video_id": "stu9_57",
+        "exercise": "situps",
+        "true": 43,
+        "pred": 27
+      },
+      {
+        "video_id": "val1257",
+        "exercise": "squats",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu4_5",
+        "exercise": "bench_press",
+        "true": 51,
+        "pred": 10
+      },
+      {
+        "video_id": "stu10_17",
+        "exercise": "front_raise",
+        "true": 11,
+        "pred": 11
+      },
+      {
+        "video_id": "stu4_27",
+        "exercise": "jumping_jacks",
+        "true": 56,
+        "pred": 65
+      },
+      {
+        "video_id": "test135",
+        "exercise": "bench_press",
+        "true": 4,
+        "pred": 5
+      },
+      {
+        "video_id": "stu7_4",
+        "exercise": "bench_press",
+        "true": 8,
+        "pred": 18
+      },
+      {
+        "video_id": "stu7_45",
+        "exercise": "pushups",
+        "true": 3,
+        "pred": 2
+      },
+      {
+        "video_id": "stu9_64",
+        "exercise": "squats",
+        "true": 14,
+        "pred": 14
+      },
+      {
+        "video_id": "stu9_52",
+        "exercise": "pushups",
+        "true": 57,
+        "pred": 41
+      },
+      {
+        "video_id": "stu1_27",
+        "exercise": "jumping_jacks",
+        "true": 7,
+        "pred": 6
+      },
+      {
+        "video_id": "stu10_24",
+        "exercise": "front_raise",
+        "true": 14,
+        "pred": 14
+      },
+      {
+        "video_id": "stu10_25",
+        "exercise": "jumping_jacks",
+        "true": 7,
+        "pred": 7
+      },
+      {
+        "video_id": "stu9_48",
+        "exercise": "pushups",
+        "true": 27,
+        "pred": 30
+      },
+      {
+        "video_id": "stu10_48",
+        "exercise": "pushups",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "train2508",
+        "exercise": "pull_up",
+        "true": 4,
+        "pred": 5
+      },
+      {
+        "video_id": "stu10_36",
+        "exercise": "pull_up",
+        "true": 29,
+        "pred": 29
+      },
+      {
+        "video_id": "stu6_63",
+        "exercise": "squats",
+        "true": 17,
+        "pred": 17
+      },
+      {
+        "video_id": "stu4_69",
+        "exercise": "squats",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu3_31",
+        "exercise": "jumping_jacks",
+        "true": 92,
+        "pred": 40
+      },
+      {
+        "video_id": "stu10_5",
+        "exercise": "bench_press",
+        "true": 16,
+        "pred": 7
+      },
+      {
+        "video_id": "stu5_47",
+        "exercise": "pushups",
+        "true": 30,
+        "pred": 33
+      },
+      {
+        "video_id": "stu6_15",
+        "exercise": "jumping_jacks",
+        "true": 12,
+        "pred": 5
+      },
+      {
+        "video_id": "stu8_70",
+        "exercise": "squats",
+        "true": 4,
+        "pred": 7
+      },
+      {
+        "video_id": "stu8_38",
+        "exercise": "pull_up",
+        "true": 16,
+        "pred": 16
+      },
+      {
+        "video_id": "stu4_64",
+        "exercise": "squats",
+        "true": 14,
+        "pred": 14
+      },
+      {
+        "video_id": "stu5_62",
+        "exercise": "squats",
+        "true": 32,
+        "pred": 32
+      },
+      {
+        "video_id": "stu10_1",
+        "exercise": "bench_press",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu7_35",
+        "exercise": "pull_up",
+        "true": 22,
+        "pred": 30
+      },
+      {
+        "video_id": "stu2_55",
+        "exercise": "situps",
+        "true": 30,
+        "pred": 29
+      },
+      {
+        "video_id": "stu2_25",
+        "exercise": "jumping_jacks",
+        "true": 58,
+        "pred": 57
+      },
+      {
+        "video_id": "stu6_30",
+        "exercise": "pull_up",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu8_9",
+        "exercise": "bench_press",
+        "true": 28,
+        "pred": 36
+      },
+      {
+        "video_id": "stu8_12",
+        "exercise": "bench_press",
+        "true": 3,
+        "pred": 2
+      },
+      {
+        "video_id": "test538",
+        "exercise": "front_raise",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "stu5_18",
+        "exercise": "jumping_jacks",
+        "true": 34,
+        "pred": 33
+      },
+      {
+        "video_id": "stu5_27",
+        "exercise": "jumping_jacks",
+        "true": 14,
+        "pred": 13
+      },
+      {
+        "video_id": "stu7_8",
+        "exercise": "bench_press",
+        "true": 8,
+        "pred": 11
+      },
+      {
+        "video_id": "stu9_36",
+        "exercise": "pull_up",
+        "true": 11,
+        "pred": 10
+      },
+      {
+        "video_id": "stu1_40",
+        "exercise": "pull_up",
+        "true": 8,
+        "pred": 7
+      },
+      {
+        "video_id": "test536",
+        "exercise": "front_raise",
+        "true": 6,
+        "pred": 6
+      },
+      {
+        "video_id": "stu4_63",
+        "exercise": "squats",
+        "true": 14,
+        "pred": 14
+      },
+      {
+        "video_id": "stu4_46",
+        "exercise": "pushups",
+        "true": 45,
+        "pred": 46
+      },
+      {
+        "video_id": "stu3_58",
+        "exercise": "situps",
+        "true": 42,
+        "pred": 42
+      },
+      {
+        "video_id": "stu7_30",
+        "exercise": "jumping_jacks",
+        "true": 15,
+        "pred": 15
+      },
+      {
+        "video_id": "stu8_10",
+        "exercise": "bench_press",
+        "true": 11,
+        "pred": 7
+      },
+      {
+        "video_id": "stu5_12",
+        "exercise": "front_raise",
+        "true": 5,
+        "pred": 4
+      },
+      {
+        "video_id": "stu9_17",
+        "exercise": "front_raise",
+        "true": 15,
+        "pred": 6
+      },
+      {
+        "video_id": "train1665",
+        "exercise": "jumping_jacks",
+        "true": 3,
+        "pred": 5
+      },
+      {
+        "video_id": "stu1_59",
+        "exercise": "situps",
+        "true": 18,
+        "pred": 21
+      },
+      {
+        "video_id": "test2025",
+        "exercise": "situps",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "stu10_6",
+        "exercise": "bench_press",
+        "true": 4,
+        "pred": 5
+      },
+      {
+        "video_id": "stu8_71",
+        "exercise": "squats",
+        "true": 4,
+        "pred": 3
+      },
+      {
+        "video_id": "stu7_52",
+        "exercise": "situps",
+        "true": 10,
+        "pred": 9
+      },
+      {
+        "video_id": "stu4_19",
+        "exercise": "jumping_jacks",
+        "true": 32,
+        "pred": 32
+      },
+      {
+        "video_id": "stu3_10",
+        "exercise": "front_raise",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "test2315",
+        "exercise": "squats",
+        "true": 3,
+        "pred": 4
+      },
+      {
+        "video_id": "stu8_45",
+        "exercise": "pushups",
+        "true": 11,
+        "pred": 12
+      },
+      {
+        "video_id": "test2320",
+        "exercise": "squats",
+        "true": 4,
+        "pred": 4
+      },
+      {
+        "video_id": "stu4_29",
+        "exercise": "pull_up",
+        "true": 5,
+        "pred": 9
+      },
+      {
+        "video_id": "stu9_47",
+        "exercise": "pushups",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "val579",
+        "exercise": "jumping_jacks",
+        "true": 3,
+        "pred": 2
+      },
+      {
+        "video_id": "stu2_62",
+        "exercise": "situps",
+        "true": 19,
+        "pred": 21
+      },
+      {
+        "video_id": "stu6_68",
+        "exercise": "squats",
+        "true": 6,
+        "pred": 1
+      },
+      {
+        "video_id": "stu2_34",
+        "exercise": "pull_up",
+        "true": 17,
+        "pred": 17
+      },
+      {
+        "video_id": "stu10_43",
+        "exercise": "pushups",
+        "true": 17,
+        "pred": 17
+      },
+      {
+        "video_id": "test2021",
+        "exercise": "situps",
+        "true": 3,
+        "pred": 2
+      },
+      {
+        "video_id": "stu3_28",
+        "exercise": "jumping_jacks",
+        "true": 30,
+        "pred": 30
+      },
+      {
+        "video_id": "stu9_71",
+        "exercise": "squats",
+        "true": 1,
+        "pred": 1
+      },
+      {
+        "video_id": "stu2_5",
+        "exercise": "bench_press",
+        "true": 3,
+        "pred": 3
+      },
+      {
+        "video_id": "stu9_45",
+        "exercise": "pull_up",
+        "true": 12,
+        "pred": 11
+      },
+      {
+        "video_id": "stu4_12",
+        "exercise": "front_raise",
+        "true": 4,
+        "pred": 4
+      },
+      {
+        "video_id": "stu6_22",
+        "exercise": "jumping_jacks",
+        "true": 64,
+        "pred": 64
+      },
+      {
+        "video_id": "stu7_17",
+        "exercise": "front_raise",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "stu3_5",
+        "exercise": "bench_press",
+        "true": 33,
+        "pred": 11
+      },
+      {
+        "video_id": "stu5_32",
+        "exercise": "pull_up",
+        "true": 30,
+        "pred": 29
+      },
+      {
+        "video_id": "stu9_31",
+        "exercise": "jumping_jacks",
+        "true": 7,
+        "pred": 6
+      },
+      {
+        "video_id": "stu6_42",
+        "exercise": "pushups",
+        "true": 8,
+        "pred": 7
+      },
+      {
+        "video_id": "stu7_13",
+        "exercise": "bench_press",
+        "true": 11,
+        "pred": 14
+      },
+      {
+        "video_id": "stu6_65",
+        "exercise": "squats",
+        "true": 19,
+        "pred": 18
+      },
+      {
+        "video_id": "stu3_20",
+        "exercise": "jumping_jacks",
+        "true": 17,
+        "pred": 18
+      },
+      {
+        "video_id": "stu5_68",
+        "exercise": "squats",
+        "true": 20,
+        "pred": 22
+      },
+      {
+        "video_id": "stu8_28",
+        "exercise": "jumping_jacks",
+        "true": 7,
+        "pred": 6
+      },
+      {
+        "video_id": "stu6_24",
+        "exercise": "jumping_jacks",
+        "true": 26,
+        "pred": 26
+      },
+      {
+        "video_id": "stu6_39",
+        "exercise": "pushups",
+        "true": 29,
+        "pred": 29
+      },
+      {
+        "video_id": "stu3_57",
+        "exercise": "situps",
+        "true": 19,
+        "pred": 18
+      },
+      {
+        "video_id": "train2659",
+        "exercise": "pushups",
+        "true": 4,
+        "pred": 4
+      },
+      {
+        "video_id": "stu8_11",
+        "exercise": "bench_press",
+        "true": 9,
+        "pred": 16
+      },
+      {
+        "video_id": "stu3_25",
+        "exercise": "jumping_jacks",
+        "true": 45,
+        "pred": 45
+      },
+      {
+        "video_id": "stu10_19",
+        "exercise": "front_raise",
+        "true": 8,
+        "pred": 7
+      },
+      {
+        "video_id": "stu8_25",
+        "exercise": "jumping_jacks",
+        "true": 32,
+        "pred": 32
+      },
+      {
+        "video_id": "stu3_39",
+        "exercise": "pull_up",
+        "true": 14,
+        "pred": 16
+      },
+      {
+        "video_id": "train2534",
+        "exercise": "pull_up",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu1_30",
+        "exercise": "pull_up",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu2_65",
+        "exercise": "situps",
+        "true": 8,
+        "pred": 8
+      },
+      {
+        "video_id": "train3335",
+        "exercise": "situps",
+        "true": 1,
+        "pred": 2
+      },
+      {
+        "video_id": "stu1_60",
+        "exercise": "situps",
+        "true": 12,
+        "pred": 11
+      },
+      {
+        "video_id": "stu10_60",
+        "exercise": "situps",
+        "true": 6,
+        "pred": 5
+      },
+      {
+        "video_id": "stu6_13",
+        "exercise": "front_raise",
+        "true": 9,
+        "pred": 9
+      },
+      {
+        "video_id": "stu6_23",
+        "exercise": "jumping_jacks",
+        "true": 34,
+        "pred": 33
+      },
+      {
+        "video_id": "stu8_23",
+        "exercise": "front_raise",
+        "true": 3,
+        "pred": 2
+      },
+      {
+        "video_id": "stu4_68",
+        "exercise": "squats",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "stu9_34",
+        "exercise": "jumping_jacks",
+        "true": 8,
+        "pred": 7
+      },
+      {
+        "video_id": "test1454",
+        "exercise": "pull_up",
+        "true": 6,
+        "pred": 6
+      },
+      {
+        "video_id": "stu3_55",
+        "exercise": "situps",
+        "true": 6,
+        "pred": 7
+      },
+      {
+        "video_id": "stu5_55",
+        "exercise": "situps",
+        "true": 4,
+        "pred": 4
+      },
+      {
+        "video_id": "train3899",
+        "exercise": "squats",
+        "true": 2,
+        "pred": 2
+      },
+      {
+        "video_id": "stu6_3",
+        "exercise": "bench_press",
+        "true": 13,
+        "pred": 11
+      },
+      {
+        "video_id": "test539",
+        "exercise": "front_raise",
+        "true": 2,
+        "pred": 4
+      },
+      {
+        "video_id": "stu2_14",
+        "exercise": "front_raise",
+        "true": 7,
+        "pred": 8
+      },
+      {
+        "video_id": "stu2_36",
+        "exercise": "pull_up",
+        "true": 5,
+        "pred": 5
+      },
+      {
+        "video_id": "stu8_58",
+        "exercise": "situps",
+        "true": 3,
+        "pred": 5
+      },
+      {
+        "video_id": "stu8_49",
+        "exercise": "situps",
+        "true": 9,
+        "pred": 13
+      },
+      {
+        "video_id": "stu9_29",
+        "exercise": "jumping_jacks",
+        "true": 43,
+        "pred": 42
+      },
+      {
+        "video_id": "stu2_37",
+        "exercise": "pull_up",
+        "true": 17,
+        "pred": 18
+      },
+      {
+        "video_id": "stu7_10",
+        "exercise": "bench_press",
+        "true": 8,
+        "pred": 7
+      },
+      {
+        "video_id": "stu3_15",
+        "exercise": "front_raise",
+        "true": 4,
+        "pred": 3
+      },
+      {
+        "video_id": "stu3_18",
+        "exercise": "front_raise",
+        "true": 16,
+        "pred": 19
+      },
+      {
+        "video_id": "stu5_16",
+        "exercise": "front_raise",
+        "true": 10,
+        "pred": 10
+      },
+      {
+        "video_id": "stu8_34",
+        "exercise": "jumping_jacks",
+        "true": 5,
+        "pred": 4
+      },
+      {
+        "video_id": "stu8_57",
+        "exercise": "situps",
+        "true": 7,
+        "pred": 6
+      },
+      {
+        "video_id": "stu8_46",
+        "exercise": "pushups",
+        "true": 19,
+        "pred": 19
+      },
+      {
+        "video_id": "stu4_47",
+        "exercise": "pushups",
+        "true": 37,
+        "pred": 39
+      },
+      {
+        "video_id": "stu2_6",
+        "exercise": "bench_press",
+        "true": 4,
+        "pred": 10
+      },
+      {
+        "video_id": "stu1_36",
+        "exercise": "pull_up",
+        "true": 9,
+        "pred": 2
+      }
+    ]
+  },
+  "skipped": [
+    [
+      "test534",
+      "person found in 0% of frames"
+    ]
+  ],
+  "n_items": 136
+}

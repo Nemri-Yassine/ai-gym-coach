@@ -133,7 +133,8 @@ def evaluate(items):
             skipped.append((item["video_id"], f"person found in {detected:.0%} of frames"))
             continue
         finite = segment[np.isfinite(segment).all(axis=(1, 2))]
-        pred_reps, _ = count_reps(normalize(finite))
+        # Exercise given as known (oracle), so this measures the counter, not Model 1.
+        pred_reps, _ = count_reps(normalize(finite), exercise=item["exercise"] if item["mmfit"] else None)
         reps.append({"video_id": item["video_id"], "exercise": item["exercise"],
                      "true": item["count"], "pred": int(pred_reps)})
         if not item["mmfit"]:

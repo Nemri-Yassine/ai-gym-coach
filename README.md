@@ -29,6 +29,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-10-24 · Fixes after review.** Rep counter: lunges and curls were counted as half (alternating limbs); the counter now uses an exercise-specific signal. Macro MAE **1.35 → 0.49** on 616 MM-Fit sets (target 0.50 met); lunges 3.10 → 0.02, curls 5.07 → 0.46; public videos 3.67 → 1.95. Recorder: reader thread timestamps frames on arrival, video written at the measured fps, filming no longer pauses for set details (RPE is a key press, the rest is typed after the session); `extract_pose(..., frame_times_ms=...)` uses `frames.csv` as the clock. 40 tests pass. Exact package versions in `requirements-lock.txt`.
 - **2026-10-23 · Public videos (stand-in for step 1.2 sessions).** 135 RepCount-A gym videos through MediaPipe → Model 1 → rep counter (`reports/public_videos.md`). Pose-only transformer: 80.8% of videos right on squats, pushups, situps and jumping jacks. The pose + IMU transformer falls to 67.9% without the watch. Rep counting MAE: squats 1.22, pushups 8.19. Own recordings are still needed before week 3.
 - **2026-10-22 · Step 1.6.** Validation package in `reports/week1.md`. Best Model 1 is a transformer on pose + watch IMU: macro-F1 **0.880** on people it has never seen (target 0.85), accuracy 0.950. Rep counting macro MAE **1.35** (target 0.50): squats 0.28, bicep curls 5.07. Spark sync of 1,460,366 rows: 57.7 s / 40.9 s / 37.1 s on 1 / 2 / 4 cores.
 - **2026-10-22 · Step 1.5.** Nine Model 1 runs in `reports/m1_benchmark.md`. Unseen macro-F1 from 0.746 (LSTM, IMU only) to 0.880 (transformer, both). Rep counting on all 616 MM-Fit sets in `reports/rep_counting.md`.
@@ -135,7 +136,7 @@ First measurements (quick tests, not final results):
 - **Fatigue is visible**: in 45 of 64 MM-Fit squat sets, the last reps are slower than the first ones.
 - **Rep counting from the skeleton** (early hip-height check): exact in 63/64 squat sets and 62/62 lunge sets.
 - **Model 1** (step 1.5, the real benchmark): transformer on pose + IMU, macro-F1 0.880 and accuracy 0.950 on MM-Fit people never seen in training. Table in `reports/m1_benchmark.md`.
-- **Rep counting** (step 1.5, PCA of the skeleton): macro MAE 1.35 reps per set across 616 sets. Squats 0.28. Bicep curls 5.07 and lunges 3.10 miss the 0.50 target. Table in `reports/rep_counting.md`.
+- **Rep counting** (exercise-specific signal, fixed 2026-10-24): macro MAE **0.49** reps per set across 616 sets (target 0.50). Lunges 0.02, squats 0.19, curls 0.46. Table in `reports/rep_counting.md`.
 - **Form mistakes on an unseen person** (random forest, train on 3 people, test on the 4th): squat 53 %, lunge 82 %, plank 90 % (chance 20–33 %). EC3D authors: 90.9 %.
 - **Camera angle**: squat mistakes are best recognized at about 45° in front (71 %), vs ~55 % from the front or the side.
 

@@ -28,15 +28,15 @@ The classes the best model still misses on unseen people: dumbbell rows (F1 0.59
 
 ## Rep counting
 
-PCA of the 36 joint coordinates, smoothed, peaks at least 0.6 s apart. **616** sets. Macro MAE **1.35** reps (target 0.50). Micro MAE 1.34.
+**Fixed on 2026-10-24.** The first counter used the main movement direction of the whole skeleton (PCA). On exercises that alternate left and right it counted one left-plus-right cycle as one rep: lunges and bicep curls came out at **exactly half** (5 instead of 10 on almost every set).
 
-| Strong | MAE | Weak | MAE |
-|---|---:|---|---:|
-| squats | 0.28 | bicep curls | 5.07 |
-| jumping jacks | 0.44 | lunges | 3.10 |
-| dumbbell rows | 0.53 | pushups | 1.37 |
+The counter now uses the exercise that Model 1 predicts:
 
-Squats, rows, presses, jacks, raises and tricep extensions are within ±1 rep on at least 98% of sets. Bicep curls are never within ±1: the main component is not one clean peak per curl. Lunges are the other miss (exact on 29% of sets). An earlier hip-height counter was exact on squats and lunges; this one is exercise-agnostic, which is what the plan asked for, and it pays for that on arm work and lunges. Figure: `reports/figures/rep_counting_mae.png`.
+- ankle height relative to the hips for squats, lunges and pushups (it drops on every rep, whichever leg is in front)
+- each wrist relative to its own shoulder for curls, rows and lateral raises; alternating arms are counted per arm and summed
+- the principal component for the other exercises, and when the exercise is unknown
+
+**616** sets. Macro MAE **0.49** reps (target 0.50, was 1.35). Lunges 3.10 → **0.02** (exact on 98% of sets), bicep curls 5.07 → **0.46**, pushups 1.37 → 0.71, squats 0.28 → 0.19. The signal per exercise was chosen on these same sets, so the numbers are slightly optimistic. On the public videos (below) the macro MAE fell from 3.67 to 1.95. Table: `reports/rep_counting.md`.
 
 ## Public videos instead of our sessions (added 2026-10-23)
 
@@ -44,7 +44,7 @@ We had no time to record this week, so the camera half of the pipeline was teste
 
 - **Model 1** on 78 videos of squats, pushups, situps and jumping jacks: the pose-only transformer gets **80.8%** of videos right (71.8% of 3-second windows). Squats are the weakest (62.5%).
 - The best MM-Fit model (transformer, pose + IMU) drops to **67.9%** when the watch is missing, even though it was trained with IMU dropout. For live use without a watch IMU, the pose-only model is the better choice.
-- **Rep counting**: MAE 1.22 on squats, 2.05 on situps, 3.23 on jumping jacks, 8.19 on pushups. These videos are long and include pauses and talking, so errors are larger than on MM-Fit.
+- **Rep counting** (exercise given): MAE 0.72 on squats, 1.81 on pushups, 2.05 on situps, 3.23 on jumping jacks; macro 1.95 (3.67 with the first counter). These videos are long and include pauses and talking, so errors are larger than on MM-Fit.
 
 This does not replace our own sessions for Model 3: no heart rate, no RPE, and not the same person over several weeks.
 
@@ -56,4 +56,5 @@ This does not replace our own sessions for Model 3: no heart rate, no RPE, and n
 
 - PySpark 4.2 warns that pandas 3.1 is not fully supported. The Parquet round-trip and the 21-session job both succeeded anyway.
 - The project path contains spaces. Spark on Windows splits unquoted paths, so the virtualenv is exposed through a junction at `C:\awc_tmp\venv`, and the Parquet output through `C:\awc_tmp\links`.
-- Rep counting misses its MAE target. Left as measured. Not retuned.
+- Rep counting first missed its MAE target because alternating exercises were counted as half; fixed on 2026-10-24 (0.49).
+- The recorder first wrote the video at a fixed 30 fps and paused filming while set details were typed. Fixed on 2026-10-24: frames are timestamped on arrival by a reader thread, the video uses the measured fps, set details are typed after the session, and pose extraction for our recordings takes its clock from `frames.csv`.

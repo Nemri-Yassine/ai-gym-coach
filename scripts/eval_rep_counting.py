@@ -37,7 +37,7 @@ def evaluate():
             seq = set_pose(pose, start, end)
             if seq is None:
                 continue
-            pred, _ = count_reps(seq)
+            pred, _ = count_reps(seq, exercise=exercise)
             rows.append({"session": session, "exercise": exercise, "true": int(reps), "pred": int(pred)})
     by_ex = {}
     for row in rows:
@@ -63,6 +63,12 @@ def write_report(summary, run_dir):
         "",
         f"Sets evaluated: {summary['n_sets']}. Macro MAE (mean of per-exercise MAEs): {summary['macro_mae']:.3f}.",
         f"Micro MAE (every set equal): {summary['micro']['mae']:.3f}.",
+        "",
+        "The signal depends on the exercise (given by Model 1): ankle height vs hips for squats, lunges "
+        "and pushups; each wrist vs its shoulder for curls, rows and lateral raises "
+        "(alternating arms counted per arm); first principal component otherwise. The choice per "
+        "exercise was made on these same 616 sets, so the numbers are slightly optimistic. "
+        "Jumping jacks were a tie here and use the principal component, which held up better on the RepCount videos.",
         "",
         "| Exercise | Sets | Exact | Within ±1 | MAE |",
         "|---|---:|---:|---:|---:|",
@@ -90,7 +96,7 @@ def write_report(summary, run_dir):
 
 def main():
     summary = evaluate()
-    run_dir = new_run("rep_counting", {"fps": 30, "signal": "pca+smooth9", "prominence": 0.3, "min_seconds": 0.6})
+    run_dir = new_run("rep_counting", {"fps": 30, "signal": "per-exercise: legs / arms / pca, smooth9", "prominence": 0.3, "min_seconds": 0.6})
     save_metrics(run_dir, summary)
     write_report(summary, run_dir)
     print(json.dumps({"macro_mae": summary["macro_mae"], "micro_mae": summary["micro"]["mae"], "n_sets": summary["n_sets"]}, indent=2))

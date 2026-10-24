@@ -426,6 +426,8 @@ Three weeks, one validation per week. Each step is small enough to be built, tes
 
 **Files**: `scripts/process_recording.py`, `src/awc/data/recordings.py` (implement `load`), `tests/test_recordings.py`
 
+> **Timing rule.** The clock of a recording is `frames.csv` (`pc_ts_ms` of every frame), never the video's fps: phone streams are uneven, and a wrong clock distorts rep durations, the main fatigue signal. Call `extract_pose(video, frame_times_ms=<frames.csv pc_ts_ms>)`, which resamples to 30 fps on the real times (`resample_times`, tested in `tests/test_pose_timing.py`). Set start/end in `sets.csv` are on the same clock.
+
 **Instructions**
 
 1. `process_recording.py <session folder>`: `video.mp4` → MediaPipe → COCO-18 → normalize → `pose.parquet` (frame, pc_ts_ms, joints); join `hr.csv` by nearest PC timestamp (±2 s) → synced table like MM-Fit interim (same columns). Write it to `data/interim/own/<user>/<session>.parquet`.

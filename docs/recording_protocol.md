@@ -29,7 +29,8 @@ python scripts/record_session.py --user yassine --session-id s01 --camera-url ht
 Preview window (click it first):
 
 - `s` — set starts
-- `e` — set ends, then type exercise, reps, RPE 1–10, form label (`correct` or an EC3D mistake name)
+- `e` — set ends; then press the RPE as a digit in the preview (1–9, `0` = 10). Filming never pauses.
+- `q` — session ends; the terminal then asks, set by set, the exercise, reps and form label (`correct` or an EC3D mistake name).
 - `q` — stop and write `meta.json`
 
 Files in `data/raw/own_recordings/<user>/<YYYY-MM-DD>_<session-id>/`:
@@ -48,7 +49,7 @@ Files in `data/raw/own_recordings/<user>/<YYYY-MM-DD>_<session-id>/`:
 2. 3 sets of squats and 3 sets of lunges.
 3. Each set goes to **RPE 8–9**: hard, but safe. Bodyweight or a light load. Stop immediately on pain.
 4. 90 s rest between sets.
-5. Type the RPE after each set (`e`).
+5. Press the RPE digit right after each set (`e`, then `1`–`9` or `0` for 10).
 
 ## Form session (once a week)
 

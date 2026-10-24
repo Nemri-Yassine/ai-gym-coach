@@ -516,6 +516,9 @@ python<span class="w"> </span>scripts/eval_rep_counting.py
 <h3>Step 2.4 · Our recordings through Models 1 and 2 <span class="tag should">SHOULD</span> · first look at RQ4</h3>
 <p><strong>Goal.</strong> Run the trained models on our own videos and compare with the dataset results.</p>
 <p><strong>Files</strong>: <code>scripts/process_recording.py</code>, <code>src/awc/data/recordings.py</code> (implement <code>load</code>), <code>tests/test_recordings.py</code></p>
+<blockquote>
+<p><strong>Timing rule.</strong> The clock of a recording is <code>frames.csv</code> (<code>pc_ts_ms</code> of every frame), never the video's fps: phone streams are uneven, and a wrong clock distorts rep durations, the main fatigue signal. Call <code>extract_pose(video, frame_times_ms=&lt;frames.csv pc_ts_ms&gt;)</code>, which resamples to 30 fps on the real times (<code>resample_times</code>, tested in <code>tests/test_pose_timing.py</code>). Set start/end in <code>sets.csv</code> are on the same clock.</p>
+</blockquote>
 <p><strong>Instructions</strong></p>
 <ol>
 <li><code>process_recording.py &lt;session folder&gt;</code>: <code>video.mp4</code> → MediaPipe → COCO-18 → normalize → <code>pose.parquet</code> (frame, pc_ts_ms, joints); join <code>hr.csv</code> by nearest PC timestamp (±2 s) → synced table like MM-Fit interim (same columns). Write it to <code>data/interim/own/&lt;user&gt;/&lt;session&gt;.parquet</code>.</li>

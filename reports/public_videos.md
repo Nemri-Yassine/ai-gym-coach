@@ -28,7 +28,7 @@ Most common window predictions: situps 374, jumping_jacks 374, pushups 222, non_
 
 ## Rep counting
 
-Macro MAE on the four MM-Fit exercises: 3.67. Over every exercise: 3.40.
+Macro MAE on the four MM-Fit exercises: 1.95. Over every exercise: 2.42.
 
 | Exercise | Videos | Exact | Within ±1 | MAE |
 |---|---:|---:|---:|---:|
@@ -36,9 +36,9 @@ Macro MAE on the four MM-Fit exercises: 3.67. Over every exercise: 3.40.
 | front_raise | 17 | 52.9% | 82.4% | 1.12 |
 | jumping_jacks | 26 | 30.8% | 84.6% | 3.23 |
 | pull_up | 19 | 42.1% | 73.7% | 1.58 |
-| pushups | 16 | 18.8% | 56.2% | 8.19 |
+| pushups | 16 | 43.8% | 75.0% | 1.81 |
 | situps | 20 | 25.0% | 70.0% | 2.05 |
-| squats | 18 | 50.0% | 83.3% | 1.22 |
+| squats | 18 | 66.7% | 83.3% | 0.72 |
 
 Skipped videos:
 

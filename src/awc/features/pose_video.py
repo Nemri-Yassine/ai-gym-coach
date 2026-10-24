@@ -67,8 +67,39 @@ def resample(seq, fps_in, fps_out=VIDEO_FPS) -> np.ndarray:
     return out.reshape(n_out, *seq.shape[1:])
 
 
-def extract_pose(video_path, model_path=POSE_MODEL):
-    """Run Pose Landmarker on every frame. Returns (pose (T, 18, 2) at 30 fps, source fps, source frames)."""
+def resample_times(seq, times_ms, fps_out=VIDEO_FPS) -> np.ndarray:
+    """Resample (T, 18, 2) onto a regular fps_out grid using real per-frame times.
+
+    For our own recordings: times_ms comes from frames.csv (PC clock), so uneven phone
+    frame rates do not distort rep durations. NaN frames stay NaN.
+    """
+    seq = np.asarray(seq, dtype=np.float64)
+    t_in = (np.asarray(times_ms, dtype=np.float64) - float(times_ms[0])) / 1000.0
+    if len(t_in) != len(seq):
+        raise ValueError(f"{len(t_in)} timestamps for {len(seq)} frames")
+    if len(seq) < 2:
+        return seq.copy()
+    if np.any(np.diff(t_in) <= 0):
+        raise ValueError("timestamps must be strictly increasing")
+    t_out = np.arange(0.0, t_in[-1] + 1e-9, 1.0 / fps_out)
+    flat = seq.reshape(len(seq), -1)
+    out = np.empty((len(t_out), flat.shape[1]), dtype=np.float64)
+    for c in range(flat.shape[1]):
+        out[:, c] = np.interp(t_out, t_in, flat[:, c])
+    src_missing = ~np.isfinite(flat).all(axis=1)
+    if src_missing.any():
+        hi = np.clip(np.searchsorted(t_in, t_out), 0, len(t_in) - 1)
+        lo = np.clip(hi - 1, 0, len(t_in) - 1)
+        out[src_missing[lo] | src_missing[hi]] = np.nan
+    return out.reshape(len(t_out), *seq.shape[1:])
+
+
+def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
+    """Run Pose Landmarker on every frame. Returns (pose (T, 18, 2) at 30 fps, source fps, source frames).
+
+    frame_times_ms: real capture time of every frame (frames.csv of our recordings). When given,
+    it is the clock: the video's fps is ignored. Without it (public videos), the video fps is used.
+    """
     import cv2
     import mediapipe as mp
     from mediapipe.tasks import python as mp_python
@@ -95,7 +126,9 @@ def extract_pose(video_path, model_path=POSE_MODEL):
             height, width = bgr.shape[:2]
             rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
             image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
-            result = landmarker.detect_for_video(image, int(round(index * 1000 / fps)))
+            ts = (int(frame_times_ms[index] - frame_times_ms[0]) if frame_times_ms is not None
+                  and index < len(frame_times_ms) else int(round(index * 1000 / fps)))
+            result = landmarker.detect_for_video(image, ts)
             if result.pose_landmarks:
                 lm = [(p.x, p.y) for p in result.pose_landmarks[0]]
                 frames.append(landmarks_to_pixels(lm, width, height))
@@ -104,5 +137,12 @@ def extract_pose(video_path, model_path=POSE_MODEL):
             index += 1
     cap.release()
     raw = np.asarray(frames, dtype=np.float64).reshape(-1, 18, 2)
+    if frame_times_ms is not None:
+        times = np.asarray(frame_times_ms[:len(raw)], dtype=np.float64)
+        if len(times) != len(raw):
+            raise ValueError(f"video has {len(raw)} frames but {len(times)} timestamps")
+        real_fps = (len(times) - 1) / max((times[-1] - times[0]) / 1000.0, 1e-6)
+        filled = fill_gaps(raw, max_gap=int(round(MAX_GAP_SECONDS * real_fps)))
+        return resample_times(filled, times).astype(np.float32), float(real_fps), len(raw)
     filled = fill_gaps(raw, max_gap=int(round(MAX_GAP_SECONDS * fps)))
     return resample(filled, fps).astype(np.float32), float(fps), len(raw)

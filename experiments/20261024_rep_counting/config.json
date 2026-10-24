@@ -1,0 +1,7 @@
+{
+  "fps": 30,
+  "signal": "per-exercise: legs / arms / pca, smooth9",
+  "prominence": 0.3,
+  "min_seconds": 0.6,
+  "git_commit": "36c4031dfdd1f03fb3e8c4fa2159823338da4d81"
+}

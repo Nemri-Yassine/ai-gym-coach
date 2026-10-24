@@ -2,11 +2,18 @@
 
     python scripts/record_session.py --user yassine --session-id s01 --camera-url http://PHONE:8080/video --hr-source none
 
-Keys while the preview is focused: s = set starts, e = set ends, q = stop the session.
-After e, the terminal asks for exercise, reps, RPE and form label.
+Keys while the preview is focused: s = set starts, e = set ends, then a digit = RPE of that set
+(1-9, 0 means 10), q = stop the session. Filming never pauses: exercise, reps and form label
+are typed in the terminal after q, set by set.
+
+Timing: a reader thread stamps every frame with the PC clock as soon as it arrives
+(frames.csv). The video is written at the frame rate measured over the first 2 seconds,
+but frames.csv is the reference clock: downstream code must take time from it, never
+from the video's fps.
 """
 import argparse
 import json
+import queue
 import threading
 import time
 from datetime import date, datetime
@@ -216,11 +223,75 @@ def _ws_send(sock, data, opcode=0x1):
     sock.sendall(header + mask + masked)
 
 
+FPS_PROBE_SECONDS = 2.0
+
+
+def estimate_fps(timestamps_ms, fallback=30.0):
+    """Frame rate from PC timestamps: (n - 1) / elapsed. Falls back when there is too little data."""
+    if len(timestamps_ms) < 2:
+        return fallback
+    elapsed = (timestamps_ms[-1] - timestamps_ms[0]) / 1000.0
+    if elapsed <= 0:
+        return fallback
+    return (len(timestamps_ms) - 1) / elapsed
+
+
+def rpe_from_key(key):
+    """'1'..'9' -> 1..9, '0' -> 10, anything else -> None."""
+    if ord("1") <= key <= ord("9"):
+        return key - ord("0")
+    if key == ord("0"):
+        return 10
+    return None
+
+
+def _reader(cap, frames, stop):
+    """Read the camera as fast as it delivers and stamp each frame on arrival."""
+    misses = 0
+    while not stop.is_set():
+        ok, frame = cap.read()
+        if not ok:
+            misses += 1
+            if misses > 50:
+                frames.put(None)
+                return
+            time.sleep(0.01)
+            continue
+        misses = 0
+        frames.put((frame, int(time.time() * 1000)))
+
+
+def _ask_set_details(folder, sets):
+    """After the session: exercise, reps and form label for every set, RPE if it was not keyed."""
+    if not sets:
+        print("no sets recorded")
+        return
+    print(f"\n{len(sets)} set(s) to describe.")
+    previous = "squats"
+    for i, st in enumerate(sets, 1):
+        print(f"set {i}: {(st['end'] - st['start']) / 1000:.1f} s")
+        exercise = _ask("  exercise", previous, EXERCISES)
+        reps = int(_ask("  reps"))
+        rpe = st["rpe"] if st["rpe"] is not None else int(_ask("  RPE 1-10"))
+        form_label = _ask("  form label", "correct", FORM_LABELS)
+        append_set(folder, i, exercise, st["start"], st["end"], reps, rpe, form_label)
+        previous = exercise
+
+
+def _status_text(set_running, sets):
+    if set_running:
+        return f"SET {len(sets) + 1} RUNNING  (e = end)"
+    if sets and sets[-1]["rpe"] is None:
+        return f"set {len(sets)} ended: press RPE 1-9, 0 = 10"
+    return f"{len(sets)} set(s)  (s = start)"
+
+
 def record(user, session_id, camera_url, hr_source, hr_token="", hr_port=8081,
            phone_position="45 deg front, hip height, 2-3 m", camera_angle="45",
            body_weight="", max_seconds=None):
     import cv2
 
+    started_at = datetime.now().isoformat(timespec="seconds")
     folder = session_dir(user, session_id, date.today())
     init_session_files(folder)
     stop = threading.Event()
@@ -233,63 +304,85 @@ def record(user, session_id, camera_url, hr_source, hr_token="", hr_port=8081,
     if not cap.isOpened():
         stop.set()
         raise RuntimeError(f"could not open camera {camera_url}")
-    ok, frame = cap.read()
-    if not ok:
-        cap.release()
-        stop.set()
-        raise RuntimeError("camera opened but returned no frame")
-    height, width = frame.shape[:2]
-    writer = cv2.VideoWriter(
-        str(folder / "video.mp4"), cv2.VideoWriter_fourcc(*"mp4v"), 30, (width, height),
-    )
-    print("Recording. Focus the preview. s = set start, e = set end, q = quit.")
+    frames = queue.Queue()
+    reader = threading.Thread(target=_reader, args=(cap, frames, stop), daemon=True)
+    reader.start()
+
+    # Measure the real frame rate before opening the writer.
+    probe = []
+    t_probe = time.perf_counter()
+    while time.perf_counter() - t_probe < FPS_PROBE_SECONDS or len(probe) < 2:
+        try:
+            item = frames.get(timeout=5)
+        except queue.Empty:
+            item = None
+        if item is None:
+            stop.set()
+            cap.release()
+            raise RuntimeError("camera opened but returned no frame")
+        probe.append(item)
+    fps = estimate_fps([ts for _, ts in probe])
+    height, width = probe[0][0].shape[:2]
+    writer = cv2.VideoWriter(str(folder / "video.mp4"), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
+    print(f"camera at {fps:.1f} fps. Focus the preview. s = set start, e = set end, digit = RPE, q = quit.")
+
     index = 0
+    sets = []                 # {"start", "end", "rpe"}, PC milliseconds
     set_start = None
-    set_index = 0
+    first_ts = last_ts = None
     t0 = time.perf_counter()
-    misses = 0
+    pending = list(probe)
     try:
         while True:
-            if frame is None:
-                ok, frame = cap.read()
-                if not ok:
-                    misses += 1
-                    if misses > 50:
-                        break
+            if pending:
+                item = pending.pop(0)
+            else:
+                try:
+                    item = frames.get(timeout=1)
+                except queue.Empty:
                     continue
-            misses = 0
-            now_ms = int(time.time() * 1000)
+            if item is None:
+                print("camera stopped sending frames")
+                break
+            frame, ts = item
+            first_ts = ts if first_ts is None else first_ts
+            last_ts = ts
             writer.write(frame)
-            append_frame(folder / "frames.csv", index, now_ms)
+            append_frame(folder / "frames.csv", index, ts)
             index += 1
-            cv2.imshow("awc record", frame)
+
+            preview = frame.copy()
+            cv2.putText(preview, _status_text(set_start is not None, sets), (20, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
+            cv2.imshow("awc record", preview)
             key = cv2.waitKey(1) & 0xFF
+            now_ms = ts           # set marks use the clock of the frame on screen, like the video
             if key in (ord("q"), 27):
                 break
-            if key == ord("s"):
+            if key == ord("s") and set_start is None:
                 set_start = now_ms
-                print(f"set started at {now_ms}")
+                print(f"set {len(sets) + 1} started")
             elif key == ord("e"):
                 if set_start is None:
                     print("press s before e")
                 else:
-                    set_index += 1
-                    exercise = _ask("exercise", "squats", EXERCISES)
-                    reps = int(_ask("reps"))
-                    rpe = int(_ask("RPE 1-10"))
-                    form_label = _ask("form label", "correct", FORM_LABELS)
-                    append_set(folder, set_index, exercise, set_start, now_ms, reps, rpe, form_label)
-                    print(f"set {set_index} saved")
+                    sets.append({"start": set_start, "end": now_ms, "rpe": None})
                     set_start = None
-            frame = None
+                    print(f"set {len(sets)} ended, press its RPE")
+            elif sets and sets[-1]["rpe"] is None and rpe_from_key(key) is not None:
+                sets[-1]["rpe"] = rpe_from_key(key)
+                print(f"set {len(sets)} RPE {sets[-1]['rpe']}")
             if max_seconds is not None and time.perf_counter() - t0 >= max_seconds:
                 break
     finally:
         stop.set()
+        reader.join(timeout=2)
         cap.release()
         writer.release()
         cv2.destroyAllWindows()
-        elapsed = max(time.perf_counter() - t0, 1e-6)
+        measured = fps
+        if index > 1 and last_ts != first_ts:
+            measured = (index - 1) / ((last_ts - first_ts) / 1000.0)
         meta = {
             "user": user,
             "date": date.today().isoformat(),
@@ -300,11 +393,16 @@ def record(user, session_id, camera_url, hr_source, hr_token="", hr_port=8081,
             "camera_url": camera_url,
             "hr_source": hr_source,
             "frames": index,
-            "measured_fps": round(index / elapsed, 2),
-            "started_at": datetime.now().isoformat(timespec="seconds"),
+            "video_fps": round(fps, 2),
+            "measured_fps": round(measured, 2),
+            "clock": "frames.csv pc_ts_ms is the reference; never time anything from the video fps",
+            "started_at": started_at,
         }
         write_meta(folder, meta)
         print(f"saved {folder}  frames={index}  fps={meta['measured_fps']}")
+    if set_start is not None:
+        print("the last set was started but never ended; it is not saved")
+    _ask_set_details(folder, sets)
     return folder
 
 
