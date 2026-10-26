@@ -1,0 +1,26 @@
+<section id="w1-public" data-transition="fade" style="background:#F4F6F8;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · test outside the dataset · RQ4 first look</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">135 public gym videos: new people, new cameras</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:16px;padding:40px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#2350D8">80.8 %</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">videos recognized</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Camera-only Model 1 on squats, pushups, situps and jumping jacks (78 videos).</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:16px;padding:40px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">67.9 %</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">camera + watch model, no watch</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">The best MM-Fit model drops when the watch data is missing.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:16px;padding:40px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">1.95</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">reps of error per video</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Long real videos with pauses. Squats 0.72. Was 3.67 before the fix.</p>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.4;color:#111A24"><b>Decision:</b> in live use without wrist motion from the watch, we run the camera-only Model 1.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#56646F">RepCount-A test split (TransRAC, CVPR 2022), academic use. Skeleton from MediaPipe, mapped to our 18 joints.</p>
+<aside>We had no own recordings yet, so we tested the camera half of the pipeline on public videos with known rep counts. This gave a real decision: without watch motion, the camera-only model is the better choice.</aside>
+</section>

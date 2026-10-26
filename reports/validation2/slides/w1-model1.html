@@ -1,0 +1,25 @@
+<section id="w1-model1" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · Model 1 · RQ1</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Model 1 beats its target on unseen people</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<h3 style="font-size:32px;font-weight:700">Macro-F1 on people never seen in training</h3>
+<table style="font-size:30px;color:#111A24">
+<tr><th style="width:34%">Architecture</th><th style="width:22%;text-align:right">Camera</th><th style="width:22%;text-align:right">Watch</th><th style="width:22%;text-align:right">Both</th></tr>
+<tr><td>1D-CNN</td><td style="text-align:right">0.785</td><td style="text-align:right">0.842</td><td style="text-align:right">0.848</td></tr>
+<tr><td>LSTM</td><td style="text-align:right">0.757</td><td style="text-align:right">0.746</td><td style="text-align:right">0.821</td></tr>
+<tr style="background:#E3E9FC"><td><b>Transformer</b></td><td style="text-align:right">0.836</td><td style="text-align:right">0.746</td><td style="text-align:right"><b>0.880 · best</b></td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Combining both inputs is the best cell for every architecture.</p>
+</div>
+<div style="width:520px;display:flex;flex-direction:column;gap:24px;background:#111A24;border-radius:16px;padding:40px;color:#EEF2F6">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:120px;font-weight:600;line-height:1;color:#8FA8FF">0.880</p>
+<p style="font-size:28px;line-height:1.35;color:#C9D3DD">macro-F1, target 0.85 · accuracy 0.950</p>
+<p style="font-size:24px;line-height:1.4;color:#C9D3DD">Weakest classes: dumbbell rows 0.59, squats 0.71, situps 0.79. The other eight classes are above 0.90.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#56646F">Test set: 5 MM-Fit sessions of people absent from training (the authors’ official split). 11 classes: 10 exercises + no activity.</p>
+<aside>Nine training runs, same split, same seed. The test sessions belong to people the model never saw, which is the fair test for RQ1. Camera plus watch wins, as expected; that is a sanity check, not our claim.</aside>
+</section>

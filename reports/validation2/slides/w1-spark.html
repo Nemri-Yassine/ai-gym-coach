@@ -1,0 +1,30 @@
+<section id="w1-spark" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · big data</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Spark syncs every stream on one clock</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:36px;width:560px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#2350D8">1,460,366</p>
+<p style="font-size:28px;color:#4A5568">rows at 30 frames per second, 21 sessions</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">99.8 %</p>
+<p style="font-size:28px;color:#4A5568">of frames have watch motion</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">81.1 %</p>
+<p style="font-size:28px;color:#4A5568">have heart rate: 3 sessions have no heart-rate file, masked, not invented</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<h3 style="font-size:32px;font-weight:700">Runtime of the full job</h3>
+<div style="display:flex;align-items:center;gap:20px"><p style="font-size:28px;width:120px">1 core</p><div style="width:900px;height:56px;background:#9DB0E8;border-radius:8px"></div><p style="font-size:28px;font-weight:700">57.7 s</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="font-size:28px;width:120px">2 cores</p><div style="width:638px;height:56px;background:#5C7FE0;border-radius:8px"></div><p style="font-size:28px;font-weight:700">40.9 s</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="font-size:28px;width:120px">4 cores</p><div style="width:579px;height:56px;background:#2350D8;border-radius:8px"></div><p style="font-size:28px;font-weight:700">37.1 s</p></div>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">One Spark task per session. Two cores help; after that the job is limited by reading files, not by computing.</p>
+</div>
+</div>
+<aside>The big data stage. Every MM-Fit stream already carries the video frame number, so Spark joins pose, watch motion and heart rate on it. Missing heart rate is marked with a mask, never filled with fake values. The scaling numbers are honest: a fourth core barely helps because the job is I/O bound.</aside>
+</section>

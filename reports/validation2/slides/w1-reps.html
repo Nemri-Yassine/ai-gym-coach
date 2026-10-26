@@ -1,0 +1,29 @@
+<section id="w1-reps" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · rep counting</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Rep counting: found a bug, fixed it, met the target</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="width:560px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;align-items:baseline;gap:24px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#8C9AA7">1.35</p>
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:72px;color:#8C9AA7">→</p>
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#2350D8">0.49</p>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">average error, reps per set, on 616 MM-Fit sets. Target: 0.50.</p>
+<p style="font-size:28px;line-height:1.4;color:#4A5568"><b style="color:#111A24">The bug:</b> alternating exercises were counted as half, one left plus right cycle seen as one rep. <b style="color:#111A24">The fix:</b> a signal chosen per exercise, given by Model 1.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<table style="font-size:30px;color:#111A24">
+<tr><th style="width:40%">Exercise</th><th style="width:20%;text-align:right">Before</th><th style="width:20%;text-align:right">After</th><th style="width:20%;text-align:right">Exact</th></tr>
+<tr style="background:#E3E9FC"><td><b>Lunges</b></td><td style="text-align:right">3.10</td><td style="text-align:right"><b>0.02</b></td><td style="text-align:right">98 %</td></tr>
+<tr style="background:#E3E9FC"><td><b>Bicep curls</b></td><td style="text-align:right">5.07</td><td style="text-align:right"><b>0.46</b></td><td style="text-align:right">66 %</td></tr>
+<tr><td>Pushups</td><td style="text-align:right">1.37</td><td style="text-align:right">0.71</td><td style="text-align:right">29 %</td></tr>
+<tr><td>Squats</td><td style="text-align:right">0.28</td><td style="text-align:right">0.19</td><td style="text-align:right">81 %</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Why it matters: Model 3 reads rep durations, so the rep boundaries must be right.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#56646F">The signal per exercise was chosen on the same 616 sets, so these numbers are slightly optimistic; the public videos are the independent check.</p>
+<aside>We present the bug openly: the first counter halved lunges and curls because they alternate left and right. Using ankle height for leg exercises and each wrist separately for arm exercises fixed it. Lunges went from 3.10 to 0.02 reps of error.</aside>
+</section>
