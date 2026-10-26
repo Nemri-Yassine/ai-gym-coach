@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Workout Coach · Validation 2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0B1016; overflow: hidden; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: 0 0; }
+#stage > section { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden;
+  opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s; }
+#stage > section.on { opacity: 1; visibility: visible; }
+section h1, section h2, section h3, section p { margin: 0; }
+section h1 { font-size: 96px; } section h2 { font-size: 64px; } section h3 { font-size: 44px; } section p { font-size: 32px; }
+section table { border-collapse: collapse; width: 100%; }
+section th, section td { padding: .35em .6em; border-bottom: 1px solid #D5DCE3; text-align: left; vertical-align: top; }
+section th { font-weight: 600; color: #56646F; }
+section aside { display: none; }
+#bar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px; font: 13px system-ui, sans-serif; color: #8C9AA7; background: linear-gradient(transparent, rgba(11,16,22,.85));
+  opacity: 0; transition: opacity .3s; }
+body:hover #bar { opacity: 1; }
+#bar button { background: #1C2733; color: #EEF2F6; border: 1px solid #26313C; border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer; }
+#notes { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); width: min(900px, 92vw); background: #EEF2F6; color: #111A24;
+  font: 18px/1.45 system-ui, sans-serif; padding: 14px 18px; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+@media print { #bar, #notes { display: none !important; } }
+</style>
+</head>
+<body>
+<div id="stage">
+<section id="cover" data-transition="fade" style="background:#111a24">
+  <p id="e1-1ftwghs" style="position:absolute; bottom:64px; left:128px; width:1664px; font-family:'Public Sans', Arial, sans-serif; font-size:24px; color:#8c9aa7">October 28, 2026 · github.com/Nemri-Yassine/ai-gym-coach</p>
+  <p id="p7c19fafff561r0-8c75e803" style="position:absolute; top:316px; left:128px; width:1664px; font-family:'Public Sans', Arial, sans-serif; font-size:24px; font-weight:600; letter-spacing:4px; text-transform:uppercase; color:#8fa8ff">Deep Learning &amp; Big Data · Validation 2</p>
+  <h1 id="p7c19fafff561r1-8c75e803" style="position:absolute; top:430px; left:50%; width:1664px; font-family:Oswald, Arial, sans-serif; font-size:160px; font-weight:700; line-height:0.95; text-transform:uppercase; color:#eef2f6; transform:translateX(-50%)">AI Workout Coach</h1>
+  <p id="p7c19fafff561r2-8c75e803" style="position:absolute; top:582px; left:128px; width:1300px; font-family:'Public Sans', Arial, sans-serif; font-size:44px; line-height:1.3; color:#c9d3dd">Progress report: week 1 done and measured, week 2 next.</p>
+  <p id="p7c19fafff561r3-8c75e803" style="position:absolute; top:679px; left:128px; width:1664px; font-family:Oswald, Arial, sans-serif; font-size:44px; font-weight:500; line-height:1.2; color:#8fa8ff">Most apps tell you what you did. Ours tells you when to stop.</p>
+  <aside>Open with the pitch line. Today: a one-minute reminder of the idea, then what week 1 delivered with measured numbers, then what the next validation will show.</aside>
+</section>
+<section id="idea" data-transition="fade" style="background:#F4F6F8;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Reminder · the idea</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">A coach that tells you when to stop</h2>
+</div>
+<div style="display:flex;gap:16px;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:2px solid #D5DCE3;border-radius:16px;padding:32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#56646F">Capture</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Phone + watch</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">Camera → 18-joint skeleton. Watch → heart rate.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:2px solid #D5DCE3;border-radius:16px;padding:32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#56646F">Model 1</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">What and how many</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">Which exercise, where each rep starts and ends.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:2px solid #D5DCE3;border-radius:16px;padding:32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#56646F">Model 2</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Good or bad rep</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">Each rep from Model 1: correct, or which mistake.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#2350D8;border:2px solid #2350D8;border-radius:16px;padding:32px;color:#F4F6F8">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#D6E0FF">Model 3 · ours</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2;color:#FFFFFF">When to stop</h3>
+<p style="font-size:24px;line-height:1.35;color:#E3E9FC">Rep speed, form, heart rate vs your own history.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:2px solid #D5DCE3;border-radius:16px;padding:32px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#56646F">Voice</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">The verdict</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">Keep going · slow down · stop.</p>
+</div>
+</div>
+<div style="display:flex;gap:24px">
+<p style="flex:1;font-size:28px;line-height:1.4;color:#4A5568"><b style="color:#111A24">Data:</b> MM-Fit (exercise, reps, heart rate) · EC3D (correct vs incorrect reps) · our own sessions (the same person over weeks).</p>
+<p style="flex:1;font-size:28px;line-height:1.4;color:#4A5568"><b style="color:#111A24">Big data:</b> Spark processes the session history; Kafka streams phone and watch data live.</p>
+</div>
+<aside>One minute only. The chain: the phone films, Model 1 says which exercise and cuts the reps, Model 2 judges each rep, Model 3 — our contribution — compares the session with the user's own history and decides when to stop.</aside>
+</section>
+<section id="questions" data-transition="fade" style="background:#F4F6F8;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Reminder · research questions</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Four questions, and where each one stands</h2>
+</div>
+<table style="font-size:28px;color:#111A24">
+<tr><th style="width:9%">RQ</th><th style="width:55%">Question</th><th style="width:36%">Status</th></tr>
+<tr><td><b>RQ1</b></td><td>Recognize the exercise and count reps on people never seen?</td><td>Answered on MM-Fit · week 1</td></tr>
+<tr style="background:#E3E9FC"><td><b>RQ2</b></td><td>Does the watch’s heart rate detect fatigue better than movement alone?</td><td>Needs our sessions · week 3</td></tr>
+<tr style="background:#E3E9FC"><td><b>RQ3</b></td><td>Does your own history warn earlier than a general model? <b>(main idea)</b></td><td>Needs our sessions · week 3</td></tr>
+<tr><td><b>RQ4</b></td><td>Does it still work on our own phone and Galaxy Watch 7?</td><td>First check on public videos · own data week 2</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">RQ2 and RQ3 are our contribution: they use the watch’s vital data and personal history.</p>
+<aside>RQ1 already has a first answer. RQ2 and RQ3, our contribution, depend on our own recordings, which the tool built this week makes possible. RQ4 has a first check on unseen public videos.</aside>
+</section>
+<section id="w1-glance" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · progress</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">What week 1 delivered</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#F4F6F8;border-radius:16px;padding:32px">
+<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:48px;height:48px" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Spark pipeline</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">MM-Fit pose, watch motion and heart rate synced into one table.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#F4F6F8;border-radius:16px;padding:32px">
+<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:48px;height:48px" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><circle cx="17" cy="9" r="3"/><path d="M17 15c3 0 5 2 5 5"/></svg>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">One skeleton</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">MM-Fit, EC3D and phone camera mapped to the same 18 joints.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#F4F6F8;border-radius:16px;padding:32px">
+<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:48px;height:48px" aria-hidden="true"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Model 1 trained</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">3 architectures × 3 input sets compared on unseen people.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#F4F6F8;border-radius:16px;padding:32px">
+<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:48px;height:48px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Rep counter</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">Reps and their boundaries for every set: the input of Model 3.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#F4F6F8;border-radius:16px;padding:32px">
+<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:48px;height:48px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 3.8 5.5 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/></svg>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Outside test</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">135 public gym videos: new people, new cameras.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#F4F6F8;border-radius:16px;padding:32px">
+<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:48px;height:48px" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">Gym recorder</h3>
+<p style="font-size:24px;line-height:1.35;color:#4A5568">Phone app: video + watch heart rate on one clock.</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4A5568"><b style="color:#111A24">42 automated tests pass</b> · every result logged with its configuration · code on GitHub.</p>
+<aside>Six deliverables. The next slides give the measured number behind each one.</aside>
+</section>
+<section id="w1-spark" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · big data</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Spark syncs every stream on one clock</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:36px;width:560px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#2350D8">1,460,366</p>
+<p style="font-size:28px;color:#4A5568">rows at 30 frames per second, 21 sessions</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">99.8 %</p>
+<p style="font-size:28px;color:#4A5568">of frames have watch motion</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">81.1 %</p>
+<p style="font-size:28px;color:#4A5568">have heart rate: 3 sessions have no heart-rate file, masked, not invented</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:28px">
+<h3 style="font-size:32px;font-weight:700">Runtime of the full job</h3>
+<div style="display:flex;align-items:center;gap:20px"><p style="font-size:28px;width:120px">1 core</p><div style="width:720px;height:56px;background:#9DB0E8;border-radius:8px"></div><p style="font-size:28px;font-weight:700">57.7 s</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="font-size:28px;width:120px">2 cores</p><div style="width:510px;height:56px;background:#5C7FE0;border-radius:8px"></div><p style="font-size:28px;font-weight:700">40.9 s</p></div>
+<div style="display:flex;align-items:center;gap:20px"><p style="font-size:28px;width:120px">4 cores</p><div style="width:463px;height:56px;background:#2350D8;border-radius:8px"></div><p style="font-size:28px;font-weight:700">37.1 s</p></div>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">One Spark task per session. Two cores help; after that the job is limited by reading files, not by computing.</p>
+</div>
+</div>
+<aside>The big data stage. Every MM-Fit stream already carries the video frame number, so Spark joins pose, watch motion and heart rate on it. Missing heart rate is marked with a mask, never filled with fake values. The scaling numbers are honest: a fourth core barely helps because the job is I/O bound.</aside>
+</section>
+<section id="w1-model1" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · Model 1 · RQ1</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Model 1 beats its target on unseen people</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<h3 style="font-size:32px;font-weight:700">Macro-F1 on people never seen in training</h3>
+<table style="font-size:30px;color:#111A24">
+<tr><th style="width:34%">Architecture</th><th style="width:22%;text-align:right">Camera</th><th style="width:22%;text-align:right">Watch</th><th style="width:22%;text-align:right">Both</th></tr>
+<tr><td>1D-CNN</td><td style="text-align:right">0.785</td><td style="text-align:right">0.842</td><td style="text-align:right">0.848</td></tr>
+<tr><td>LSTM</td><td style="text-align:right">0.757</td><td style="text-align:right">0.746</td><td style="text-align:right">0.821</td></tr>
+<tr style="background:#E3E9FC"><td><b>Transformer</b></td><td style="text-align:right">0.836</td><td style="text-align:right">0.746</td><td style="text-align:right"><b>0.880 · best</b></td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Combining both inputs is the best cell for every architecture.</p>
+</div>
+<div style="width:520px;display:flex;flex-direction:column;gap:24px;background:#111A24;border-radius:16px;padding:40px;color:#EEF2F6">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:120px;font-weight:600;line-height:1;color:#8FA8FF">0.880</p>
+<p style="font-size:28px;line-height:1.35;color:#C9D3DD">macro-F1, target 0.85 · accuracy 0.950</p>
+<p style="font-size:24px;line-height:1.4;color:#C9D3DD">Weakest classes: dumbbell rows 0.59, squats 0.71, situps 0.79. The other eight classes are above 0.90.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#56646F">Test set: 5 MM-Fit sessions of people absent from training (the authors’ official split). 11 classes: 10 exercises + no activity.</p>
+<aside>Nine training runs, same split, same seed. The test sessions belong to people the model never saw, which is the fair test for RQ1. Camera plus watch wins, as expected; that is a sanity check, not our claim.</aside>
+</section>
+<section id="w1-reps" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · rep counting</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">Rep counting: found a bug, fixed it, met the target</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="width:560px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;align-items:baseline;gap:24px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#8C9AA7">1.35</p>
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:72px;color:#8C9AA7">→</p>
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#2350D8">0.49</p>
+</div>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">average error, reps per set, on 616 MM-Fit sets. Target: 0.50.</p>
+<p style="font-size:28px;line-height:1.4;color:#4A5568"><b style="color:#111A24">The bug:</b> alternating exercises were counted as half, one left plus right cycle seen as one rep. <b style="color:#111A24">The fix:</b> a signal chosen per exercise, given by Model 1.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<table style="font-size:30px;color:#111A24">
+<tr><th style="width:40%">Exercise</th><th style="width:20%;text-align:right">Before</th><th style="width:20%;text-align:right">After</th><th style="width:20%;text-align:right">Exact</th></tr>
+<tr style="background:#E3E9FC"><td><b>Lunges</b></td><td style="text-align:right">3.10</td><td style="text-align:right"><b>0.02</b></td><td style="text-align:right">98 %</td></tr>
+<tr style="background:#E3E9FC"><td><b>Bicep curls</b></td><td style="text-align:right">5.07</td><td style="text-align:right"><b>0.46</b></td><td style="text-align:right">66 %</td></tr>
+<tr><td>Pushups</td><td style="text-align:right">1.37</td><td style="text-align:right">0.71</td><td style="text-align:right">29 %</td></tr>
+<tr><td>Squats</td><td style="text-align:right">0.28</td><td style="text-align:right">0.19</td><td style="text-align:right">81 %</td></tr>
+</table>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Why it matters: Model 3 reads rep durations, so the rep boundaries must be right.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#56646F">The signal per exercise was chosen on the same 616 sets, so these numbers are slightly optimistic; the public videos are the independent check.</p>
+<aside>We present the bug openly: the first counter halved lunges and curls because they alternate left and right. Using ankle height for leg exercises and each wrist separately for arm exercises fixed it. Lunges went from 3.10 to 0.02 reps of error.</aside>
+</section>
+<section id="w1-public" data-transition="fade" style="background:#F4F6F8;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · test outside the dataset · RQ4 first look</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">135 public gym videos: new people, new cameras</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:16px;padding:40px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#2350D8">80.8 %</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">videos recognized</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Camera-only Model 1 on squats, pushups, situps and jumping jacks (78 videos).</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:16px;padding:40px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">67.9 %</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">camera + watch model, no watch</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">The best MM-Fit model drops when the watch data is missing.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border-radius:16px;padding:40px">
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1;color:#111A24">1.95</p>
+<h3 style="font-size:32px;font-weight:700;line-height:1.2">reps of error per video</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">Long real videos with pauses. Squats 0.72. Was 3.67 before the fix.</p>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.4;color:#111A24"><b>Decision:</b> in live use without wrist motion from the watch, we run the camera-only Model 1.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#56646F">RepCount-A test split (TransRAC, CVPR 2022), academic use. Skeleton from MediaPipe, mapped to our 18 joints.</p>
+<aside>We had no own recordings yet, so we tested the camera half of the pipeline on public videos with known rep counts. This gave a real decision: without watch motion, the camera-only model is the better choice.</aside>
+</section>
+<section id="w1-recorder" data-transition="fade" style="background:#FFFFFF;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#2350D8">Week 1 · our own data</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">A gym recorder: phone video and watch heart rate on one clock</h2>
+</div>
+<div style="display:flex;gap:80px;align-items:flex-start">
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;gap:20px;align-items:flex-start"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:44px;height:44px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5-6-3.5z"/></svg><p style="font-size:30px;line-height:1.35"><b>Web app in Chrome</b> on the Poco X3 Pro: no laptop at the gym, no watch code.</p></div>
+<div style="display:flex;gap:20px;align-items:flex-start"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:44px;height:44px" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><p style="font-size:30px;line-height:1.35"><b>Heart rate over Bluetooth</b> from the Galaxy Watch 7, logged during sets and rests.</p></div>
+<div style="display:flex;gap:20px;align-items:flex-start"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:44px;height:44px" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><p style="font-size:30px;line-height:1.35"><b>One clock</b> for every video frame, heart-rate value and set mark.</p></div>
+<div style="display:flex;gap:20px;align-items:flex-start"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#2350D8;width:44px;height:44px" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg><p style="font-size:30px;line-height:1.35"><b>Labels at the source:</b> exercise, reps, effort 1–10 and form after every set.</p></div>
+</div>
+<div style="width:600px;display:flex;flex-direction:column;gap:20px;background:#F4F6F8;border-radius:16px;padding:40px">
+<h3 style="font-size:32px;font-weight:700">Checked</h3>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Real Chrome video imported at <b style="color:#111A24">30.2 fps</b>; frame clock accurate to <b style="color:#111A24">one frame (33 ms)</b>.</p>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Galaxy Watch 7 connection: <b style="color:#111A24">[result of the watch test]</b></p>
+<p style="font-size:28px;line-height:1.4;color:#4A5568">Sessions recorded: <b style="color:#111A24">[number]</b></p>
+</div>
+</div>
+<aside>Model 3 needs the same person over many sessions with heart rate and effort scores; no public dataset has that. This tool makes it possible without writing a watch app. Fill the two bracketed lines with what happened at the gym on Monday.</aside>
+</section>
+<section id="next" data-transition="fade" style="background:#111A24;color:#EEF2F6;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#F0A35E">Next validation · week 2</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase;color:#EEF2F6">What you will see next time</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;border-radius:16px;padding:36px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F0A35E">Model 2 · EC3D</p>
+<h3 style="font-size:36px;font-weight:700;line-height:1.2;color:#EEF2F6">Good rep or which mistake</h3>
+<p style="font-size:26px;line-height:1.4;color:#C9D3DD">Graph network on the skeleton vs LSTM vs our random-forest baseline (53 / 82 / 90 %). Authors’ result: 90.9 %.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;border-radius:16px;padding:36px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F0A35E">Kafka · live</p>
+<h3 style="font-size:36px;font-weight:700;line-height:1.2;color:#EEF2F6">Camera and watch streaming</h3>
+<p style="font-size:26px;line-height:1.4;color:#C9D3DD">Pose and heart rate through Kafka, with measured messages per second and latency.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;border-radius:16px;padding:36px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F0A35E">RQ4 · our sessions</p>
+<h3 style="font-size:36px;font-weight:700;line-height:1.2;color:#EEF2F6">Models 1 and 2 on our videos</h3>
+<p style="font-size:26px;line-height:1.4;color:#C9D3DD">Dataset results next to our own phone and watch results.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#1C2733;border-radius:16px;padding:36px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#F0A35E">Spark · history</p>
+<h3 style="font-size:36px;font-weight:700;line-height:1.2;color:#EEF2F6">Rep table and personal baselines</h3>
+<p style="font-size:26px;line-height:1.4;color:#C9D3DD">Every rep with its speed, depth, form and heart rate, compared only with past sessions.</p>
+</div>
+</div>
+<aside>Four deliverables for the next validation. The fourth one is the direct input of Model 3, our contribution, which comes in week 3.</aside>
+</section>
+<section id="risks" data-transition="fade" style="background:#F4F6F8;color:#111A24;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#B0600C">Next validation · risks</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1.05;text-transform:uppercase">What could slow us down, and our plan</h2>
+</div>
+<table style="font-size:30px;color:#111A24">
+<tr><th style="width:36%">Risk</th><th style="width:64%">Plan</th></tr>
+<tr><td><b>Not enough own sessions</b></td><td>Recording started this week; target 6 normal + 2 form sessions per person.</td></tr>
+<tr><td><b>Watch heart rate drops out</b></td><td>Bluetooth first, Pulsoid as fallback; gaps are masked, never invented.</td></tr>
+<tr><td><b>Kafka setup on Windows</b></td><td>Docker image first; replay of recorded sessions if live capture fails.</td></tr>
+<tr><td><b>EC3D has only 4 people</b></td><td>Strict test on a person never seen, 3D views from many angles, our own reps as an extra test.</td></tr>
+</table>
+<aside>Be direct about these: each risk already has a fallback, and none of them blocks the next validation.</aside>
+</section>
+<section id="end" data-transition="fade" style="background:#111A24;color:#EEF2F6;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#8FA8FF">Summary</p>
+<h2 style="font-family:'Oswald', Arial, sans-serif;font-size:96px;font-weight:700;line-height:1;text-transform:uppercase;color:#EEF2F6">Week 1 done and measured. Week 2 next.</h2>
+<div style="display:flex;gap:48px">
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1;color:#8FA8FF">0.880</p><p style="font-size:26px;color:#C9D3DD">Model 1 on unseen people</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1;color:#8FA8FF">0.49</p><p style="font-size:26px;color:#C9D3DD">reps of error per set</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1;color:#8FA8FF">1.46 M</p><p style="font-size:26px;color:#C9D3DD">rows synced by Spark</p></div>
+<div style="display:flex;flex-direction:column;gap:4px"><p style="font-family:'Oswald', Arial, sans-serif;font-size:72px;font-weight:600;line-height:1;color:#8FA8FF">80.8 %</p><p style="font-size:26px;color:#C9D3DD">public videos recognized</p></div>
+</div>
+<p style="font-family:'Oswald', Arial, sans-serif;font-size:44px;font-weight:500;line-height:1.2;color:#C9D3DD">Thank you. Questions?</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#8C9AA7">Code, tests and every result: github.com/Nemri-Yassine/ai-gym-coach</p>
+<aside>Close on the four numbers, then open questions.</aside>
+</section>
+</div>
+<div id="notes" hidden></div>
+<div id="bar">
+  <span>← → to move · F fullscreen · N notes</span>
+  <span><button id="prev">←</button> <span id="count"></span> <button id="next">→</button></span>
+</div>
+<script>
+const slides = [...document.querySelectorAll('#stage > section')];
+let cur = 0;
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  document.getElementById('stage').style.transform = `scale(${s}) translate(-50%, -50%)`;
+}
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((el, k) => el.classList.toggle('on', k === cur));
+  document.getElementById('count').textContent = (cur + 1) + ' / ' + slides.length;
+  const aside = slides[cur].querySelector('aside');
+  document.getElementById('notes').textContent = aside ? aside.textContent : 'No notes for this slide.';
+  try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+}
+addEventListener('resize', fit);
+addEventListener('keydown', e => {
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  else if (e.key === 'Home') show(0);
+  else if (e.key === 'End') show(slides.length - 1);
+  else if (e.key === 'f' || e.key === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+  else if (e.key === 'n' || e.key === 'N') { const n = document.getElementById('notes'); n.hidden = !n.hidden; }
+});
+document.getElementById('stage').addEventListener('click', e => show(cur + (e.clientX > innerWidth / 2 ? 1 : -1)));
+document.getElementById('prev').onclick = () => show(cur - 1);
+document.getElementById('next').onclick = () => show(cur + 1);
+fit();
+show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>

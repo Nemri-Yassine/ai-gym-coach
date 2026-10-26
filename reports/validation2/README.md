@@ -3,7 +3,9 @@
 The deck lives online: https://claude.ai/artifact/Rs7TWWwQcgeozhssWb7S8s
 Present it from there, or export it as PowerPoint or PDF from the deck's download menu.
 
-This folder is a copy of the slide sources, kept with the project:
+**One-file version:** `AI_Workout_Coach_Validation2.html`: open it in any browser. Keys: → / Space next, ← previous, F fullscreen, N speaker notes. Rebuild it after editing a slide with `python scripts/docs/build_validation2_html.py`.
+
+This folder also keeps the slide sources:
 
 - `deck.json`: title, slide order and sections
 - `slides/*.html`: one file per slide, with speaker notes in the `<aside>` at the end
