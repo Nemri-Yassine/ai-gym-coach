@@ -4,7 +4,8 @@
     python scripts/docs/build_progress.py
 
 Run scripts/demo_video.py first for the annotated real-video demo (embedded in the page).
-Takes presentation/progress_template.html and fills it with, from presentation/index.html,
+Takes reports/validation2/src/week1_template.html and fills it with, from presentation/index.html
+(read only: the main presentation is never modified),
 the styles, the "idea" and "how it works" slides and the drawing code (so both presentations
 look and behave the same), then inlines the data files. Output:
 reports/validation2/AI_Workout_Coach_Week1.html
@@ -15,7 +16,8 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-PRES = ROOT / "presentation"
+PRES = ROOT / "presentation"                       # main presentation: only read, never changed
+SRC = ROOT / "reports" / "validation2" / "src"     # week 1 template and data
 OUT = ROOT / "reports" / "validation2" / "AI_Workout_Coach_Week1.html"
 DEMO = ROOT / "reports" / "validation2" / "demo" / "stu9_64"      # made by scripts/demo_video.py
 
@@ -33,13 +35,13 @@ def section(index, sid):
     return m.group(0)
 
 
-def data_js(name):
-    return (PRES / name).read_text(encoding="utf-8").strip()
+def data_js(path):
+    return path.read_text(encoding="utf-8").strip()
 
 
 def build():
     index = (PRES / "index.html").read_text(encoding="utf-8")
-    page = (PRES / "progress_template.html").read_text(encoding="utf-8")
+    page = (SRC / "week1_template.html").read_text(encoding="utf-8")
 
     style = between(index, "<style>", "</style>", include_start=False)
     lib = between(index, "const EX = ", "/* ---------------- step inits")
@@ -56,7 +58,7 @@ def build():
     mime = "video/mp4" if video.suffix == ".mp4" else "video/webm"
     page = page.replace("/*DEMO_VIDEO*/", f"data:{mime};base64," + base64.b64encode(video.read_bytes()).decode())
     page = page.replace("/*DEMO_JSON*/", json.dumps(summary))
-    page = page.replace("/*DATA*/", "\n".join(data_js(n) for n in ("mmfit_data.js", "ec3d_data.js", "progress_data.js")))
+    page = page.replace("/*DATA*/", "\n".join(data_js(f) for f in (PRES / "mmfit_data.js", PRES / "ec3d_data.js", SRC / "week1_data.js")))
     left = re.findall(r"/\*(INDEX_\w+|DATA|DEMO_\w+)\*/|<!--SECTION:[\w-]+-->", page)
     if left:
         raise ValueError(f"unfilled placeholders: {left}")

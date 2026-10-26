@@ -1,8 +1,8 @@
-"""Real data for the week 1 progress presentation (presentation/progress.html).
+"""Real data for the week 1 validation presentation (reports/validation2/AI_Workout_Coach_Week1.html).
 
     python scripts/docs/build_progress_data.py
 
-Writes presentation/progress_data.js (const PROGRESS = {...}). Everything shown in the simulations
+Writes reports/validation2/src/week1_data.js (const PROGRESS = {...}). Everything shown in the simulations
 comes from here: MM-Fit skeletons of an unseen person (w00 is in test_unseen), the trained
 camera-only Model 1's real predictions, both rep counters run on the same sets, and one
 public RepCount video with its real prediction.
@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from awc.config import INTERIM, MMFIT_CLASSES, MODELS, PRESENTATION
+from awc.config import INTERIM, MMFIT_CLASSES, MODELS, REPORTS
 from awc.data import mmfit
 from awc.features import reps as R
 from awc.features.skeleton import normalize
@@ -160,7 +160,7 @@ def main():
         "public": public_video(model),
         "synced_row": synced_row(),
     }
-    out = PRESENTATION / "progress_data.js"
+    out = REPORTS / "validation2" / "src" / "week1_data.js"
     out.write_text("const PROGRESS = " + json.dumps(data, separators=(",", ":")) + ";\n", encoding="utf-8")
     print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
     for ex, c in data["model1"].items():
