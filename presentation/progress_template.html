@@ -112,9 +112,9 @@ svg.chart circle.pk.hit{fill:currentColor}
   <p class="lede rv" style="--i:2">Six pieces, each one measured. The next slides show them <strong>running on real data</strong>. Click a card to jump to it.</p>
   <div class="dl-grid">
     <button class="dl rv" style="--i:3" data-goto="spark"><span class="k">Big data</span><b>Spark pipeline</b><span>Pose, watch motion and heart rate joined on one clock.</span><span class="res">1,460,366 rows</span><span class="go">see it run →</span></button>
-    <button class="dl rv" style="--i:4" data-goto="m1"><span class="k">Model 1 · RQ1</span><b>Exercise recognition</b><span>3 architectures × 3 input sets, tested on unseen people.</span><span class="res">0.880 macro-F1</span><span class="go">see it run →</span></button>
+    <button class="dl rv" style="--i:4" data-goto="real"><span class="k">Model 1 · RQ1</span><b>Exercise recognition</b><span>3 architectures × 3 input sets, tested on unseen people.</span><span class="res">0.880 macro-F1</span><span class="go">see it run →</span></button>
     <button class="dl rv" style="--i:5" data-goto="reps"><span class="k">Rep counter</span><b>Reps and their boundaries</b><span>A bug found and fixed: alternating exercises were halved.</span><span class="res">1.35 → 0.49 reps</span><span class="go">see it run →</span></button>
-    <button class="dl rv" style="--i:6" data-goto="public"><span class="k">RQ4 first look</span><b>Test outside the dataset</b><span>135 public gym videos: new people, new cameras.</span><span class="res">80.8 % recognized</span><span class="go">see it run →</span></button>
+    <button class="dl rv" style="--i:6" data-goto="real"><span class="k">RQ4 first look</span><b>Test outside the dataset</b><span>135 public gym videos: new people, new cameras.</span><span class="res">80.8 % recognized</span><span class="go">see it run on a real video →</span></button>
     <button class="dl rv" style="--i:7" data-goto="recorder"><span class="k">Our own data</span><b>Gym recorder app</b><span>Phone video + Galaxy Watch heart rate, one clock.</span><span class="res">30 fps · ±33 ms</span><span class="go">see it run →</span></button>
     <button class="dl rv" style="--i:8" data-goto="idea"><span class="k">Foundation</span><b>One skeleton for all sources</b><span>MM-Fit, EC3D and the phone camera on the same 18 joints.</span><span class="res">3 sources · 18 joints</span><span class="go">back to the idea →</span></button>
   </div>
@@ -195,23 +195,25 @@ svg.chart circle.pk.hit{fill:currentColor}
   <div class="stats rv" style="--i:6" id="repStats"></div>
 </section>
 
-<!-- WEEK 1 · PUBLIC VIDEO -->
-<section class="step" id="s-public" hidden>
-  <div class="eyebrow rv">Step 07 <span>· Week 1 · outside the dataset · RQ4 first look</span></div>
-  <h2 class="rv" style="--i:1">A YouTube gym video the model has never seen</h2>
-  <p class="lede rv" style="--i:2">A RepCount-A video: new person, new camera, new gym. MediaPipe turns every frame into our 18 joints and the same camera-only Model 1 reads it.</p>
-  <div class="grid g-side">
-    <div class="panel rv" style="--i:3">
-      <div class="viz" style="min-height:380px"><canvas id="cvPub"></canvas><span class="tag" id="pubTag"></span></div>
+<!-- WEEK 1 · REAL VIDEO -->
+<section class="step" id="s-real" hidden>
+  <div class="eyebrow rv">Step 05 <span>· Week 1 · the pipeline on a real video</span></div>
+  <h2 class="rv" style="--i:1">Real video, real model, frame by frame</h2>
+  <p class="lede rv" style="--i:2">A public gym video the model has never seen. Every frame goes through the chain <strong>as it would live, using only the past</strong>: MediaPipe finds the skeleton, Model 1 reads the last 3 seconds and names the exercise, the rep counter counts.</p>
+  <div class="grid g-side" style="grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)">
+    <div class="panel rv" style="--i:3;padding:10px">
+      <video id="realVid" src="/*DEMO_VIDEO*/" muted playsinline loop controls preload="auto" style="width:100%;border-radius:8px;display:block;background:#000"></video>
     </div>
     <div class="panel rv" style="--i:4">
-      <div class="cap">Model 1 output</div>
-      <div class="probs" id="pubProbs"></div>
-      <div class="verdict" id="pubVerdict"></div>
+      <div class="stats" id="realStats" style="grid-template-columns:repeat(2,minmax(0,1fr))"></div>
+      <ol class="ol">
+        <li><div><b>Skeleton</b><span>MediaPipe, pretrained, 18 joints per frame</span></div></li>
+        <li><div><b>Exercise</b><span>our Model 1, camera only, every 0.1 s on the last 3 s</span></div></li>
+        <li><div><b>Reps</b><span>our counter, with the exercise Model 1 chose</span></div></li>
+      </ol>
+      <p class="note">RepCount-A test split (TransRAC, CVPR 2022), academic use. The extra rep comes from the final static hold. After Monday, the same script runs on our own gym video: <span class="mono">scripts/demo_video.py</span>.</p>
     </div>
   </div>
-  <div class="stats rv" style="--i:5" id="pubStats"></div>
-  <div class="callout rv" style="--i:6"><p><b>Decision taken from this test:</b> in live use without the watch's wrist motion, we run the camera-only Model 1. The camera + watch model falls to 67.9 % when the watch data is missing.</p></div>
 </section>
 
 <!-- WEEK 1 · RECORDER -->
@@ -316,15 +318,16 @@ const STEPS = [
   {id:"how", lbl:"How it works"},
   {id:"w1", group:"Week 1", lbl:"Delivered"},
   {id:"spark", lbl:"Spark sync"},
-  {id:"m1", lbl:"Model 1 live", key:true},
-  {id:"reps", lbl:"Rep counter"},
-  {id:"public", lbl:"Public video"},
+  {id:"real", lbl:"Real video", key:true},
+  {id:"m1", lbl:"Model 1 inside"},
+  {id:"reps", lbl:"Rep counter fix"},
   {id:"recorder", lbl:"Gym recorder"},
   {id:"next", group:"Next validation", lbl:"Model 2 & co"},
   {id:"close", lbl:"Where we stand"},
 ];
 const stat = (n, u) => `<div class="stat"><span class="n">${n}</span><span class="u">${u}</span></div>`;
 const CLASS_LBL = c => EX[c] || (c === "non_activity" ? "No activity" : c);
+const NAMES_SAFE = c => CLASS_LBL(c || "non_activity");
 
 /* probability bars shared by Model 1 and the public video */
 function probBars(el) {
@@ -476,19 +479,10 @@ const init = {
     show(ex);
     $("#repStats").innerHTML = stat("1.35 → 0.49", "reps of error per set, 616 sets (target 0.50)") + stat("3.10 → 0.02", "lunges") + stat("5.07 → 0.46", "bicep curls") + stat("0.28 → 0.19", "squats");
   },
-  public() {
-    const v = P.public;
-    if (!v) { $("#pubTag").textContent = "public video data missing"; return; }
-    const update = probBars($("#pubProbs"));
-    const verdict = top => {
-      if (top == null) return;
-      const said = P.classes[top];
-      $("#pubVerdict").innerHTML = `<span class="pill" style="background:var(--sunk);color:var(--ink)">Truth: ${CLASS_LBL(v.true)} · ${v.count} reps</span><span class="pill ${said === v.true ? "ok" : "warn"}">Model: ${CLASS_LBL(said)}</span>`;
-    };
-    new Skel($("#cvPub"), v.frames, {fps: 10, onFrame: i => verdict(update(v.probs[i], v.true))});
-    $("#pubTag").textContent = `RepCount-A · video ${v.video_id} · MediaPipe skeleton`;
-    verdict(update(v.probs.find(p => p), v.true));
-    $("#pubStats").innerHTML = stat("80.8 %", "of 78 public videos recognized (camera only)") + stat("67.9 %", "camera + watch model, watch missing") + stat("1.95", "reps of error per video (was 3.67)");
+  real() {
+    const R = /*DEMO_JSON*/;
+    $("#realStats").innerHTML = stat(NAMES_SAFE(R.exercise), "exercise found") + stat(`${R.reps_counted} / ${R.truth_reps}`, "reps counted / ground truth")
+      + stat(`${Math.round(R.processing_fps_mean)} fps`, "processing speed on a laptop CPU") + stat(R.realtime_capable ? "yes" : "no", "fast enough for live use (video is 30 fps)");
   },
   recorder() {
     const dm = D.demo, frames = dm.frames.map(f => [f[1], f[2]]);
@@ -567,6 +561,8 @@ function go(i, push = true) {
   if (!reduced && !first) { void sec.offsetWidth; sec.classList.add(dir); }
   cur = i;
   if (!inited[st.id] && init[st.id]) { inited[st.id] = 1; init[st.id](); }
+  const vid = $("#realVid");
+  if (vid) { if (st.id === "real") { vid.currentTime = 0; vid.play().catch(() => {}); } else vid.pause(); }
   $$(".st").forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("done", k < i); b.setAttribute("aria-current", k === i ? "step" : "false"); });
   const btn = $$(".st")[i];
   $("#railFill").style.width = (btn.offsetLeft + btn.offsetWidth / 2) + "px";

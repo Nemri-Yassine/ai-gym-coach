@@ -3,17 +3,21 @@
     python scripts/docs/build_progress_data.py   # real predictions and rep comparisons (once)
     python scripts/docs/build_progress.py
 
+Run scripts/demo_video.py first for the annotated real-video demo (embedded in the page).
 Takes presentation/progress_template.html and fills it with, from presentation/index.html,
 the styles, the "idea" and "how it works" slides and the drawing code (so both presentations
 look and behave the same), then inlines the data files. Output:
 reports/validation2/AI_Workout_Coach_Week1.html
 """
+import base64
+import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PRES = ROOT / "presentation"
 OUT = ROOT / "reports" / "validation2" / "AI_Workout_Coach_Week1.html"
+DEMO = ROOT / "reports" / "validation2" / "demo" / "stu9_64"      # made by scripts/demo_video.py
 
 
 def between(text, start, end, include_start=True):
@@ -46,8 +50,14 @@ def build():
     page = page.replace("<!--SECTION:s-how-->", section(index, "s-how"))
     page = page.replace("/*INDEX_LIB*/", lib)
     page = page.replace("/*INDEX_3D*/", lib3d)
+    summary = json.loads(DEMO.with_suffix(".json").read_text(encoding="utf-8"))
+    summary.pop("timeline", None)
+    video = DEMO.parent / summary.get("file", DEMO.name + ".mp4")
+    mime = "video/mp4" if video.suffix == ".mp4" else "video/webm"
+    page = page.replace("/*DEMO_VIDEO*/", f"data:{mime};base64," + base64.b64encode(video.read_bytes()).decode())
+    page = page.replace("/*DEMO_JSON*/", json.dumps(summary))
     page = page.replace("/*DATA*/", "\n".join(data_js(n) for n in ("mmfit_data.js", "ec3d_data.js", "progress_data.js")))
-    left = re.findall(r"/\*(INDEX_\w+|DATA)\*/|<!--SECTION:[\w-]+-->", page)
+    left = re.findall(r"/\*(INDEX_\w+|DATA|DEMO_\w+)\*/|<!--SECTION:[\w-]+-->", page)
     if left:
         raise ValueError(f"unfilled placeholders: {left}")
     OUT.parent.mkdir(parents=True, exist_ok=True)

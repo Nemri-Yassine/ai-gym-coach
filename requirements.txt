@@ -15,3 +15,4 @@ jupyter
 markdown
 pylance
 pymdown-extensions
+imageio-ffmpeg
