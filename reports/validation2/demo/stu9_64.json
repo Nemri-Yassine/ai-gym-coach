@@ -6,7 +6,15 @@
  "exercise": "squats",
  "reps_counted": 15,
  "truth_reps": 14,
- "processing_fps_mean": 66.1,
+ "segments": [
+  {
+   "exercise": "squats",
+   "start_s": 0.0,
+   "end_s": 40.9,
+   "reps": 15
+  }
+ ],
+ "processing_fps_mean": 60.8,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [

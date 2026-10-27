@@ -19,7 +19,13 @@ ROOT = Path(__file__).resolve().parents[2]
 PRES = ROOT / "presentation"                       # main presentation: only read, never changed
 SRC = ROOT / "reports" / "validation2" / "src"     # week 1 template and data
 OUT = ROOT / "reports" / "validation2" / "AI_Workout_Coach_Week1.html"
-DEMO = ROOT / "reports" / "validation2" / "demo" / "stu9_64"      # made by scripts/demo_video.py
+GUIDE = ROOT / "reports" / "validation2" / "AI_Workout_Coach_Week1_Guide.html"   # technical notes for us
+DEMO_DIR = ROOT / "reports" / "validation2" / "demo"               # made by scripts/demo_video.py
+# one typical public video per exercise (rep error at or below the median), in tab order
+DEMOS = [("stu9_64", "squats", "The extra rep comes from the static hold at the end of the video."),
+         ("stu8_46", "pushups", ""),
+         ("stu3_53", "situps", "The person stands up at the end; the result keeps the exercise done the longest."),
+         ("stu6_24", "jumping_jacks", "")]
 
 
 def between(text, start, end, include_start=True):
@@ -52,19 +58,38 @@ def build():
     page = page.replace("<!--SECTION:s-how-->", section(index, "s-how"))
     page = page.replace("/*INDEX_LIB*/", lib)
     page = page.replace("/*INDEX_3D*/", lib3d)
-    summary = json.loads(DEMO.with_suffix(".json").read_text(encoding="utf-8"))
-    summary.pop("timeline", None)
-    video = DEMO.parent / summary.get("file", DEMO.name + ".mp4")
-    mime = "video/mp4" if video.suffix == ".mp4" else "video/webm"
-    page = page.replace("/*DEMO_VIDEO*/", f"data:{mime};base64," + base64.b64encode(video.read_bytes()).decode())
-    page = page.replace("/*DEMO_JSON*/", json.dumps(summary))
+    demos = []
+    for vid, label, note in DEMOS:
+        summary = json.loads((DEMO_DIR / f"{vid}.json").read_text(encoding="utf-8"))
+        summary.pop("timeline", None)
+        video = DEMO_DIR / summary.get("file", f"{vid}.mp4")
+        mime = "video/mp4" if video.suffix == ".mp4" else "video/webm"
+        demos.append({"label": label, "note": note, "summary": summary,
+                      "src": f"data:{mime};base64," + base64.b64encode(video.read_bytes()).decode()})
+    page = page.replace("/*DEMOS*/", json.dumps(demos))
     page = page.replace("/*DATA*/", "\n".join(data_js(f) for f in (PRES / "mmfit_data.js", PRES / "ec3d_data.js", SRC / "week1_data.js")))
-    left = re.findall(r"/\*(INDEX_\w+|DATA|DEMO_\w+)\*/|<!--SECTION:[\w-]+-->", page)
+    left = re.findall(r"/\*(INDEX_\w+|DATA|DEMOS)\*/|<!--SECTION:[\w-]+-->", page)
     if left:
         raise ValueError(f"unfilled placeholders: {left}")
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")
+    build_guide(demos)
+
+
+NAMES = {"squats": "Squats", "pushups": "Push-ups", "situps": "Sit-ups", "jumping_jacks": "Jumping jacks"}
+
+
+def build_guide(demos):
+    """Technical guide: same numbers as the presentation; the video table comes from the demo JSON files."""
+    rows = []
+    for d in demos:
+        r = d["summary"]
+        rows.append(f"<tr><td>{r['video']} · {NAMES.get(d['label'], d['label'])}</td><td>{NAMES.get(r['exercise'], r['exercise'])}</td>"
+                    f"<td class=\"n\">{r['reps_counted']} / {r['truth_reps']}</td><td class=\"n\">{round(r['processing_fps_mean'])} fps</td></tr>")
+    page = (SRC / "guide_template.html").read_text(encoding="utf-8").replace("/*DEMO_ROWS*/", "\n    ".join(rows))
+    GUIDE.write_text(page, encoding="utf-8")
+    print(f"wrote {GUIDE} ({GUIDE.stat().st_size // 1024} KB)")
 
 
 if __name__ == "__main__":

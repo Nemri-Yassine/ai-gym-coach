@@ -199,10 +199,11 @@ svg.chart circle.pk.hit{fill:currentColor}
 <section class="step" id="s-real" hidden>
   <div class="eyebrow rv">Step 05 <span>· Week 1 · the pipeline on a real video</span></div>
   <h2 class="rv" style="--i:1">Real video, real model, frame by frame</h2>
-  <p class="lede rv" style="--i:2">A public gym video the model has never seen. Every frame goes through the chain <strong>as it would live, using only the past</strong>: MediaPipe finds the skeleton, Model 1 reads the last 3 seconds and names the exercise, the rep counter counts.</p>
+  <p class="lede rv" style="--i:2">Public gym videos the model has never seen, one per exercise. Every frame goes through the chain <strong>as it would live, using only the past</strong>: MediaPipe finds the skeleton, Model 1 reads the last 3 seconds and names the exercise, the rep counter counts.</p>
+  <div class="exbtns rv" style="--i:3" id="realEx"></div>
   <div class="grid g-side" style="grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)">
     <div class="panel rv" style="--i:3;padding:10px">
-      <video id="realVid" src="/*DEMO_VIDEO*/" muted playsinline loop controls preload="auto" style="width:100%;border-radius:8px;display:block;background:#000"></video>
+      <video id="realVid" muted playsinline loop controls preload="auto" style="width:100%;border-radius:8px;display:block;background:#000"></video>
     </div>
     <div class="panel rv" style="--i:4">
       <div class="stats" id="realStats" style="grid-template-columns:repeat(2,minmax(0,1fr))"></div>
@@ -211,7 +212,8 @@ svg.chart circle.pk.hit{fill:currentColor}
         <li><div><b>Exercise</b><span>our Model 1, camera only, every 0.1 s on the last 3 s</span></div></li>
         <li><div><b>Reps</b><span>our counter, with the exercise Model 1 chose</span></div></li>
       </ol>
-      <p class="note">RepCount-A test split (TransRAC, CVPR 2022), academic use. The extra rep comes from the final static hold. After Monday, the same script runs on our own gym video: <span class="mono">scripts/demo_video.py</span>.</p>
+      <p class="note" id="realNote"></p>
+      <p class="note">One typical video per exercise (rep error at or below the median). Over all 78 public videos of these exercises: 80.8 % recognized. RepCount-A test split (TransRAC, CVPR 2022), academic use. Same script for our own gym videos: <span class="mono">scripts/demo_video.py</span>.</p>
     </div>
   </div>
 </section>
@@ -480,9 +482,19 @@ const init = {
     $("#repStats").innerHTML = stat("1.35 → 0.49", "reps of error per set, 616 sets (target 0.50)") + stat("3.10 → 0.02", "lunges") + stat("5.07 → 0.46", "bicep curls") + stat("0.28 → 0.19", "squats");
   },
   real() {
-    const R = /*DEMO_JSON*/;
-    $("#realStats").innerHTML = stat(NAMES_SAFE(R.exercise), "exercise found") + stat(`${R.reps_counted} / ${R.truth_reps}`, "reps counted / ground truth")
-      + stat(`${Math.round(R.processing_fps_mean)} fps`, "processing speed on a laptop CPU") + stat(R.realtime_capable ? "yes" : "no", "fast enough for live use (video is 30 fps)");
+    const DEMOS = /*DEMOS*/;
+    const v = $("#realVid");
+    $("#realEx").innerHTML = DEMOS.map((d, i) => `<button data-i="${i}" aria-pressed="${i === 0}">${CLASS_LBL(d.label)}</button>`).join("");
+    const show = i => {
+      const d = DEMOS[i], R = d.summary;
+      $$("#realEx button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.i === i));
+      v.src = d.src; v.currentTime = 0; v.play().catch(() => {});
+      $("#realStats").innerHTML = stat(NAMES_SAFE(R.exercise), "exercise found") + stat(`${R.reps_counted} / ${R.truth_reps}`, "reps counted / ground truth")
+        + stat(`${Math.round(R.processing_fps_mean)} fps`, "processing speed on a laptop CPU") + stat(R.realtime_capable ? "yes" : "no", "fast enough for live use (video is 30 fps)");
+      $("#realNote").textContent = d.note || "";
+    };
+    $("#realEx").onclick = e => { const b = e.target.closest("button"); if (b) show(+b.dataset.i); };
+    show(0);
   },
   recorder() {
     const dm = D.demo, frames = dm.frames.map(f => [f[1], f[2]]);
@@ -562,7 +574,7 @@ function go(i, push = true) {
   cur = i;
   if (!inited[st.id] && init[st.id]) { inited[st.id] = 1; init[st.id](); }
   const vid = $("#realVid");
-  if (vid) { if (st.id === "real") { vid.currentTime = 0; vid.play().catch(() => {}); } else vid.pause(); }
+  if (vid) { if (st.id === "real") { if (vid.src) { vid.currentTime = 0; vid.play().catch(() => {}); } } else vid.pause(); }
   $$(".st").forEach((b, k) => { b.classList.toggle("on", k === i); b.classList.toggle("done", k < i); b.setAttribute("aria-current", k === i ? "step" : "false"); });
   const btn = $$(".st")[i];
   $("#railFill").style.width = (btn.offsetLeft + btn.offsetWidth / 2) + "px";

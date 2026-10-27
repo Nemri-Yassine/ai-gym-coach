@@ -3,7 +3,7 @@
     python scripts/demo_video.py path/to/video.mp4 --truth-reps 14 --title "RepCount-A · squats"
 
 Each frame only uses the past: MediaPipe skeleton -> every 0.1 s Model 1 (camera only) reads the
-last 3 s and names the exercise -> the rep counter counts since that exercise started, with the
+last 3 s; a new exercise is accepted once it stays the top class for 2 s -> the rep counter counts since that exercise started, with the
 exercise Model 1 chose. The overlay shows the skeleton, the exercise with its confidence, the rep
 count and the processing speed. Output: <out>.mp4 (H.264, small, plays everywhere; needs the
 imageio-ffmpeg package, else a large <out>.webm is kept) and <out>.json.
@@ -28,7 +28,7 @@ from awc.models.m1_recognition import M1Model
 WINDOW_S = 3.0
 EVERY = 3                    # run Model 1 every 3 frames (0.1 s at 30 fps)
 EMA = 0.35                   # smoothing of the displayed probabilities
-CONFIDENT = 0.5
+SWITCH_STEPS = 20           # a new exercise must stay the top class for 20 model steps (2 s) in a row
 NA = MMFIT_CLASSES.index("non_activity")
 NAMES = {"squats": "Squats", "lunges": "Lunges", "bicep_curls": "Biceps curls", "situps": "Sit-ups",
          "pushups": "Push-ups", "tricep_extensions": "Triceps extensions", "dumbbell_rows": "Dumbbell rows",
@@ -89,10 +89,13 @@ def draw_overlay(frame, pose_px, state, scale):
     d.text((32, 28), "AI WORKOUT COACH · LIVE", font=font(15, True), fill=ACCENT)
     ex = state["exercise"]
     d.text((32, 54), NAMES.get(ex, ex), font=font(34, True), fill=INK if ex != "non_activity" else MUTED)
-    conf = state["conf"]
-    d.rounded_rectangle([32, 104, 32 + 280, 116], 6, fill=(38, 49, 60, 255))
-    d.rounded_rectangle([32, 104, 32 + max(12, int(280 * conf)), 116], 6, fill=ACCENT + (255,))
-    d.text((322, 98), f"{conf * 100:.0f}%", font=font(18, True), fill=INK)
+    if state.get("final"):
+        d.text((32, 98), "RESULT FOR THE WHOLE VIDEO", font=font(15, True), fill=OK)
+    else:
+        conf = state["conf"]
+        d.rounded_rectangle([32, 104, 32 + 280, 116], 6, fill=(38, 49, 60, 255))
+        d.rounded_rectangle([32, 104, 32 + max(12, int(280 * conf)), 116], 6, fill=ACCENT + (255,))
+        d.text((322, 98), f"{conf * 100:.0f}%", font=font(18, True), fill=INK)
     d.text((32, 130), "REPS", font=font(15, True), fill=MUTED)
     d.text((32, 146), str(state["reps"]), font=font(64, True), fill=OK if state["reps"] else INK)
     d.text((150, 158), state["sub"], font=font(15), fill=MUTED)
@@ -145,6 +148,8 @@ def run(video, out, model_name="m1_transformer_pose", truth_reps=None, title="",
     probs_s = None
     state = {"exercise": "non_activity", "conf": 0.0, "reps": 0, "sub": "warming up: 3 s of history needed", "fps": 0.0, "footer": title}
     seg_start, seg_ex = None, None
+    candidate, streak = None, 0
+    segments = []            # one entry per exercise bout: exercise, start/end seconds, reps
     timeline, proc = [], []
     index, last_ts = 0, -1
     with vision.PoseLandmarker.create_from_options(options) as landmarker:
@@ -175,13 +180,19 @@ def run(video, out, model_name="m1_transformer_pose", truth_reps=None, title="",
                         logits = model(x) if inputs == "pose" else model(x, torch.zeros(1, 90, 6), torch.zeros(1))
                         p = torch.softmax(logits, 1).numpy()[0]
                     probs_s = p if probs_s is None else EMA * p + (1 - EMA) * probs_s
-                    top = int(np.argmax(probs_s))
-                    if probs_s[top] >= CONFIDENT:
-                        ex = MMFIT_CLASSES[top]
-                        if ex != state["exercise"]:
-                            state["exercise"] = ex
-                            if ex != "non_activity" and ex != seg_ex:
-                                seg_ex, seg_start, state["reps"] = ex, max(0.0, ts - WINDOW_S * 1000), 0
+                    top = MMFIT_CLASSES[int(np.argmax(probs_s))]
+                    # switch only when the same new class stays on top for 1 s: one noisy step cannot flip it
+                    if top == state["exercise"]:
+                        candidate, streak = None, 0
+                    else:
+                        streak = streak + 1 if top == candidate else 1
+                        candidate = top
+                        if streak >= SWITCH_STEPS:
+                            state["exercise"], candidate, streak = top, None, 0
+                            if top != "non_activity" and top != seg_ex:
+                                back = (WINDOW_S + SWITCH_STEPS * EVERY / fps) * 1000
+                                seg_ex, seg_start, state["reps"] = top, max(0.0, ts - back), 0
+                                segments.append({"exercise": top, "start_s": round(seg_start / 1000, 1), "end_s": None, "reps": 0})
                     state["conf"] = float(probs_s[int(np.argmax(probs_s))])
                     state["sub"] = "reps since the exercise started" if seg_ex else "looking for an exercise"
                     timeline.append([round(ts / 1000, 2), MMFIT_CLASSES[int(np.argmax(probs_s))], round(state["conf"], 3)])
@@ -191,14 +202,19 @@ def run(video, out, model_name="m1_transformer_pose", truth_reps=None, title="",
                         seq = resample_times(np.asarray([poses[i] for i in keep]), np.asarray([times[i] for i in keep]))
                         n, _ = count_reps(normalize(seq), fps=30, exercise=seg_ex)
                         state["reps"] = max(state["reps"], int(n))     # a confirmed rep never disappears
+                        segments[-1]["reps"], segments[-1]["end_s"] = state["reps"], round(ts / 1000, 1)
             proc.append(time.perf_counter() - t0)
             state["fps"] = 1.0 / max(np.mean(proc[-30:]), 1e-6)
             frame = cv2.resize(bgr, size, interpolation=cv2.INTER_AREA)
             writer.write(draw_overlay(frame, pose, state, scale))
             index += 1
     cap.release()
-    # hold the last frame 2 s with the result
+    # the result is the exercise done the longest; a bout at the very end (standing up) does not erase it
+    main = max(segments, key=lambda g: (g["end_s"] or g["start_s"]) - g["start_s"]) if segments else None
     if index:
+        if main:
+            state["exercise"], state["reps"] = main["exercise"], main["reps"]
+            state["final"], state["sub"] = True, f"longest bout: {main['start_s']:.0f}–{main['end_s'] or main['start_s']:.0f} s"
         state["footer"] = f"Counted {state['reps']} reps" + (f" · ground truth {truth_reps}" if truth_reps else "")
         last = draw_overlay(frame, poses[-1], state, scale)
         for _ in range(int(fps * 2)):
@@ -206,7 +222,8 @@ def run(video, out, model_name="m1_transformer_pose", truth_reps=None, title="",
     writer.release()
     summary = {
         "video": Path(video).name, "frames": index, "seconds": round(times[-1] / 1000, 1) if times else 0,
-        "model": model_name, "exercise": seg_ex, "reps_counted": state["reps"], "truth_reps": truth_reps,
+        "model": model_name, "exercise": main["exercise"] if main else None,
+        "reps_counted": main["reps"] if main else 0, "truth_reps": truth_reps, "segments": segments,
         "processing_fps_mean": round(1 / float(np.mean(proc)), 1) if proc else None,
         "realtime_capable": bool(proc) and 1 / float(np.mean(proc)) >= fps,
         "pose_found_ratio": round(float(np.mean([np.isfinite(p).all() for p in poses])), 3) if poses else 0,

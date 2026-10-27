@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Workout Coach · Week 1 Technical Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Reading layout: sticky table of contents on the left, one numbered part per pipeline stage. Same palette as the presentations. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunk:#E3E8ED; --ink:#101A23; --muted:#56646F; --line:#CDD5DD;
+  --accent:#1E4BD2; --accent-soft:#DCE4FB; --pose:#1E4BD2; --imu:#B06F12; --hr:#D2353A; --ok:#23885A; --warn:#C27B0C;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif; --f-body:"Public Sans",system-ui,"Segoe UI",sans-serif; --f-mono:"IBM Plex Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1116; --surface:#141B22; --sunk:#0F151B; --ink:#E5EBF0; --muted:#8D9BA7; --line:#25313C;
+  --accent:#7393FF; --accent-soft:#1C2850; --pose:#7393FF; --imu:#E2A54A; --hr:#FF6A64; --ok:#4CC487; --warn:#EFB043; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1116; --surface:#141B22; --sunk:#0F151B; --ink:#E5EBF0; --muted:#8D9BA7; --line:#25313C;
+  --accent:#7393FF; --accent-soft:#1C2850; --pose:#7393FF; --imu:#E2A54A; --hr:#FF6A64; --ok:#4CC487; --warn:#EFB043; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--f-body)}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.toc{position:static!important}}
+.toc{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.toc .cap{margin-bottom:8px}
+.toc a{color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:6px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:var(--surface)}
+.toc a.on{color:var(--ink);border-left-color:var(--accent);background:var(--surface)}
+.brand{font:850 22px/1 var(--f-display);font-stretch:72%;text-transform:uppercase;letter-spacing:.02em;margin-bottom:18px}
+.brand b{color:var(--accent)}
+h1{font:900 clamp(38px,5.5vw,64px)/.95 var(--f-display);font-stretch:68%;text-transform:uppercase;margin:0 0 16px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+h2{font:850 34px/1 var(--f-display);font-stretch:74%;text-transform:uppercase;margin:0;text-wrap:balance}
+h3{font-size:17px;margin:18px 0 6px}
+p{margin:0 0 12px;max-width:72ch}
+.lede{font-size:18px;color:var(--muted)}
+.cap{font:600 11px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+section{padding:36px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+section:first-of-type{border-top:0;padding-top:0}
+.num{font:600 12px var(--f-mono);color:var(--accent);letter-spacing:.08em}
+.io{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:6px 0}
+@media (max-width:700px){.io{grid-template-columns:minmax(0,1fr)}}
+.io div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14.5px}
+.io div b{display:block;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:6px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--f-mono);white-space:nowrap}
+td:first-child{font-weight:600}
+.why{background:var(--accent-soft);border-radius:10px;padding:12px 16px;font-size:15px}
+.why b{color:var(--accent)}
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:6px 0}
+.fig svg{width:100%;height:auto;display:block}
+.fig .cap{margin-top:8px}
+svg text{font-family:var(--f-body)}
+.k{fill:var(--ink)} .m{fill:var(--muted)} .box{fill:var(--sunk);stroke:var(--line)} .boxa{fill:var(--accent-soft);stroke:var(--accent)} .ln{stroke:var(--muted);stroke-width:2;fill:none}
+.ln.a{stroke:var(--accent)} .fp{fill:var(--pose)} .fw{fill:var(--imu)} .fh{fill:var(--hr)} .fo{fill:var(--ok)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:500 12px var(--f-mono);padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+code{font:13.5px var(--f-mono);background:var(--sunk);padding:1px 5px;border-radius:4px}
+dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:8px 16px;margin:0}
+dt{font-weight:700} dd{margin:0;color:var(--muted)}
+@media (max-width:700px){dl{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" id="toc">
+  <div class="brand">AI Workout <b>Coach</b></div>
+  <span class="cap">Week 1 · technical guide</span>
+  <a href="#flow">0 · The whole flow</a>
+  <a href="#data">1 · Data and splits</a>
+  <a href="#spark">2 · Spark sync</a>
+  <a href="#skeleton">3 · One skeleton</a>
+  <a href="#windows">4 · Windows</a>
+  <a href="#model1">5 · Model 1</a>
+  <a href="#reps">6 · Rep counter</a>
+  <a href="#live">7 · Real videos, live mode</a>
+  <a href="#recorder">8 · Gym recorder</a>
+  <a href="#limits">9 · Limits and next</a>
+  <a href="#glossary">10 · Glossary</a>
+</nav>
+<main>
+<section id="top">
+  <h1>How week 1 works, <em>and why we built it this way</em></h1>
+  <p class="lede">Our own notes for the validation. Each part follows the presentation: what goes in, what comes out, the parameters that matter, and the reason behind each choice. Every number comes from the code and the logged experiments.</p>
+</section>
+
+<section id="flow">
+  <span class="num">0</span><h2>The whole flow</h2>
+  <p>Two paths share the same building blocks. <b>Training</b> reads the MM-Fit dataset. <b>Live use</b> reads a camera. Both turn the person into the same 18-joint skeleton, so a model trained on the dataset works on a new video.</p>
+  <div class="fig"><svg viewBox="0 0 1000 300" role="img" aria-label="Pipeline diagram">
+    <text x="10" y="22" class="m" font-size="13" font-weight="600">TRAINING</text>
+    <rect x="10" y="34" width="150" height="56" rx="8" class="box"/><text x="85" y="58" text-anchor="middle" class="k" font-size="14" font-weight="700">MM-Fit files</text><text x="85" y="77" text-anchor="middle" class="m" font-size="12">21 sessions, .npy</text>
+    <rect x="200" y="34" width="150" height="56" rx="8" class="box"/><text x="275" y="58" text-anchor="middle" class="k" font-size="14" font-weight="700">Spark sync</text><text x="275" y="77" text-anchor="middle" class="m" font-size="12">one row per frame</text>
+    <rect x="390" y="34" width="150" height="56" rx="8" class="box"/><text x="465" y="58" text-anchor="middle" class="k" font-size="14" font-weight="700">3 s windows</text><text x="465" y="77" text-anchor="middle" class="m" font-size="12">32,421 · normalized</text>
+    <rect x="580" y="34" width="150" height="56" rx="8" class="boxa"/><text x="655" y="58" text-anchor="middle" class="k" font-size="14" font-weight="700">Train Model 1</text><text x="655" y="77" text-anchor="middle" class="m" font-size="12">PyTorch, CPU</text>
+    <path d="M160 62 H200 M350 62 H390 M540 62 H580" class="ln"/>
+    <path d="M655 90 V160" class="ln a" stroke-dasharray="5 5"/><text x="665" y="130" class="m" font-size="12">trained weights</text>
+    <text x="10" y="182" class="m" font-size="13" font-weight="600">LIVE USE</text>
+    <rect x="10" y="194" width="150" height="56" rx="8" class="box"/><text x="85" y="218" text-anchor="middle" class="k" font-size="14" font-weight="700">Video frame</text><text x="85" y="237" text-anchor="middle" class="m" font-size="12">phone or public video</text>
+    <rect x="200" y="194" width="150" height="56" rx="8" class="box"/><text x="275" y="218" text-anchor="middle" class="k" font-size="14" font-weight="700">MediaPipe</text><text x="275" y="237" text-anchor="middle" class="m" font-size="12">pretrained, 33 → 18</text>
+    <rect x="390" y="194" width="150" height="56" rx="8" class="box"/><text x="465" y="218" text-anchor="middle" class="k" font-size="14" font-weight="700">Last 3 s</text><text x="465" y="237" text-anchor="middle" class="m" font-size="12">same normalization</text>
+    <rect x="580" y="194" width="150" height="56" rx="8" class="boxa"/><text x="655" y="218" text-anchor="middle" class="k" font-size="14" font-weight="700">Model 1</text><text x="655" y="237" text-anchor="middle" class="m" font-size="12">which exercise</text>
+    <rect x="770" y="194" width="210" height="56" rx="8" class="boxa"/><text x="875" y="218" text-anchor="middle" class="k" font-size="14" font-weight="700">Rep counter</text><text x="875" y="237" text-anchor="middle" class="m" font-size="12">signal chosen by exercise</text>
+    <path d="M160 222 H200 M350 222 H390 M540 222 H580 M730 222 H770" class="ln"/>
+    <text x="10" y="285" class="m" font-size="12.5">Only MediaPipe is pretrained. Spark sync, windows, Model 1 and the rep counter are ours.</text>
+  </svg></div>
+</section>
+
+<section id="data">
+  <span class="num">1</span><h2>Data and splits</h2>
+  <div class="io"><div><b>Dataset</b>MM-Fit: 10 people, 21 workout sessions, 10 exercises, 6,160 labelled reps.</div><div><b>Streams we use</b>Camera skeleton (30 fps), left-wrist watch motion (100 Hz), watch heart rate (~1 Hz).</div><div><b>Labels</b>Per set: start frame, end frame, rep count, exercise. Frames outside a set are "no activity".</div></div>
+  <div class="tw"><table><thead><tr><th>Split</th><th>Sessions</th><th>Used for</th></tr></thead><tbody>
+    <tr><td>train</td><td class="n">w01 w02 w03 w04 w06 w07 w08 w16 w17 w18</td><td>learning the weights</td></tr>
+    <tr><td>validation</td><td class="n">w14 w15 w19</td><td>early stopping, choosing the best epoch</td></tr>
+    <tr><td>test, seen people</td><td class="n">w09 w10 w11</td><td>people also present in training</td></tr>
+    <tr><td>test, unseen people</td><td class="n">w00 w05 w12 w13 w20</td><td><b>our main number</b>: people never seen</td></tr>
+  </tbody></table></div>
+  <p class="why"><b>Why this split:</b> it is the one the MM-Fit authors use in their own code, so our numbers can be compared with theirs. Testing on unseen people is the honest test: a coach must work on a new user, not only on the people it learned from.</p>
+</section>
+
+<section id="spark">
+  <span class="num">2</span><h2>Spark sync</h2>
+  <div class="io"><div><b>Input</b>Per session: pose (2, frames, 19), watch acc and gyro rows <code>[frame, time, x, y, z]</code>, heart-rate rows <code>[frame, time, bpm]</code>.</div><div><b>Output</b>Parquet, one row per video frame: 36 joint coordinates, 6 watch values, heart rate, heart-rate mask, exercise, set id. <b>1,460,366 rows.</b></div><div><b>Code</b><code>src/awc/features/sync.py</code> (logic) and <code>src/awc/bigdata/build_interim.py</code> (Spark job).</div></div>
+  <div class="tw"><table><thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Join key</td><td class="n">frame number</td><td>Every MM-Fit file already carries the video frame, so no time alignment guesswork is needed.</td></tr>
+    <tr><td>Reference clock</td><td class="n">camera, 30 fps</td><td>The camera is our main live sensor; everything is expressed on its clock.</td></tr>
+    <tr><td>Watch motion</td><td class="n">mean per frame (~3.3 samples)</td><td>Reduces 100 Hz to 30 Hz without losing the movement shape.</td></tr>
+    <tr><td>Heart rate</td><td class="n">linear interpolation</td><td>About one value per second; between two values the heart rate changes smoothly.</td></tr>
+    <tr><td>Heart-rate mask</td><td class="n">0 if nearest real value &gt; 5 s</td><td>3 sessions (w05, w10, w18) have no heart-rate file. We mark the gap; we never invent values.</td></tr>
+    <tr><td>Parallelism</td><td class="n">applyInPandas, one task per session</td><td>Sessions are independent, so each one can run on its own core.</td></tr>
+  </tbody></table></div>
+  <p>Measured runtime of the full job: <b>57.7 s on 1 core, 40.9 s on 2, 37.1 s on 4.</b> Two cores help; after that the job waits on reading files rather than on computing. Spark's automatic partition merging was turned off because it was putting all 21 sessions in one task.</p>
+</section>
+
+<section id="skeleton">
+  <span class="num">3</span><h2>One skeleton for every source</h2>
+  <p>MM-Fit gives 18 joints (OpenPose order), EC3D gives 25 (in 3D), MediaPipe gives 33. All three are mapped to the same <b>18 joints</b>, with y pointing up. MediaPipe has no neck point, so the neck is the midpoint of the two shoulders.</p>
+  <div class="fig"><svg viewBox="0 0 900 230" role="img" aria-label="Normalization: before and after">
+    <text x="20" y="22" class="m" font-size="13" font-weight="600">BEFORE: PIXELS</text>
+    <rect x="20" y="34" width="380" height="170" rx="8" class="box"/>
+    <g transform="translate(70,60)" class="fp"><circle cx="30" cy="0" r="6"/><circle cx="30" cy="22" r="5"/><circle cx="15" cy="60" r="5"/><circle cx="45" cy="60" r="5"/><circle cx="12" cy="100" r="5"/><circle cx="48" cy="100" r="5"/></g>
+    <g transform="translate(260,90) scale(.6)" class="fp"><circle cx="30" cy="0" r="8"/><circle cx="30" cy="22" r="7"/><circle cx="15" cy="60" r="7"/><circle cx="45" cy="60" r="7"/><circle cx="12" cy="100" r="7"/><circle cx="48" cy="100" r="7"/></g>
+    <text x="90" y="196" class="m" font-size="12">near the camera</text><text x="262" y="196" class="m" font-size="12">far, smaller</text>
+    <path d="M420 120 H480" class="ln a"/><path d="M472 113 L482 120 L472 127" class="ln a"/>
+    <text x="500" y="22" class="m" font-size="13" font-weight="600">AFTER: NORMALIZED</text>
+    <rect x="500" y="34" width="380" height="170" rx="8" class="box"/>
+    <path d="M690 44 V196 M510 140 H870" stroke="var(--line)" stroke-dasharray="4 4"/>
+    <g transform="translate(660,40)" class="fo"><circle cx="30" cy="0" r="6"/><circle cx="30" cy="40" r="5"/><circle cx="15" cy="100" r="5"/><circle cx="45" cy="100" r="5"/><circle cx="12" cy="150" r="5"/><circle cx="48" cy="150" r="5"/></g>
+    <text x="700" y="136" class="m" font-size="12">mid-hip = (0, 0)</text>
+  </svg><div class="cap">Both people end up identical: same origin, same size.</div></div>
+  <div class="tw"><table><thead><tr><th>Step</th><th>Rule</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Origin</td><td>mid-hip (average of the two hips) at (0, 0), every frame</td><td>Where the person stands in the image no longer matters.</td></tr>
+    <tr><td>Scale</td><td>divide by the median neck-to-hip distance of the window</td><td>Height and distance to the camera no longer matter. The median ignores a few bad frames.</td></tr>
+    <tr><td>Result</td><td>invariant to moving and resizing (tested)</td><td>The model learns the movement, not the person or the camera.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="windows">
+  <span class="num">4</span><h2>Windows: what Model 1 sees</h2>
+  <div class="fig"><svg viewBox="0 0 900 140" role="img" aria-label="Overlapping 3-second windows">
+    <path d="M20 110 H880" class="ln"/>
+    <g font-size="12" class="m"><text x="20" y="130">0 s</text><text x="300" y="130">1.5 s</text><text x="580" y="130">3 s</text><text x="860" y="130">4.5 s</text></g>
+    <rect x="20" y="20" width="560" height="22" rx="5" class="boxa"/><text x="30" y="36" class="k" font-size="12.5">window 1 · 90 frames · label = exercise at its centre</text>
+    <rect x="300" y="50" width="560" height="22" rx="5" class="box"/><text x="310" y="66" class="k" font-size="12.5">window 2 starts 45 frames later (50 % overlap)</text>
+    <path d="M300 20 V100" stroke="var(--line)" stroke-dasharray="4 4"/>
+  </svg></div>
+  <div class="tw"><table><thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Length</td><td class="n">3 s = 90 frames</td><td>One to two reps of every exercise fit in it: enough to tell a squat from a lunge, short enough to react quickly.</td></tr>
+    <tr><td>Step</td><td class="n">45 frames (50 % overlap)</td><td>Twice as many training examples without copying whole windows.</td></tr>
+    <tr><td>Label</td><td class="n">exercise at the centre frame</td><td>A window that touches a set border takes the label of where it mostly is.</td></tr>
+    <tr><td>Pose input</td><td class="n">90 × 36</td><td>18 joints × (x, y), normalized as in part 3.</td></tr>
+    <tr><td>Watch input</td><td class="n">90 × 6</td><td>Acceleration + rotation, standardized with <b>training statistics only</b> so no test information leaks in.</td></tr>
+    <tr><td>Count</td><td class="n">32,421 windows</td><td>Train: 15,756, of which 11,628 are "no activity". That imbalance is why we use class weights and macro-F1.</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="model1">
+  <span class="num">5</span><h2>Model 1: which exercise</h2>
+  <div class="io"><div><b>Input</b>One window: pose 90 × 36, and/or watch 90 × 6.</div><div><b>Output</b>11 probabilities (softmax): 10 exercises + no activity.</div><div><b>Code</b><code>src/awc/models/m1_recognition.py</code>, <code>src/awc/training/train_m1.py</code>.</div></div>
+  <div class="fig"><svg viewBox="0 0 900 170" role="img" aria-label="Model 1 architecture">
+    <rect x="10" y="20" width="150" height="50" rx="8" class="box"/><text x="85" y="42" text-anchor="middle" class="k" font-size="13.5" font-weight="700">Pose 90 × 36</text><text x="85" y="60" text-anchor="middle" class="m" font-size="12">camera</text>
+    <rect x="10" y="100" width="150" height="50" rx="8" class="box"/><text x="85" y="122" text-anchor="middle" class="k" font-size="13.5" font-weight="700">Watch 90 × 6</text><text x="85" y="140" text-anchor="middle" class="m" font-size="12">dropped 30 % of the time</text>
+    <rect x="210" y="20" width="200" height="50" rx="8" class="box"/><text x="310" y="42" text-anchor="middle" class="k" font-size="13.5" font-weight="700">Encoder</text><text x="310" y="60" text-anchor="middle" class="m" font-size="12">CNN · LSTM · Transformer</text>
+    <rect x="210" y="100" width="200" height="50" rx="8" class="box"/><text x="310" y="122" text-anchor="middle" class="k" font-size="13.5" font-weight="700">Encoder</text><text x="310" y="140" text-anchor="middle" class="m" font-size="12">same type</text>
+    <rect x="460" y="60" width="170" height="50" rx="8" class="boxa"/><text x="545" y="82" text-anchor="middle" class="k" font-size="13.5" font-weight="700">Join + mask flag</text><text x="545" y="100" text-anchor="middle" class="m" font-size="12">watch present or not</text>
+    <rect x="680" y="60" width="210" height="50" rx="8" class="boxa"/><text x="785" y="82" text-anchor="middle" class="k" font-size="13.5" font-weight="700">Dense 128 → 11</text><text x="785" y="100" text-anchor="middle" class="m" font-size="12">dropout 0.3, softmax</text>
+    <path d="M160 45 H210 M160 125 H210 M410 45 C440 45 440 85 460 85 M410 125 C440 125 440 85 460 85 M630 85 H680" class="ln"/>
+  </svg></div>
+  <div class="tw"><table><thead><tr><th>Encoder</th><th>Shape</th><th>Why we test it</th></tr></thead><tbody>
+    <tr><td>1D-CNN</td><td>3 blocks: convolution (kernel 5) → batch norm → ReLU → pooling; 64, 128, 128 channels</td><td>Finds short motion patterns; fast baseline.</td></tr>
+    <tr><td>LSTM</td><td>2 layers, bidirectional, 64 units each way</td><td>Reads the window in order and remembers what came before.</td></tr>
+    <tr><td>Transformer</td><td>64 dimensions, 4 attention heads, 2 layers, learned time positions</td><td>Each moment can look at every other moment of the window: good for whole-movement patterns.</td></tr>
+  </tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Training parameter</th><th>Value</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Optimizer</td><td class="n">Adam, learning rate 0.001</td><td>Standard, stable default for small networks.</td></tr>
+    <tr><td>Batch, epochs</td><td class="n">128, at most 30</td><td>Fits easily on a laptop CPU.</td></tr>
+    <tr><td>Early stopping</td><td class="n">patience 5, on validation macro-F1</td><td>Keeps the best epoch and stops before overfitting.</td></tr>
+    <tr><td>Class weights</td><td class="n">inverse frequency</td><td>Otherwise the model would learn to answer "no activity" (74 % of training windows).</td></tr>
+    <tr><td>Watch dropout</td><td class="n">30 % of training windows</td><td>The same model must still work when the watch sends no motion data.</td></tr>
+    <tr><td>Seed</td><td class="n">42</td><td>Same split, same start: every run can be repeated.</td></tr>
+    <tr><td>Main metric</td><td class="n">macro-F1</td><td>Average F1 over the 11 classes, so every exercise counts equally whatever its size.</td></tr>
+  </tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Result on unseen people</th><th>Camera</th><th>Watch</th><th>Both</th></tr></thead><tbody>
+    <tr><td>1D-CNN</td><td class="n">0.785</td><td class="n">0.842</td><td class="n">0.848</td></tr>
+    <tr><td>LSTM</td><td class="n">0.757</td><td class="n">0.746</td><td class="n">0.821</td></tr>
+    <tr><td>Transformer</td><td class="n">0.836</td><td class="n">0.746</td><td class="n"><b>0.880</b></td></tr>
+  </tbody></table></div>
+  <p>Best: Transformer on camera + watch, macro-F1 <b>0.880</b> (target 0.85), accuracy 0.950, 166,283 parameters, 24.7 minutes of CPU training. The camera-only Transformer (0.836, 84,811 parameters) is the one used on videos. Weakest classes: dumbbell rows (F1 0.59), squats (0.71), sit-ups (0.79); the other eight are above 0.90.</p>
+</section>
+
+<section id="reps">
+  <span class="num">6</span><h2>Rep counter</h2>
+  <p>Not a neural network: signal processing on the normalized skeleton. It runs once the exercise is known, and also gives the start and end of every rep, which Model 3 will use.</p>
+  <div class="tw"><table><thead><tr><th>Exercise group</th><th>Signal followed</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Squats, lunges, push-ups</td><td>ankle height relative to the hips</td><td>Drops once per rep whichever leg is in front.</td></tr>
+    <tr><td>Curls, rows, lateral raises</td><td>each wrist relative to its shoulder, per arm</td><td>Alternating arms are counted separately and added.</td></tr>
+    <tr><td>Other exercises</td><td>main direction of the whole body (PCA)</td><td>General fallback when no body part dominates.</td></tr>
+  </tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Smoothing</td><td class="n">9 frames (0.3 s)</td><td>Removes skeleton jitter without hiding a rep.</td></tr>
+    <tr><td>Minimum gap</td><td class="n">0.6 s between reps</td><td>No human rep is faster; prevents counting one rep twice.</td></tr>
+    <tr><td>Prominence</td><td class="n">0.3 × the signal's spread</td><td>A peak must be a real movement, not a small wobble.</td></tr>
+    <tr><td>Peaks or valleys</td><td class="n">the more regular one</td><td>Works whether the exercise starts at the top or the bottom.</td></tr>
+  </tbody></table></div>
+  <p><b>The bug we found and fixed.</b> The first version always followed the whole body. On lunges and curls, which alternate left and right, it saw one left-plus-right cycle as one rep and counted exactly half. Average error over 616 MM-Fit sets: <b>1.35 → 0.49 reps</b> (target 0.50); lunges 3.10 → 0.02, curls 5.07 → 0.46. The signal per exercise was chosen on those same sets, so the public videos (part 7) are the independent check.</p>
+</section>
+
+<section id="live">
+  <span class="num">7</span><h2>Real videos, live mode</h2>
+  <p>The script <code>scripts/demo_video.py</code> runs the chain frame by frame, the way it will run on the phone, <b>using only past frames</b>.</p>
+  <div class="tw"><table><thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead><tbody>
+    <tr><td>Skeleton</td><td class="n">MediaPipe Pose Landmarker (full)</td><td>Pretrained and free; posture detection already exists, so we reuse it.</td></tr>
+    <tr><td>Model 1 rate</td><td class="n">every 0.1 s, on the last 3 s</td><td>Ten decisions per second is smooth on screen and cheap.</td></tr>
+    <tr><td>Smoothing</td><td class="n">running average, weight 0.35 on the newest</td><td>Stops the displayed probabilities from flickering.</td></tr>
+    <tr><td>Switching exercise</td><td class="n">new class on top for 2 s in a row</td><td>Standing up after sit-ups looks like a squat for a moment; 2 s stops that from changing the answer.</td></tr>
+    <tr><td>Result of a video</td><td class="n">the exercise done the longest</td><td>A short bout at the start or the end never replaces the real exercise.</td></tr>
+  </tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Video (public, unseen)</th><th>Exercise found</th><th>Reps counted / true</th><th>Speed on CPU</th></tr></thead><tbody>
+    <tr><td>stu9_64.mp4 · Squats</td><td>Squats</td><td class="n">15 / 14</td><td class="n">61 fps</td></tr>
+    <tr><td>stu8_46.mp4 · Push-ups</td><td>Push-ups</td><td class="n">20 / 19</td><td class="n">69 fps</td></tr>
+    <tr><td>stu3_53.mp4 · Sit-ups</td><td>Sit-ups</td><td class="n">12 / 11</td><td class="n">68 fps</td></tr>
+    <tr><td>stu6_24.mp4 · Jumping jacks</td><td>Jumping jacks</td><td class="n">26 / 26</td><td class="n">68 fps</td></tr>
+  </tbody></table></div>
+  <p>One typical video per exercise was shown (rep error at or below the median of the correctly recognized videos). Over all 78 public videos of these four exercises, <b>80.8 %</b> are recognized by the camera-only model. The camera + watch model falls to <b>67.9 %</b> when the watch data is missing, so in live use without watch motion we run the camera-only model.</p>
+</section>
+
+<section id="recorder">
+  <span class="num">8</span><h2>Gym recorder</h2>
+  <div class="io"><div><b>Phone</b>Web app in Chrome on the Poco X3 Pro (<code>docs/gym/index.html</code>, served by GitHub Pages because the camera and Bluetooth need https).</div><div><b>Watch</b>Galaxy Watch 7 running the free app Heart for Bluetooth, which sends heart rate with the standard Bluetooth heart-rate service. Pulsoid is the fallback.</div><div><b>Saved</b>One video per set, plus a session file: heart rate for the whole session, each set's exercise, reps, effort 1–10 and form.</div></div>
+  <div class="tw"><table><thead><tr><th>Choice</th><th>Why</th></tr></thead><tbody>
+    <tr><td>One clock: the phone's</td><td>Video frames, heart rate and set marks are stamped by the same clock, so they line up without a sync step.</td></tr>
+    <tr><td>Heart rate during rests too</td><td>How fast the heart rate recovers between sets is a fatigue signal for Model 3.</td></tr>
+    <tr><td>One video per set</td><td>Small files (a few MB) and no long recording held in the phone's memory.</td></tr>
+    <tr><td>Labels at the source</td><td>Exercise, reps, effort and form are typed right after each set, while we remember them.</td></tr>
+    <tr><td>Import script</td><td><code>scripts/import_phone_session.py</code> turns the downloads into the project's recording format. Checked on a real Chrome recording: 30.2 fps, frame clock within one frame (33 ms).</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="limits">
+  <span class="num">9</span><h2>Limits and what comes next</h2>
+  <ul>
+    <li>Squats are the weakest class on unseen people (F1 0.71): standing still between reps looks like no activity or the start of a squat.</li>
+    <li>The rep counter's settings were chosen on MM-Fit itself; the public videos are the independent check.</li>
+    <li>No injury labels exist anywhere: Model 3 will predict fatigue and form breakdown, the warning signs.</li>
+    <li>Own recordings are only starting: they are the data for Model 3 and for the real-device test (RQ4).</li>
+  </ul>
+  <p><b>Next validation:</b> Model 2 on EC3D (correct rep or which mistake), Kafka streaming of camera and watch, our own sessions through Models 1 and 2, and the Spark history with personal baselines.</p>
+</section>
+
+<section id="glossary">
+  <span class="num">10</span><h2>Glossary</h2>
+  <dl>
+    <dt>Skeleton</dt><dd>The (x, y) positions of 18 body joints in one video frame.</dd>
+    <dt>Window</dt><dd>3 seconds of skeletons (90 frames): one input of Model 1.</dd>
+    <dt>Softmax</dt><dd>Turns the model's raw scores into probabilities that add up to 100 %.</dd>
+    <dt>Macro-F1</dt><dd>F1 balances precision and recall; macro = averaged over classes, so small classes count as much as big ones.</dd>
+    <dt>MAE</dt><dd>Mean absolute error: on average, how many reps the counter is off per set.</dd>
+    <dt>Unseen people</dt><dd>Test sessions of people who were not in the training data.</dd>
+    <dt>Leakage</dt><dd>Test information sneaking into training; avoided by computing statistics on training data only.</dd>
+    <dt>Early stopping</dt><dd>Stop training when the validation score has not improved for 5 epochs; keep the best epoch.</dd>
+    <dt>Parquet</dt><dd>Column-based file format that Spark reads and writes efficiently.</dd>
+    <dt>applyInPandas</dt><dd>Spark runs a normal pandas function on each group (here, each session) in parallel.</dd>
+    <dt>Prominence</dt><dd>How much a peak stands out from its surroundings; small wobbles have low prominence.</dd>
+    <dt>MediaPipe</dt><dd>Google's free pretrained pose estimator; the only pretrained part of our system.</dd>
+  </dl>
+</section>
+</main>
+</div>
+<script>
+const links = [...document.querySelectorAll(".toc a")];
+const obs = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id));
+}), {rootMargin: "-20% 0px -70% 0px"});
+document.querySelectorAll("main section[id]").forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
