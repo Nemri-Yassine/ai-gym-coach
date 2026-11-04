@@ -6,7 +6,7 @@ resample to 64 frames. Mirroring and the train-only augmentation happen
 there too, so the npz does not store a copy per angle.
 """
 import numpy as np
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, get_worker_info
 
 from awc.config import M2_REPS
 from awc.data.ec3d import load as load_ec3d
@@ -56,11 +56,50 @@ def resample(seq, length=REP_FRAMES) -> np.ndarray:
     return out.reshape((length,) + seq.shape[1:]).astype(np.float32)
 
 
-def time_warp(seq, factor) -> np.ndarray:
-    """Stretch or compress time by `factor`, then resample back to the same length."""
-    n = int(np.asarray(seq).shape[0])
-    stretched = max(2, int(round(n * float(factor))))
-    return resample(resample(seq, stretched), n)
+_WARP_SEGMENTS = 3
+
+
+def _sample_at(seq, pos) -> np.ndarray:
+    """Linear sample of seq (T, ...) at source positions pos (T,)."""
+    seq = np.asarray(seq, dtype=np.float64)
+    n = int(seq.shape[0])
+    flat = seq.reshape(n, -1)
+    pos = np.clip(np.asarray(pos, dtype=np.float64), 0.0, n - 1)
+    i0 = np.floor(pos).astype(np.int64)
+    i1 = np.minimum(i0 + 1, n - 1)
+    weight = (pos - i0)[:, None]
+    out = flat[i0] * (1.0 - weight) + flat[i1] * weight
+    return out.reshape(seq.shape).astype(np.float32)
+
+
+def time_warp(seq, rng, n_segments=_WARP_SEGMENTS) -> np.ndarray:
+    """Random piecewise-linear time map. Endpoints stay put. Length stays the same.
+
+    Each piece draws a local speed from U(0.8, 1.2), so one part of the rep
+    plays faster and another plays slower. The speeds are rescaled so the
+    map still starts at the first frame and ends at the last.
+    """
+    seq = np.asarray(seq, dtype=np.float64)
+    n = int(seq.shape[0])
+    if n < 2:
+        return seq.astype(np.float32)
+    speeds = np.asarray(rng.uniform(_AUG_WARP[0], _AUG_WARP[1], size=n_segments), dtype=np.float64)
+    gaps = np.asarray(rng.random(n_segments), dtype=np.float64)
+    gaps = np.maximum(gaps, 1e-3)
+    gaps = gaps / gaps.sum()
+    src_gaps = speeds * gaps
+    src_gaps = src_gaps / src_gaps.sum()
+    out_edges = np.concatenate([[0.0], np.cumsum(gaps)])
+    src_edges = np.concatenate([[0.0], np.cumsum(src_gaps)])
+    out_edges[-1] = 1.0
+    src_edges[-1] = 1.0
+    if not (np.all(np.diff(src_edges) > 0) and np.all(np.diff(out_edges) > 0)):
+        raise RuntimeError("time warp map is not strictly increasing")
+    unit = np.linspace(0.0, 1.0, n)
+    src_pos = np.interp(unit, out_edges, src_edges) * (n - 1)
+    src_pos[0] = 0.0
+    src_pos[-1] = float(n - 1)
+    return _sample_at(seq, src_pos)
 
 
 def mistake_index(exercise, code) -> int:
@@ -175,11 +214,10 @@ def skeleton_from_rep(pose3d, yaw_deg, mirrored=False) -> np.ndarray:
 
 
 def augment_skeleton(seq, rng) -> np.ndarray:
-    """Train-only: scale U(0.9, 1.1), time-warp U(0.8, 1.2), Gaussian noise σ=0.01."""
+    """Train-only: scale U(0.9, 1.1), piecewise time warp, Gaussian noise σ=0.01."""
     scale = float(rng.uniform(*_AUG_SCALE))
     seq = np.asarray(seq, dtype=np.float64) * scale
-    factor = float(rng.uniform(*_AUG_WARP))
-    seq = time_warp(seq, factor)
+    seq = time_warp(seq, rng)
     seq = seq + rng.normal(0.0, _AUG_NOISE, size=seq.shape)
     return seq.astype(np.float32)
 
@@ -205,7 +243,19 @@ class FormDataset(Dataset):
             self.views = [(TEST_YAW, False)]
         else:
             self.views = [(yaw, False) for yaw in TRAIN_YAWS]
-        self.rng = np.random.default_rng(seed)
+        self.seed = int(seed)
+        self._calls = 0
+
+    def _rng(self, index):
+        """One generator per sample. Worker id is part of the seed, so forked
+        DataLoader workers do not replay the same stream. Training keeps
+        num_workers at 0 anyway."""
+        info = get_worker_info()
+        worker_id = 0 if info is None else int(info.id)
+        self._calls += 1
+        return np.random.default_rng(
+            np.random.SeedSequence([self.seed, worker_id, int(index), self._calls])
+        )
 
     def __len__(self):
         return int(len(self.indices) * len(self.views))
@@ -216,7 +266,7 @@ class FormDataset(Dataset):
         yaw, mirrored = self.views[index % n_views]
         pose = skeleton_from_rep(rep_pose(self.pack, row), yaw, mirrored)
         if self.augment:
-            pose = augment_skeleton(pose, self.rng)
+            pose = augment_skeleton(pose, self._rng(index))
         return {
             "pose": pose,
             "exercise": str(self.pack["exercise"][row]),

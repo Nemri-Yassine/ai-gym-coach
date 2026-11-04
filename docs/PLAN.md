@@ -332,7 +332,7 @@ Three weeks, one validation per week. Each step is small enough to be built, tes
 4. Angles:
     - **train:** yaw ∈ {0, 15, 30, 45, 60, 75, 90} × {normal, mirrored}
     - **test:** 45° only (main) and the full sweep (robustness, reported separately)
-5. Online augmentation (train only, in the PyTorch Dataset): scale ×U(0.9, 1.1), time-warp ×U(0.8, 1.2) then resample back to 64, Gaussian noise σ = 0.01.
+5. Online augmentation (train only, in the PyTorch Dataset): scale ×U(0.9, 1.1), a non-uniform time warp, Gaussian noise σ = 0.01. The warp is a random strictly increasing piecewise-linear time map. The first and last frames stay fixed, and the length stays 64. Local speed is drawn from U(0.8, 1.2), so some parts of the rep play faster and others slower.
 6. Folds: **leave one person out** (4 folds). A person never appears in train and test of the same fold.
 7. Save `data/processed/m2_reps.npz` (base 3D-projected arrays + metadata); angles and augmentation are applied in the Dataset so the file stays small.
 

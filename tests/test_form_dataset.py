@@ -16,6 +16,7 @@ from awc.features.form_dataset import (
     loso_folds,
     mistake_index,
     resample,
+    time_warp,
 )
 
 
@@ -28,6 +29,18 @@ def test_resample_length():
         assert out.dtype == np.float32
         np.testing.assert_allclose(out[0], seq[0], atol=1e-5)
         np.testing.assert_allclose(out[-1], seq[-1], atol=1e-5)
+
+
+def test_time_warp_moves_the_middle():
+    rng = np.random.default_rng(0)
+    t = np.linspace(0.0, 1.0, REP_FRAMES)
+    seq = np.sin(2 * np.pi * t).astype(np.float64)[:, None]
+    out = time_warp(seq, rng)
+    assert out.shape == seq.shape
+    assert out.dtype == np.float32
+    np.testing.assert_allclose(out[0], seq[0], atol=1e-5)
+    np.testing.assert_allclose(out[-1], seq[-1], atol=1e-5)
+    assert float(np.max(np.abs(out[:, 0] - seq[:, 0]))) > 1e-2
 
 
 def test_no_subject_leak():
