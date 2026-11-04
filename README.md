@@ -24,11 +24,13 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 1.4 | One skeleton for every source, Model 1 windows | ✅ Done · Oct 22, 2026 |
 | 1.5 | Model 1 benchmark and rep counting | ✅ Done · Oct 22, 2026 |
 | 1.6 | Week 1 validation package | ✅ Done · Oct 22, 2026 |
-| 2.1 | EC3D rep dataset for Model 2 | ⏳ Next |
-| 2.2–3.5 | Model 2, Kafka, Model 3, live coach, report | ⬜ |
+| 2.1 | EC3D rep dataset for Model 2 | ✅ Done · Nov 4, 2026 |
+| 2.2 | Model 2 benchmark on EC3D | ⏳ Next |
+| 2.3–3.5 | Kafka, recordings, Model 3, live coach, report | ⬜ |
 
 ### Log
 
+- **2026-11-04 · Step 2.1.** EC3D rep dataset: 362 reps after dropping 9 unknown squats (squat 132, lunge 127, plank 103). 4 people, leave-one-person-out. Reps are 24–208 frames long (median 78), stored once in `data/processed/m2_reps.npz` (7,732,955 bytes) and resampled to 64 frames in the dataset.
 - **2026-10-24 · Gym recorder (step 1.2, phone side).** Phone web app `docs/gym/index.html` (Chrome on the Poco X3 Pro): films each set, logs Galaxy Watch 7 heart rate over Bluetooth for the whole session (watch app *Heart for Bluetooth*; Pulsoid as fallback), RPE / reps / form tapped after each set, everything on the phone clock, saved to Downloads. `scripts/import_phone_session.py` converts a session into `data/raw/own_recordings/`. Tested end to end in demo mode: real Chrome MP4 at 30.2 fps, frame clock within one frame. Not yet tried on the real watch. Guide: `docs/gym_guide.md`. 42 tests pass.
 - **2026-10-24 · Fixes after review.** Rep counter: lunges and curls were counted as half (alternating limbs); the counter now uses an exercise-specific signal. Macro MAE **1.35 → 0.49** on 616 MM-Fit sets (target 0.50 met); lunges 3.10 → 0.02, curls 5.07 → 0.46; public videos 3.67 → 1.95. Recorder: reader thread timestamps frames on arrival, video written at the measured fps, filming no longer pauses for set details (RPE is a key press, the rest is typed after the session); `extract_pose(..., frame_times_ms=...)` uses `frames.csv` as the clock. 40 tests pass. Exact package versions in `requirements-lock.txt`.
 - **2026-10-23 · Public videos (stand-in for step 1.2 sessions).** 135 RepCount-A gym videos through MediaPipe → Model 1 → rep counter (`reports/public_videos.md`). Pose-only transformer: 80.8% of videos right on squats, pushups, situps and jumping jacks. The pose + IMU transformer falls to 67.9% without the watch. Rep counting MAE: squats 1.22, pushups 8.19. Own recordings are still needed before week 3.

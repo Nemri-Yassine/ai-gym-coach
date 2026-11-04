@@ -11,6 +11,7 @@ OWN_DIR = RAW / "own_recordings"        # our phone + Galaxy Watch 7 sessions
 REPCOUNT_DIR = RAW / "repcount"         # RepCount-A test split (Lance), public gym videos with rep counts
 INTERIM = DATA / "interim"              # synced, cleaned, normalized (Parquet)
 PROCESSED = DATA / "processed"          # model-ready windows and per-rep tensors
+M2_REPS = PROCESSED / "m2_reps.npz"     # EC3D reps for Model 2 (3D sequences; angles applied later)
 
 MODELS = ROOT / "models"                # trained checkpoints
 POSE_MODEL = MODELS / "pose_landmarker_full.task"   # MediaPipe Pose Landmarker (pretrained, downloaded)
