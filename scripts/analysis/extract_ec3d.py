@@ -4,6 +4,7 @@ Writes presentation/ec3d_data.js (a global const EC3D used by index.html).
 data_3D.pickle only holds numpy arrays (checked with pickletools before loading)."""
 import pickle, os, json, collections
 import numpy as np
+from awc.features.form_features import FEATURE_NAMES, features_3d as features
 
 PROJ = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')   # project root
 HERE = os.path.join(PROJ, 'presentation')            # output folder
@@ -21,34 +22,6 @@ r = lambda a, n=3: [round(float(v), n) for v in a]
 seqs = collections.OrderedDict()
 for i, k in enumerate(map(tuple, L[:, :4])):
     seqs.setdefault(k, []).append(i)
-
-def dist(p, a, b): return np.linalg.norm(p[:, :, a] - p[:, :, b], axis=1)
-
-def features(p):
-    """One number per known mistake, computed on one rep. z is vertical, mid-hip is the origin."""
-    hipw, shw = dist(p, 9, 12), dist(p, 2, 5)
-    ank = (p[:, 2, 11] + p[:, 2, 14]) / 2
-    leg = dist(p, 9, 11).mean() + 1e-9
-    # EC3D keeps the trunk upright (neck fixed above mid-hip), so measure the trunk angle against the shins
-    trunk = p[:, :, 1] - p[:, :, 8]
-    shin = (p[:, :, 10] + p[:, :, 13]) / 2 - (p[:, :, 11] + p[:, :, 14]) / 2
-    cos = np.einsum('ij,ij->i', trunk, shin) / (np.linalg.norm(trunk, axis=1) * np.linalg.norm(shin, axis=1) + 1e-9)
-    lean = np.degrees(np.arccos(np.clip(cos, -1, 1)))
-    # body line for planks: distance of mid-hip from the shoulder-ankle line, signed by vertical side
-    sh = (p[:, :, 2] + p[:, :, 5]) / 2; an = (p[:, :, 11] + p[:, :, 14]) / 2
-    t = np.clip(np.einsum('ij,ij->i', -sh, an - sh) / (np.einsum('ij,ij->i', an - sh, an - sh) + 1e-9), 0, 1)
-    proj = sh + t[:, None] * (an - sh)
-    sag = -proj[:, 2] / (dist(p, 2, 11).mean() + 1e-9)          # mid-hip (origin) above (+) or below (-) the line
-    # knee beyond toe, horizontal, for the front leg (the knee furthest from the hip)
-    kt = []
-    for kn, toe in ((10, 22), (13, 19)):
-        kt.append(np.linalg.norm(p[:, :2, kn], axis=1) - np.linalg.norm(p[:, :2, toe], axis=1))
-    return dict(knee_width=float((dist(p, 10, 13) / hipw).min()),
-                feet_width=float((dist(p, 11, 14) / shw).mean()),
-                depth=float((-ank).min() / leg),          # hip height above the ankles at the bottom of the rep
-                lean=float(lean.max()),
-                knee_toe=float(np.max(kt) / leg),
-                sag=float(np.median(sag)))
 
 rows = []
 for (ex, sub, lab, rep), idx in seqs.items():
@@ -81,7 +54,7 @@ for ex, lab, feat, desc in EVID:
 # ---------- quick baseline: leave-one-subject-out, hand-made features, per exercise ----------
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
-FEATS = ['knee_width', 'feet_width', 'depth', 'lean', 'knee_toe', 'sag']
+FEATS = list(FEATURE_NAMES)
 baseline = {}
 for ex in ['SQUAT', 'Lunges', 'Plank']:
     data = [x for x in rows if x['ex'] == ex and x['lab'] != '10']

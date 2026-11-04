@@ -1,0 +1,1803 @@
+{
+  "model": "lstm",
+  "quick": false,
+  "epochs": 60,
+  "lr": 0.001,
+  "seed": 42,
+  "num_workers": 0,
+  "test_yaw": 45,
+  "train_views": "yaw 0..90 x mirror, train only",
+  "test_views": "one yaw, no mirror, no augmentation",
+  "correct_share": {
+    "squat": 0.3106060606060606,
+    "lunge": 0.36220472440944884,
+    "plank": 0.32038834951456313
+  },
+  "project_seconds": 0.57,
+  "train_seconds": 895.1,
+  "all_people_seconds": 303.09,
+  "parameter_count": 53195,
+  "rf_trees": null,
+  "checkpoint": "m2_lstm.pt",
+  "checkpoint_scored": false,
+  "folds": [
+    {
+      "fold": 0,
+      "test_subject": "Hugues",
+      "n_train_reps": 277,
+      "n_test_reps": 85,
+      "yaw_45": {
+        "per_exercise": {
+          "squat": {
+            "n": 31,
+            "n_correct": 10,
+            "accuracy": 0.3225806451612903,
+            "macro_f1": 0.30404223227752636,
+            "majority_class": 0,
+            "majority_accuracy": 0.3225806451612903,
+            "mistake_recall": 0.7142857142857143,
+            "mistake_precision": 0.625,
+            "mistake_specificity": 0.1,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.6774193548387096,
+            "always_mistake_specificity": 0.0
+          },
+          "lunge": {
+            "n": 32,
+            "n_correct": 12,
+            "accuracy": 0.65625,
+            "macro_f1": 0.5996691480562447,
+            "majority_class": 0,
+            "majority_accuracy": 0.375,
+            "mistake_recall": 0.55,
+            "mistake_precision": 0.8461538461538461,
+            "mistake_specificity": 0.8333333333333334,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.625,
+            "always_mistake_specificity": 0.0
+          },
+          "plank": {
+            "n": 22,
+            "n_correct": 7,
+            "accuracy": 0.8636363636363636,
+            "macro_f1": 0.8807017543859649,
+            "majority_class": 2,
+            "majority_accuracy": 0.45454545454545453,
+            "mistake_recall": 0.8666666666666667,
+            "mistake_precision": 0.9285714285714286,
+            "mistake_specificity": 0.8571428571428571,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.6818181818181818,
+            "always_mistake_specificity": 0.0
+          }
+        },
+        "overall_accuracy": 0.5882352941176471
+      },
+      "angles": {
+        "0": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.2903225806451613,
+              "macro_f1": 0.3124183006535947,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.7142857142857143,
+              "mistake_precision": 0.625,
+              "mistake_specificity": 0.1,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.3125,
+              "macro_f1": 0.28852628852628853,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.4,
+              "mistake_precision": 0.47058823529411764,
+              "mistake_specificity": 0.25,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.6363636363636364,
+              "macro_f1": 0.4871794871794872,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.9333333333333333,
+              "mistake_precision": 0.875,
+              "mistake_specificity": 0.7142857142857143,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.38823529411764707
+        },
+        "15": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3548387096774194,
+              "macro_f1": 0.36085470085470084,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.9523809523809523,
+              "mistake_precision": 0.7142857142857143,
+              "mistake_specificity": 0.2,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.375,
+              "macro_f1": 0.3682539682539683,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.6,
+              "mistake_precision": 0.5,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.6363636363636364,
+              "macro_f1": 0.48888888888888893,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.8666666666666667,
+              "mistake_precision": 0.9285714285714286,
+              "mistake_specificity": 0.8571428571428571,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.43529411764705883
+        },
+        "30": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3870967741935484,
+              "macro_f1": 0.4123076923076924,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.8571428571428571,
+              "mistake_precision": 0.6923076923076923,
+              "mistake_specificity": 0.2,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.4375,
+              "macro_f1": 0.4545454545454546,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.6,
+              "mistake_precision": 0.5454545454545454,
+              "mistake_specificity": 0.16666666666666666,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.7272727272727273,
+              "macro_f1": 0.6924369747899158,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.7333333333333333,
+              "mistake_precision": 0.9166666666666666,
+              "mistake_specificity": 0.8571428571428571,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.49411764705882355
+        },
+        "45": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3225806451612903,
+              "macro_f1": 0.30404223227752636,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.7142857142857143,
+              "mistake_precision": 0.625,
+              "mistake_specificity": 0.1,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.65625,
+              "macro_f1": 0.5996691480562447,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.55,
+              "mistake_precision": 0.8461538461538461,
+              "mistake_specificity": 0.8333333333333334,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.8636363636363636,
+              "macro_f1": 0.8807017543859649,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.8666666666666667,
+              "mistake_precision": 0.9285714285714286,
+              "mistake_specificity": 0.8571428571428571,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5882352941176471
+        },
+        "60": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3870967741935484,
+              "macro_f1": 0.41807359307359304,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.8571428571428571,
+              "mistake_precision": 0.6428571428571429,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.6875,
+              "macro_f1": 0.6507936507936507,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.6,
+              "mistake_precision": 0.8571428571428571,
+              "mistake_specificity": 0.8333333333333334,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.9090909090909091,
+              "macro_f1": 0.9212962962962963,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.8666666666666667,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.6352941176470588
+        },
+        "75": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3870967741935484,
+              "macro_f1": 0.4235714285714286,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.8571428571428571,
+              "mistake_precision": 0.6666666666666666,
+              "mistake_specificity": 0.1,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.71875,
+              "macro_f1": 0.7123411978221416,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.65,
+              "mistake_precision": 0.8666666666666667,
+              "mistake_specificity": 0.8333333333333334,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.8636363636363636,
+              "macro_f1": 0.8823529411764706,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.8,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.6352941176470588
+        },
+        "90": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3870967741935484,
+              "macro_f1": 0.40714285714285714,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.9047619047619048,
+              "mistake_precision": 0.7037037037037037,
+              "mistake_specificity": 0.2,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.6875,
+              "macro_f1": 0.6939571150097464,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.7,
+              "mistake_precision": 0.8235294117647058,
+              "mistake_specificity": 0.75,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 22,
+              "n_correct": 7,
+              "accuracy": 0.8181818181818182,
+              "macro_f1": 0.8425925925925926,
+              "majority_class": 2,
+              "majority_accuracy": 0.45454545454545453,
+              "mistake_recall": 0.7333333333333333,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6818181818181818,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.611764705882353
+        }
+      }
+    },
+    {
+      "fold": 1,
+      "test_subject": "Isinsu",
+      "n_train_reps": 270,
+      "n_test_reps": 92,
+      "yaw_45": {
+        "per_exercise": {
+          "squat": {
+            "n": 38,
+            "n_correct": 10,
+            "accuracy": 0.47368421052631576,
+            "macro_f1": 0.40202020202020206,
+            "majority_class": 0,
+            "majority_accuracy": 0.2631578947368421,
+            "mistake_recall": 0.42857142857142855,
+            "mistake_precision": 1.0,
+            "mistake_specificity": 1.0,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.7368421052631579,
+            "always_mistake_specificity": 0.0
+          },
+          "lunge": {
+            "n": 31,
+            "n_correct": 11,
+            "accuracy": 0.45161290322580644,
+            "macro_f1": 0.34188034188034183,
+            "majority_class": 0,
+            "majority_accuracy": 0.3548387096774194,
+            "mistake_recall": 0.15,
+            "mistake_precision": 1.0,
+            "mistake_specificity": 1.0,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.6451612903225806,
+            "always_mistake_specificity": 0.0
+          },
+          "plank": {
+            "n": 23,
+            "n_correct": 8,
+            "accuracy": 0.5217391304347826,
+            "macro_f1": 0.5083099906629318,
+            "majority_class": 2,
+            "majority_accuracy": 0.43478260869565216,
+            "mistake_recall": 0.7333333333333333,
+            "mistake_precision": 0.6470588235294118,
+            "mistake_specificity": 0.25,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.6521739130434783,
+            "always_mistake_specificity": 0.0
+          }
+        },
+        "overall_accuracy": 0.4782608695652174
+      },
+      "angles": {
+        "0": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.42105263157894735,
+              "macro_f1": 0.42235496514672716,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.75,
+              "mistake_precision": 0.84,
+              "mistake_specificity": 0.6,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.5806451612903226,
+              "macro_f1": 0.49354838709677423,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.45,
+              "mistake_precision": 0.8181818181818182,
+              "mistake_specificity": 0.8181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.6086956521739131,
+              "macro_f1": 0.5367965367965368,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 0.8666666666666667,
+              "mistake_precision": 0.65,
+              "mistake_specificity": 0.125,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5217391304347826
+        },
+        "15": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.47368421052631576,
+              "macro_f1": 0.41413270637408567,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.6071428571428571,
+              "mistake_precision": 0.8947368421052632,
+              "mistake_specificity": 0.8,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.4838709677419355,
+              "macro_f1": 0.41269841269841273,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.45,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.6521739130434783,
+              "macro_f1": 0.6296296296296297,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 0.8,
+              "mistake_precision": 0.7058823529411765,
+              "mistake_specificity": 0.375,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5217391304347826
+        },
+        "30": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.39473684210526316,
+              "macro_f1": 0.3213986013986014,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.2857142857142857,
+              "mistake_precision": 0.8888888888888888,
+              "mistake_specificity": 0.9,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.45161290322580644,
+              "macro_f1": 0.3633699633699634,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.35,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.391304347826087,
+              "macro_f1": 0.3651960784313726,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 0.6666666666666666,
+              "mistake_precision": 0.5555555555555556,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.41304347826086957
+        },
+        "45": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.47368421052631576,
+              "macro_f1": 0.40202020202020206,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.42857142857142855,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.45161290322580644,
+              "macro_f1": 0.34188034188034183,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.15,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.5217391304347826,
+              "macro_f1": 0.5083099906629318,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 0.7333333333333333,
+              "mistake_precision": 0.6470588235294118,
+              "mistake_specificity": 0.25,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.4782608695652174
+        },
+        "60": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.39473684210526316,
+              "macro_f1": 0.39705710955710954,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.4642857142857143,
+              "mistake_precision": 0.8125,
+              "mistake_specificity": 0.7,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.41935483870967744,
+              "macro_f1": 0.29444444444444445,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.1,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.8695652173913043,
+              "macro_f1": 0.8583333333333334,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 0.9333333333333333,
+              "mistake_precision": 0.9333333333333333,
+              "mistake_specificity": 0.875,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5217391304347826
+        },
+        "75": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.42105263157894735,
+              "macro_f1": 0.4157771260997068,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.5,
+              "mistake_precision": 0.8235294117647058,
+              "mistake_specificity": 0.7,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.4838709677419355,
+              "macro_f1": 0.38345864661654133,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.2,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.9130434782608695,
+              "macro_f1": 0.9100217864923748,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 0.9333333333333333,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5652173913043478
+        },
+        "90": {
+          "per_exercise": {
+            "squat": {
+              "n": 38,
+              "n_correct": 10,
+              "accuracy": 0.39473684210526316,
+              "macro_f1": 0.3281081081081081,
+              "majority_class": 0,
+              "majority_accuracy": 0.2631578947368421,
+              "mistake_recall": 0.39285714285714285,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.7368421052631579,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 31,
+              "n_correct": 11,
+              "accuracy": 0.4838709677419355,
+              "macro_f1": 0.3941798941798942,
+              "majority_class": 0,
+              "majority_accuracy": 0.3548387096774194,
+              "mistake_recall": 0.3,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6451612903225806,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 23,
+              "n_correct": 8,
+              "accuracy": 0.9565217391304348,
+              "macro_f1": 0.947089947089947,
+              "majority_class": 2,
+              "majority_accuracy": 0.43478260869565216,
+              "mistake_recall": 1.0,
+              "mistake_precision": 1.0,
+              "mistake_specificity": 1.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6521739130434783,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5652173913043478
+        }
+      }
+    },
+    {
+      "fold": 2,
+      "test_subject": "Sena",
+      "n_train_reps": 265,
+      "n_test_reps": 97,
+      "yaw_45": {
+        "per_exercise": {
+          "squat": {
+            "n": 32,
+            "n_correct": 11,
+            "accuracy": 0.34375,
+            "macro_f1": 0.2583333333333333,
+            "majority_class": 0,
+            "majority_accuracy": 0.34375,
+            "mistake_recall": 1.0,
+            "mistake_precision": 0.65625,
+            "mistake_specificity": 0.0,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.65625,
+            "always_mistake_specificity": 0.0
+          },
+          "lunge": {
+            "n": 32,
+            "n_correct": 11,
+            "accuracy": 0.53125,
+            "macro_f1": 0.4624691358024691,
+            "majority_class": 0,
+            "majority_accuracy": 0.34375,
+            "mistake_recall": 0.6190476190476191,
+            "mistake_precision": 0.7222222222222222,
+            "mistake_specificity": 0.5454545454545454,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.65625,
+            "always_mistake_specificity": 0.0
+          },
+          "plank": {
+            "n": 33,
+            "n_correct": 11,
+            "accuracy": 0.45454545454545453,
+            "macro_f1": 0.37563131313131315,
+            "majority_class": 2,
+            "majority_accuracy": 0.3333333333333333,
+            "mistake_recall": 0.6363636363636364,
+            "mistake_precision": 0.6363636363636364,
+            "mistake_specificity": 0.2727272727272727,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.6666666666666666,
+            "always_mistake_specificity": 0.0
+          }
+        },
+        "overall_accuracy": 0.44329896907216493
+      },
+      "angles": {
+        "0": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.28125,
+              "macro_f1": 0.24564102564102566,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.6875,
+              "macro_f1": 0.678941798941799,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.7142857142857143,
+              "mistake_precision": 0.8333333333333334,
+              "mistake_specificity": 0.7272727272727273,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.6363636363636364,
+              "macro_f1": 0.5966117216117216,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.5,
+              "mistake_precision": 0.9166666666666666,
+              "mistake_specificity": 0.9090909090909091,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5360824742268041
+        },
+        "15": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.28125,
+              "macro_f1": 0.24424242424242423,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.75,
+              "macro_f1": 0.7391087344028521,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.7619047619047619,
+              "mistake_precision": 0.8888888888888888,
+              "mistake_specificity": 0.8181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.5454545454545454,
+              "macro_f1": 0.49239665881345046,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.5454545454545454,
+              "mistake_precision": 0.8,
+              "mistake_specificity": 0.7272727272727273,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5257731958762887
+        },
+        "30": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.3125,
+              "macro_f1": 0.28734402852049906,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.59375,
+              "macro_f1": 0.5238095238095238,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.5714285714285714,
+              "mistake_precision": 0.8,
+              "mistake_specificity": 0.7272727272727273,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.5757575757575758,
+              "macro_f1": 0.47735507246376807,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.45454545454545453,
+              "mistake_precision": 0.8333333333333334,
+              "mistake_specificity": 0.8181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.4948453608247423
+        },
+        "45": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.34375,
+              "macro_f1": 0.2583333333333333,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.53125,
+              "macro_f1": 0.4624691358024691,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.6190476190476191,
+              "mistake_precision": 0.7222222222222222,
+              "mistake_specificity": 0.5454545454545454,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.45454545454545453,
+              "macro_f1": 0.37563131313131315,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.6363636363636364,
+              "mistake_precision": 0.6363636363636364,
+              "mistake_specificity": 0.2727272727272727,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.44329896907216493
+        },
+        "60": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.40625,
+              "macro_f1": 0.3271794871794872,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.4375,
+              "macro_f1": 0.3686868686868687,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.6190476190476191,
+              "mistake_precision": 0.6190476190476191,
+              "mistake_specificity": 0.2727272727272727,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.5454545454545454,
+              "macro_f1": 0.5089869281045751,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.8181818181818182,
+              "mistake_precision": 0.6666666666666666,
+              "mistake_specificity": 0.18181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.4639175257731959
+        },
+        "75": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.34375,
+              "macro_f1": 0.27781818181818185,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.375,
+              "macro_f1": 0.2972222222222222,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.6190476190476191,
+              "mistake_precision": 0.5652173913043478,
+              "mistake_specificity": 0.09090909090909091,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.5757575757575758,
+              "macro_f1": 0.5408496732026143,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.8636363636363636,
+              "mistake_precision": 0.6785714285714286,
+              "mistake_specificity": 0.18181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.4329896907216495
+        },
+        "90": {
+          "per_exercise": {
+            "squat": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.34375,
+              "macro_f1": 0.2827586206896552,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.65625,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 11,
+              "accuracy": 0.4375,
+              "macro_f1": 0.3810728744939271,
+              "majority_class": 0,
+              "majority_accuracy": 0.34375,
+              "mistake_recall": 0.7142857142857143,
+              "mistake_precision": 0.625,
+              "mistake_specificity": 0.18181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.65625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 33,
+              "n_correct": 11,
+              "accuracy": 0.696969696969697,
+              "macro_f1": 0.6492575524833589,
+              "majority_class": 2,
+              "majority_accuracy": 0.3333333333333333,
+              "mistake_recall": 0.9545454545454546,
+              "mistake_precision": 0.7,
+              "mistake_specificity": 0.18181818181818182,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6666666666666666,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.4948453608247423
+        }
+      }
+    },
+    {
+      "fold": 3,
+      "test_subject": "Vidit",
+      "n_train_reps": 274,
+      "n_test_reps": 88,
+      "yaw_45": {
+        "per_exercise": {
+          "squat": {
+            "n": 31,
+            "n_correct": 10,
+            "accuracy": 0.1935483870967742,
+            "macro_f1": 0.17852941176470588,
+            "majority_class": 0,
+            "majority_accuracy": 0.3225806451612903,
+            "mistake_recall": 0.7619047619047619,
+            "mistake_precision": 0.64,
+            "mistake_specificity": 0.1,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.6774193548387096,
+            "always_mistake_specificity": 0.0
+          },
+          "lunge": {
+            "n": 32,
+            "n_correct": 12,
+            "accuracy": 0.8125,
+            "macro_f1": 0.8181818181818182,
+            "majority_class": 0,
+            "majority_accuracy": 0.375,
+            "mistake_recall": 0.9,
+            "mistake_precision": 0.8181818181818182,
+            "mistake_specificity": 0.6666666666666666,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.625,
+            "always_mistake_specificity": 0.0
+          },
+          "plank": {
+            "n": 25,
+            "n_correct": 7,
+            "accuracy": 0.72,
+            "macro_f1": 0.5733333333333334,
+            "majority_class": 2,
+            "majority_accuracy": 0.36,
+            "mistake_recall": 1.0,
+            "mistake_precision": 0.72,
+            "mistake_specificity": 0.0,
+            "always_mistake_recall": 1.0,
+            "always_mistake_precision": 0.72,
+            "always_mistake_specificity": 0.0
+          }
+        },
+        "overall_accuracy": 0.5681818181818182
+      },
+      "angles": {
+        "0": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.25806451612903225,
+              "macro_f1": 0.24366515837104075,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.6666666666666666,
+              "mistake_precision": 0.5833333333333334,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.46875,
+              "macro_f1": 0.39996626180836703,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.6451612903225806,
+              "mistake_specificity": 0.08333333333333333,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.76,
+              "macro_f1": 0.7404761904761905,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 0.8333333333333334,
+              "mistake_precision": 0.9375,
+              "mistake_specificity": 0.8571428571428571,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.4772727272727273
+        },
+        "15": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.2903225806451613,
+              "macro_f1": 0.3,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.6666666666666666,
+              "mistake_precision": 0.6666666666666666,
+              "mistake_specificity": 0.3,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.53125,
+              "macro_f1": 0.516839199447895,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.75,
+              "mistake_precision": 0.6521739130434783,
+              "mistake_specificity": 0.3333333333333333,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.92,
+              "macro_f1": 0.9111111111111111,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.9,
+              "mistake_specificity": 0.7142857142857143,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5568181818181818
+        },
+        "30": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.16129032258064516,
+              "macro_f1": 0.16534798534798534,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.8095238095238095,
+              "mistake_precision": 0.6538461538461539,
+              "mistake_specificity": 0.1,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.8125,
+              "macro_f1": 0.8063492063492065,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.7692307692307693,
+              "mistake_specificity": 0.5,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.84,
+              "macro_f1": 0.8060606060606061,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.8181818181818182,
+              "mistake_specificity": 0.42857142857142855,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5909090909090909
+        },
+        "45": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.1935483870967742,
+              "macro_f1": 0.17852941176470588,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.7619047619047619,
+              "mistake_precision": 0.64,
+              "mistake_specificity": 0.1,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.8125,
+              "macro_f1": 0.8181818181818182,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 0.9,
+              "mistake_precision": 0.8181818181818182,
+              "mistake_specificity": 0.6666666666666666,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.72,
+              "macro_f1": 0.5733333333333334,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.72,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.5681818181818182
+        },
+        "60": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.3225806451612903,
+              "macro_f1": 0.2857142857142857,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.8571428571428571,
+              "mistake_precision": 0.6428571428571429,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.8125,
+              "macro_f1": 0.8063492063492065,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.7692307692307693,
+              "mistake_specificity": 0.5,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.72,
+              "macro_f1": 0.5733333333333334,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.72,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.6136363636363636
+        },
+        "75": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.45161290322580644,
+              "macro_f1": 0.38621553884711785,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.9047619047619048,
+              "mistake_precision": 0.6551724137931034,
+              "mistake_specificity": 0.0,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.71875,
+              "macro_f1": 0.688888888888889,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.6896551724137931,
+              "mistake_specificity": 0.25,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.76,
+              "macro_f1": 0.6666666666666666,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.75,
+              "mistake_specificity": 0.14285714285714285,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.6363636363636364
+        },
+        "90": {
+          "per_exercise": {
+            "squat": {
+              "n": 31,
+              "n_correct": 10,
+              "accuracy": 0.41935483870967744,
+              "macro_f1": 0.35128205128205126,
+              "majority_class": 0,
+              "majority_accuracy": 0.3225806451612903,
+              "mistake_recall": 0.9523809523809523,
+              "mistake_precision": 0.6896551724137931,
+              "mistake_specificity": 0.1,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.6774193548387096,
+              "always_mistake_specificity": 0.0
+            },
+            "lunge": {
+              "n": 32,
+              "n_correct": 12,
+              "accuracy": 0.625,
+              "macro_f1": 0.5826240318993942,
+              "majority_class": 0,
+              "majority_accuracy": 0.375,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.6666666666666666,
+              "mistake_specificity": 0.16666666666666666,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.625,
+              "always_mistake_specificity": 0.0
+            },
+            "plank": {
+              "n": 25,
+              "n_correct": 7,
+              "accuracy": 0.8,
+              "macro_f1": 0.7338624338624338,
+              "majority_class": 2,
+              "majority_accuracy": 0.36,
+              "mistake_recall": 1.0,
+              "mistake_precision": 0.782608695652174,
+              "mistake_specificity": 0.2857142857142857,
+              "always_mistake_recall": 1.0,
+              "always_mistake_precision": 0.72,
+              "always_mistake_specificity": 0.0
+            }
+          },
+          "overall_accuracy": 0.6022727272727273
+        }
+      }
+    }
+  ],
+  "summary": {
+    "per_exercise": {
+      "squat": {
+        "accuracy_mean": 0.33339081069609505,
+        "accuracy_std": 0.11469134514858867,
+        "macro_f1_mean": 0.2857312948489419,
+        "macro_f1_std": 0.09327609981950803,
+        "mistake_recall_mean": 0.7261904761904762,
+        "mistake_recall_std": 0.23449661432847868,
+        "mistake_precision_mean": 0.7303125,
+        "mistake_precision_std": 0.18024397528072889,
+        "mistake_specificity_mean": 0.30000000000000004,
+        "mistake_specificity_std": 0.4690415759823429,
+        "majority_accuracy_mean": 0.3130172962648557,
+        "majority_accuracy_std": 0.03470530355163656,
+        "always_mistake_recall_mean": 1.0,
+        "always_mistake_recall_std": 0.0,
+        "always_mistake_precision_mean": 0.6869827037351443,
+        "always_mistake_precision_std": 0.03470530355163655,
+        "always_mistake_specificity_mean": 0.0,
+        "always_mistake_specificity_std": 0.0,
+        "n_mean": 33.0
+      },
+      "lunge": {
+        "accuracy_mean": 0.6129032258064516,
+        "accuracy_std": 0.15747976858867171,
+        "macro_f1_mean": 0.5555501109802184,
+        "macro_f1_std": 0.2043206150696971,
+        "mistake_recall_mean": 0.5547619047619048,
+        "mistake_recall_std": 0.3093955778332432,
+        "mistake_precision_mean": 0.8466394716394717,
+        "mistake_precision_std": 0.11519429598726183,
+        "mistake_specificity_mean": 0.7613636363636364,
+        "mistake_specificity_std": 0.1980834865559433,
+        "majority_accuracy_mean": 0.36214717741935487,
+        "majority_accuracy_std": 0.015516227358405727,
+        "always_mistake_recall_mean": 1.0,
+        "always_mistake_recall_std": 0.0,
+        "always_mistake_precision_mean": 0.6378528225806451,
+        "always_mistake_precision_std": 0.015516227358405727,
+        "always_mistake_specificity_mean": 0.0,
+        "always_mistake_specificity_std": 0.0,
+        "n_mean": 31.75
+      },
+      "plank": {
+        "accuracy_mean": 0.6399802371541502,
+        "accuracy_std": 0.18689769329617117,
+        "macro_f1_mean": 0.5844940978783858,
+        "macro_f1_std": 0.2139246124872497,
+        "mistake_recall_mean": 0.8090909090909091,
+        "mistake_recall_std": 0.15846678924475463,
+        "mistake_precision_mean": 0.7329984721161191,
+        "mistake_precision_std": 0.1355748947435082,
+        "mistake_specificity_mean": 0.3449675324675325,
+        "mistake_specificity_std": 0.36311781789263403,
+        "majority_accuracy_mean": 0.39566534914360996,
+        "majority_accuracy_std": 0.05817881668185407,
+        "always_mistake_recall_mean": 1.0,
+        "always_mistake_recall_std": 0.0,
+        "always_mistake_precision_mean": 0.6801646903820817,
+        "always_mistake_precision_std": 0.029184848731981072,
+        "always_mistake_specificity_mean": 0.0,
+        "always_mistake_specificity_std": 0.0,
+        "n_mean": 25.75
+      }
+    },
+    "angles": {
+      "0": {
+        "squat": {
+          "accuracy_mean": 0.3126724320882852,
+          "accuracy_std": 0.07351910687007643,
+          "mistake_recall_mean": 0.7827380952380952,
+          "mistake_recall_std": 0.1488095238095238
+        },
+        "lunge": {
+          "accuracy_mean": 0.5123487903225806,
+          "accuracy_std": 0.160398185827041,
+          "mistake_recall_mean": 0.6410714285714286,
+          "mistake_recall_std": 0.27617251583639046
+        },
+        "plank": {
+          "accuracy_mean": 0.6603557312252963,
+          "accuracy_std": 0.0676978219712233,
+          "mistake_recall_mean": 0.7833333333333333,
+          "mistake_recall_std": 0.19340994650588011
+        },
+        "overall": {
+          "accuracy_mean": 0.48083240651299025,
+          "accuracy_std": 0.06661538006757932
+        }
+      },
+      "15": {
+        "squat": {
+          "accuracy_mean": 0.3500238752122241,
+          "accuracy_std": 0.08871142663266965,
+          "mistake_recall_mean": 0.806547619047619,
+          "mistake_recall_std": 0.19834324181122087
+        },
+        "lunge": {
+          "accuracy_mean": 0.5350302419354839,
+          "accuracy_std": 0.1575364897215325,
+          "mistake_recall_mean": 0.6404761904761904,
+          "mistake_recall_std": 0.1468103810425523
+        },
+        "plank": {
+          "accuracy_mean": 0.688498023715415,
+          "accuracy_std": 0.1613402585193673,
+          "mistake_recall_mean": 0.803030303030303,
+          "mistake_recall_std": 0.19078880289329933
+        },
+        "overall": {
+          "accuracy_mean": 0.509906156444078,
+          "accuracy_std": 0.052151946821943504
+        }
+      },
+      "30": {
+        "squat": {
+          "accuracy_mean": 0.3139059847198642,
+          "accuracy_std": 0.10829594681960572,
+          "mistake_recall_mean": 0.7380952380952381,
+          "mistake_recall_std": 0.3122589773477143
+        },
+        "lunge": {
+          "accuracy_mean": 0.5738407258064516,
+          "accuracy_std": 0.17405273385168923,
+          "mistake_recall_mean": 0.6303571428571428,
+          "mistake_recall_std": 0.27057352792467604
+        },
+        "plank": {
+          "accuracy_mean": 0.6335836627140975,
+          "accuracy_std": 0.19444662324290568,
+          "mistake_recall_mean": 0.7136363636363636,
+          "mistake_recall_std": 0.22488986523305668
+        },
+        "overall": {
+          "accuracy_mean": 0.49822889426338157,
+          "accuracy_std": 0.07274275359538286
+        }
+      },
+      "45": {
+        "squat": {
+          "accuracy_mean": 0.33339081069609505,
+          "accuracy_std": 0.11469134514858867,
+          "mistake_recall_mean": 0.7261904761904762,
+          "mistake_recall_std": 0.23449661432847868
+        },
+        "lunge": {
+          "accuracy_mean": 0.6129032258064516,
+          "accuracy_std": 0.15747976858867171,
+          "mistake_recall_mean": 0.5547619047619048,
+          "mistake_recall_std": 0.3093955778332432
+        },
+        "plank": {
+          "accuracy_mean": 0.6399802371541502,
+          "accuracy_std": 0.18689769329617117,
+          "mistake_recall_mean": 0.8090909090909091,
+          "mistake_recall_std": 0.15846678924475463
+        },
+        "overall": {
+          "accuracy_mean": 0.5194942377342119,
+          "accuracy_std": 0.06976561459533419
+        }
+      },
+      "60": {
+        "squat": {
+          "accuracy_mean": 0.37766606536502545,
+          "accuracy_std": 0.037557930923494666,
+          "mistake_recall_mean": 0.7946428571428571,
+          "mistake_recall_std": 0.23030407288277502
+        },
+        "lunge": {
+          "accuracy_mean": 0.5892137096774194,
+          "accuracy_std": 0.19268804500358833,
+          "mistake_recall_mean": 0.5797619047619047,
+          "mistake_recall_std": 0.3691090578658826
+        },
+        "plank": {
+          "accuracy_mean": 0.7610276679841896,
+          "accuracy_std": 0.16518491022258489,
+          "mistake_recall_mean": 0.9045454545454545,
+          "mistake_recall_std": 0.07923339462237729
+        },
+        "overall": {
+          "accuracy_mean": 0.5586467843728503,
+          "accuracy_std": 0.08007179045431287
+        }
+      },
+      "75": {
+        "squat": {
+          "accuracy_mean": 0.4008780772495756,
+          "accuracy_std": 0.04631262150998992,
+          "mistake_recall_mean": 0.8154761904761905,
+          "mistake_recall_std": 0.21854237798435497
+        },
+        "lunge": {
+          "accuracy_mean": 0.5740927419354839,
+          "accuracy_std": 0.17284803831835335,
+          "mistake_recall_mean": 0.6172619047619048,
+          "mistake_recall_std": 0.3274502091246581
+        },
+        "plank": {
+          "accuracy_mean": 0.7781093544137023,
+          "accuracy_std": 0.14921603815447693,
+          "mistake_recall_mean": 0.8992424242424243,
+          "mistake_recall_std": 0.0864698974144259
+        },
+        "overall": {
+          "accuracy_mean": 0.5674662090091731,
+          "accuracy_std": 0.09563205849863164
+        }
+      },
+      "90": {
+        "squat": {
+          "accuracy_mean": 0.38623461375212226,
+          "accuracy_std": 0.031490331397122456,
+          "mistake_recall_mean": 0.8125,
+          "mistake_recall_std": 0.2824507729736974
+        },
+        "lunge": {
+          "accuracy_mean": 0.5584677419354839,
+          "accuracy_std": 0.11729412928395624,
+          "mistake_recall_mean": 0.6785714285714286,
+          "mistake_recall_std": 0.28773097790515795
+        },
+        "plank": {
+          "accuracy_mean": 0.8179183135704875,
+          "accuracy_std": 0.10670928236801047,
+          "mistake_recall_mean": 0.921969696969697,
+          "mistake_recall_std": 0.1275699991502532
+        },
+        "overall": {
+          "accuracy_mean": 0.5685250463210425,
+          "accuracy_std": 0.05306665860072567
+        }
+      }
+    }
+  },
+  "reference_3d_rf": null,
+  "context_not_measured": {
+    "authors_graph_accuracy": 0.909,
+    "earlier_3d_rf_squat_accuracy": 0.53
+  }
+}

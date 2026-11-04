@@ -1,0 +1,8 @@
+{
+  "sources": {
+    "stgcn": "C:\\Users\\yassi\\OneDrive\\Bureau\\projet DL BIG DATA\\experiments\\20261104_m2_stgcn\\metrics.json",
+    "lstm": "C:\\Users\\yassi\\OneDrive\\Bureau\\projet DL BIG DATA\\experiments\\20261104_m2_lstm\\metrics.json",
+    "rf": "C:\\Users\\yassi\\OneDrive\\Bureau\\projet DL BIG DATA\\experiments\\20261104_m2_rf\\metrics.json"
+  },
+  "git_commit": "6f946d6d7bae9fb49e38853e5a7ad021a01c5417"
+}

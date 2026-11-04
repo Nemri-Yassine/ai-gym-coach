@@ -1,0 +1,24 @@
+{
+  "model": "rf",
+  "epochs": 60,
+  "batch": 32,
+  "lr": 0.001,
+  "seed": 42,
+  "quick": false,
+  "num_workers": 0,
+  "test_yaw": 45,
+  "train_yaws": [
+    0,
+    15,
+    30,
+    45,
+    60,
+    75,
+    90
+  ],
+  "rf_features": "2d",
+  "rf_trees": 300,
+  "early_stopping": false,
+  "scored_checkpoint": "loso folds only; the all-people checkpoint is not scored",
+  "git_commit": "6f946d6d7bae9fb49e38853e5a7ad021a01c5417"
+}

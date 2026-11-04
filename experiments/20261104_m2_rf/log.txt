@@ -1,0 +1,9 @@
+model=rf epochs=60 quick=False reps=362
+projected 362 reps in 0.6s
+fold 1 Hugues random forest fit on 3878 views
+fold 2 Isinsu random forest fit on 3780 views
+fold 3 Sena random forest fit on 3710 views
+fold 4 Vidit random forest fit on 3836 views
+all-people checkpoint m2_rf.pickle saved and not evaluated
+train_seconds 11.6 all_people_seconds 2.2
+RUN_DIR=C:\Users\yassi\OneDrive\Bureau\projet DL BIG DATA\experiments\20261104_m2_rf

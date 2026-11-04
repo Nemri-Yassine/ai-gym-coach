@@ -1,0 +1,305 @@
+model=stgcn epochs=60 quick=False reps=362
+projected 362 reps in 0.7s
+fold 1 Hugues epoch 1/60 loss 1.0384
+fold 1 Hugues epoch 2/60 loss 0.8766
+fold 1 Hugues epoch 3/60 loss 0.7812
+fold 1 Hugues epoch 4/60 loss 0.7351
+fold 1 Hugues epoch 5/60 loss 0.6542
+fold 1 Hugues epoch 6/60 loss 0.6084
+fold 1 Hugues epoch 7/60 loss 0.5730
+fold 1 Hugues epoch 8/60 loss 0.5212
+fold 1 Hugues epoch 9/60 loss 0.5222
+fold 1 Hugues epoch 10/60 loss 0.5078
+fold 1 Hugues epoch 11/60 loss 0.4413
+fold 1 Hugues epoch 12/60 loss 0.4266
+fold 1 Hugues epoch 13/60 loss 0.3947
+fold 1 Hugues epoch 14/60 loss 0.3682
+fold 1 Hugues epoch 15/60 loss 0.3335
+fold 1 Hugues epoch 16/60 loss 0.3173
+fold 1 Hugues epoch 17/60 loss 0.2711
+fold 1 Hugues epoch 18/60 loss 0.2529
+fold 1 Hugues epoch 19/60 loss 0.2506
+fold 1 Hugues epoch 20/60 loss 0.2722
+fold 1 Hugues epoch 21/60 loss 0.2074
+fold 1 Hugues epoch 22/60 loss 0.2192
+fold 1 Hugues epoch 23/60 loss 0.1887
+fold 1 Hugues epoch 24/60 loss 0.1902
+fold 1 Hugues epoch 25/60 loss 0.1885
+fold 1 Hugues epoch 26/60 loss 0.1524
+fold 1 Hugues epoch 27/60 loss 0.1717
+fold 1 Hugues epoch 28/60 loss 0.1505
+fold 1 Hugues epoch 29/60 loss 0.1725
+fold 1 Hugues epoch 30/60 loss 0.1224
+fold 1 Hugues epoch 31/60 loss 0.1051
+fold 1 Hugues epoch 32/60 loss 0.1116
+fold 1 Hugues epoch 33/60 loss 0.1100
+fold 1 Hugues epoch 34/60 loss 0.1753
+fold 1 Hugues epoch 35/60 loss 0.1218
+fold 1 Hugues epoch 36/60 loss 0.1250
+fold 1 Hugues epoch 37/60 loss 0.0993
+fold 1 Hugues epoch 38/60 loss 0.0738
+fold 1 Hugues epoch 39/60 loss 0.1024
+fold 1 Hugues epoch 40/60 loss 0.0826
+fold 1 Hugues epoch 41/60 loss 0.0693
+fold 1 Hugues epoch 42/60 loss 0.0650
+fold 1 Hugues epoch 43/60 loss 0.0837
+fold 1 Hugues epoch 44/60 loss 0.0845
+fold 1 Hugues epoch 45/60 loss 0.0679
+fold 1 Hugues epoch 46/60 loss 0.0573
+fold 1 Hugues epoch 47/60 loss 0.0878
+fold 1 Hugues epoch 48/60 loss 0.1014
+fold 1 Hugues epoch 49/60 loss 0.0747
+fold 1 Hugues epoch 50/60 loss 0.0380
+fold 1 Hugues epoch 51/60 loss 0.0449
+fold 1 Hugues epoch 52/60 loss 0.0524
+fold 1 Hugues epoch 53/60 loss 0.0343
+fold 1 Hugues epoch 54/60 loss 0.0449
+fold 1 Hugues epoch 55/60 loss 0.0418
+fold 1 Hugues epoch 56/60 loss 0.0386
+fold 1 Hugues epoch 57/60 loss 0.0479
+fold 1 Hugues epoch 58/60 loss 0.0513
+fold 1 Hugues epoch 59/60 loss 0.0581
+fold 1 Hugues epoch 60/60 loss 0.0507
+fold 2 Isinsu epoch 1/60 loss 1.0500
+fold 2 Isinsu epoch 2/60 loss 0.8867
+fold 2 Isinsu epoch 3/60 loss 0.8096
+fold 2 Isinsu epoch 4/60 loss 0.7560
+fold 2 Isinsu epoch 5/60 loss 0.7193
+fold 2 Isinsu epoch 6/60 loss 0.6732
+fold 2 Isinsu epoch 7/60 loss 0.6178
+fold 2 Isinsu epoch 8/60 loss 0.5708
+fold 2 Isinsu epoch 9/60 loss 0.5406
+fold 2 Isinsu epoch 10/60 loss 0.5103
+fold 2 Isinsu epoch 11/60 loss 0.4743
+fold 2 Isinsu epoch 12/60 loss 0.4690
+fold 2 Isinsu epoch 13/60 loss 0.4116
+fold 2 Isinsu epoch 14/60 loss 0.3776
+fold 2 Isinsu epoch 15/60 loss 0.3891
+fold 2 Isinsu epoch 16/60 loss 0.3742
+fold 2 Isinsu epoch 17/60 loss 0.3281
+fold 2 Isinsu epoch 18/60 loss 0.3756
+fold 2 Isinsu epoch 19/60 loss 0.3070
+fold 2 Isinsu epoch 20/60 loss 0.2791
+fold 2 Isinsu epoch 21/60 loss 0.2499
+fold 2 Isinsu epoch 22/60 loss 0.2436
+fold 2 Isinsu epoch 23/60 loss 0.2425
+fold 2 Isinsu epoch 24/60 loss 0.2524
+fold 2 Isinsu epoch 25/60 loss 0.2394
+fold 2 Isinsu epoch 26/60 loss 0.2299
+fold 2 Isinsu epoch 27/60 loss 0.1731
+fold 2 Isinsu epoch 28/60 loss 0.1659
+fold 2 Isinsu epoch 29/60 loss 0.1955
+fold 2 Isinsu epoch 30/60 loss 0.1678
+fold 2 Isinsu epoch 31/60 loss 0.1579
+fold 2 Isinsu epoch 32/60 loss 0.1702
+fold 2 Isinsu epoch 33/60 loss 0.1467
+fold 2 Isinsu epoch 34/60 loss 0.1375
+fold 2 Isinsu epoch 35/60 loss 0.1405
+fold 2 Isinsu epoch 36/60 loss 0.1256
+fold 2 Isinsu epoch 37/60 loss 0.1160
+fold 2 Isinsu epoch 38/60 loss 0.1205
+fold 2 Isinsu epoch 39/60 loss 0.1661
+fold 2 Isinsu epoch 40/60 loss 0.0984
+fold 2 Isinsu epoch 41/60 loss 0.1307
+fold 2 Isinsu epoch 42/60 loss 0.0885
+fold 2 Isinsu epoch 43/60 loss 0.0856
+fold 2 Isinsu epoch 44/60 loss 0.0897
+fold 2 Isinsu epoch 45/60 loss 0.0849
+fold 2 Isinsu epoch 46/60 loss 0.0989
+fold 2 Isinsu epoch 47/60 loss 0.0894
+fold 2 Isinsu epoch 48/60 loss 0.0711
+fold 2 Isinsu epoch 49/60 loss 0.1176
+fold 2 Isinsu epoch 50/60 loss 0.1039
+fold 2 Isinsu epoch 51/60 loss 0.0812
+fold 2 Isinsu epoch 52/60 loss 0.0959
+fold 2 Isinsu epoch 53/60 loss 0.0795
+fold 2 Isinsu epoch 54/60 loss 0.0615
+fold 2 Isinsu epoch 55/60 loss 0.0509
+fold 2 Isinsu epoch 56/60 loss 0.0558
+fold 2 Isinsu epoch 57/60 loss 0.0657
+fold 2 Isinsu epoch 58/60 loss 0.0542
+fold 2 Isinsu epoch 59/60 loss 0.0701
+fold 2 Isinsu epoch 60/60 loss 0.0444
+fold 3 Sena epoch 1/60 loss 1.0734
+fold 3 Sena epoch 2/60 loss 0.9001
+fold 3 Sena epoch 3/60 loss 0.7853
+fold 3 Sena epoch 4/60 loss 0.7164
+fold 3 Sena epoch 5/60 loss 0.6893
+fold 3 Sena epoch 6/60 loss 0.6241
+fold 3 Sena epoch 7/60 loss 0.6027
+fold 3 Sena epoch 8/60 loss 0.5511
+fold 3 Sena epoch 9/60 loss 0.5385
+fold 3 Sena epoch 10/60 loss 0.5061
+fold 3 Sena epoch 11/60 loss 0.4545
+fold 3 Sena epoch 12/60 loss 0.4521
+fold 3 Sena epoch 13/60 loss 0.4274
+fold 3 Sena epoch 14/60 loss 0.4095
+fold 3 Sena epoch 15/60 loss 0.3636
+fold 3 Sena epoch 16/60 loss 0.3942
+fold 3 Sena epoch 17/60 loss 0.3229
+fold 3 Sena epoch 18/60 loss 0.3083
+fold 3 Sena epoch 19/60 loss 0.2865
+fold 3 Sena epoch 20/60 loss 0.2710
+fold 3 Sena epoch 21/60 loss 0.2490
+fold 3 Sena epoch 22/60 loss 0.2331
+fold 3 Sena epoch 23/60 loss 0.2092
+fold 3 Sena epoch 24/60 loss 0.1888
+fold 3 Sena epoch 25/60 loss 0.1859
+fold 3 Sena epoch 26/60 loss 0.1628
+fold 3 Sena epoch 27/60 loss 0.1422
+fold 3 Sena epoch 28/60 loss 0.1428
+fold 3 Sena epoch 29/60 loss 0.1384
+fold 3 Sena epoch 30/60 loss 0.1076
+fold 3 Sena epoch 31/60 loss 0.1126
+fold 3 Sena epoch 32/60 loss 0.1112
+fold 3 Sena epoch 33/60 loss 0.0938
+fold 3 Sena epoch 34/60 loss 0.0889
+fold 3 Sena epoch 35/60 loss 0.1051
+fold 3 Sena epoch 36/60 loss 0.0817
+fold 3 Sena epoch 37/60 loss 0.0687
+fold 3 Sena epoch 38/60 loss 0.0685
+fold 3 Sena epoch 39/60 loss 0.0705
+fold 3 Sena epoch 40/60 loss 0.0726
+fold 3 Sena epoch 41/60 loss 0.0701
+fold 3 Sena epoch 42/60 loss 0.0620
+fold 3 Sena epoch 43/60 loss 0.0631
+fold 3 Sena epoch 44/60 loss 0.0880
+fold 3 Sena epoch 45/60 loss 0.0706
+fold 3 Sena epoch 46/60 loss 0.0467
+fold 3 Sena epoch 47/60 loss 0.0578
+fold 3 Sena epoch 48/60 loss 0.0701
+fold 3 Sena epoch 49/60 loss 0.0358
+fold 3 Sena epoch 50/60 loss 0.0583
+fold 3 Sena epoch 51/60 loss 0.0453
+fold 3 Sena epoch 52/60 loss 0.0623
+fold 3 Sena epoch 53/60 loss 0.0465
+fold 3 Sena epoch 54/60 loss 0.0645
+fold 3 Sena epoch 55/60 loss 0.0433
+fold 3 Sena epoch 56/60 loss 0.0709
+fold 3 Sena epoch 57/60 loss 0.0316
+fold 3 Sena epoch 58/60 loss 0.0206
+fold 3 Sena epoch 59/60 loss 0.0389
+fold 3 Sena epoch 60/60 loss 0.0274
+fold 4 Vidit epoch 1/60 loss 1.0789
+fold 4 Vidit epoch 2/60 loss 0.9111
+fold 4 Vidit epoch 3/60 loss 0.8180
+fold 4 Vidit epoch 4/60 loss 0.7674
+fold 4 Vidit epoch 5/60 loss 0.7190
+fold 4 Vidit epoch 6/60 loss 0.6770
+fold 4 Vidit epoch 7/60 loss 0.6338
+fold 4 Vidit epoch 8/60 loss 0.6361
+fold 4 Vidit epoch 9/60 loss 0.5737
+fold 4 Vidit epoch 10/60 loss 0.5727
+fold 4 Vidit epoch 11/60 loss 0.5243
+fold 4 Vidit epoch 12/60 loss 0.5369
+fold 4 Vidit epoch 13/60 loss 0.5026
+fold 4 Vidit epoch 14/60 loss 0.4715
+fold 4 Vidit epoch 15/60 loss 0.4589
+fold 4 Vidit epoch 16/60 loss 0.4368
+fold 4 Vidit epoch 17/60 loss 0.4062
+fold 4 Vidit epoch 18/60 loss 0.3906
+fold 4 Vidit epoch 19/60 loss 0.3679
+fold 4 Vidit epoch 20/60 loss 0.3383
+fold 4 Vidit epoch 21/60 loss 0.3290
+fold 4 Vidit epoch 22/60 loss 0.3065
+fold 4 Vidit epoch 23/60 loss 0.2767
+fold 4 Vidit epoch 24/60 loss 0.2644
+fold 4 Vidit epoch 25/60 loss 0.2466
+fold 4 Vidit epoch 26/60 loss 0.2311
+fold 4 Vidit epoch 27/60 loss 0.2351
+fold 4 Vidit epoch 28/60 loss 0.2076
+fold 4 Vidit epoch 29/60 loss 0.2021
+fold 4 Vidit epoch 30/60 loss 0.1765
+fold 4 Vidit epoch 31/60 loss 0.1759
+fold 4 Vidit epoch 32/60 loss 0.1767
+fold 4 Vidit epoch 33/60 loss 0.1725
+fold 4 Vidit epoch 34/60 loss 0.1578
+fold 4 Vidit epoch 35/60 loss 0.1347
+fold 4 Vidit epoch 36/60 loss 0.1293
+fold 4 Vidit epoch 37/60 loss 0.1258
+fold 4 Vidit epoch 38/60 loss 0.1068
+fold 4 Vidit epoch 39/60 loss 0.1227
+fold 4 Vidit epoch 40/60 loss 0.1213
+fold 4 Vidit epoch 41/60 loss 0.0826
+fold 4 Vidit epoch 42/60 loss 0.0847
+fold 4 Vidit epoch 43/60 loss 0.0822
+fold 4 Vidit epoch 44/60 loss 0.1011
+fold 4 Vidit epoch 45/60 loss 0.0927
+fold 4 Vidit epoch 46/60 loss 0.0815
+fold 4 Vidit epoch 47/60 loss 0.0859
+fold 4 Vidit epoch 48/60 loss 0.0980
+fold 4 Vidit epoch 49/60 loss 0.0675
+fold 4 Vidit epoch 50/60 loss 0.0629
+fold 4 Vidit epoch 51/60 loss 0.0997
+fold 4 Vidit epoch 52/60 loss 0.0652
+fold 4 Vidit epoch 53/60 loss 0.0687
+fold 4 Vidit epoch 54/60 loss 0.0473
+fold 4 Vidit epoch 55/60 loss 0.0723
+fold 4 Vidit epoch 56/60 loss 0.0728
+fold 4 Vidit epoch 57/60 loss 0.0699
+fold 4 Vidit epoch 58/60 loss 0.0608
+fold 4 Vidit epoch 59/60 loss 0.0494
+fold 4 Vidit epoch 60/60 loss 0.0604
+all-people epoch 1/60 loss 1.0472
+all-people epoch 2/60 loss 0.8855
+all-people epoch 3/60 loss 0.7882
+all-people epoch 4/60 loss 0.7291
+all-people epoch 5/60 loss 0.6832
+all-people epoch 6/60 loss 0.6206
+all-people epoch 7/60 loss 0.5906
+all-people epoch 8/60 loss 0.5609
+all-people epoch 9/60 loss 0.5042
+all-people epoch 10/60 loss 0.4916
+all-people epoch 11/60 loss 0.4432
+all-people epoch 12/60 loss 0.4076
+all-people epoch 13/60 loss 0.3923
+all-people epoch 14/60 loss 0.3592
+all-people epoch 15/60 loss 0.3312
+all-people epoch 16/60 loss 0.3210
+all-people epoch 17/60 loss 0.3051
+all-people epoch 18/60 loss 0.2721
+all-people epoch 19/60 loss 0.2595
+all-people epoch 20/60 loss 0.2373
+all-people epoch 21/60 loss 0.2381
+all-people epoch 22/60 loss 0.2140
+all-people epoch 23/60 loss 0.2052
+all-people epoch 24/60 loss 0.1935
+all-people epoch 25/60 loss 0.1714
+all-people epoch 26/60 loss 0.1549
+all-people epoch 27/60 loss 0.1757
+all-people epoch 28/60 loss 0.1425
+all-people epoch 29/60 loss 0.1295
+all-people epoch 30/60 loss 0.1307
+all-people epoch 31/60 loss 0.1082
+all-people epoch 32/60 loss 0.1276
+all-people epoch 33/60 loss 0.1057
+all-people epoch 34/60 loss 0.0991
+all-people epoch 35/60 loss 0.1010
+all-people epoch 36/60 loss 0.1116
+all-people epoch 37/60 loss 0.0923
+all-people epoch 38/60 loss 0.1012
+all-people epoch 39/60 loss 0.1154
+all-people epoch 40/60 loss 0.0722
+all-people epoch 41/60 loss 0.0805
+all-people epoch 42/60 loss 0.0745
+all-people epoch 43/60 loss 0.0832
+all-people epoch 44/60 loss 0.0679
+all-people epoch 45/60 loss 0.0791
+all-people epoch 46/60 loss 0.0574
+all-people epoch 47/60 loss 0.0777
+all-people epoch 48/60 loss 0.0565
+all-people epoch 49/60 loss 0.0619
+all-people epoch 50/60 loss 0.0592
+all-people epoch 51/60 loss 0.0576
+all-people epoch 52/60 loss 0.0442
+all-people epoch 53/60 loss 0.0611
+all-people epoch 54/60 loss 0.0554
+all-people epoch 55/60 loss 0.0463
+all-people epoch 56/60 loss 0.0328
+all-people epoch 57/60 loss 0.0544
+all-people epoch 58/60 loss 0.0591
+all-people epoch 59/60 loss 0.0417
+all-people epoch 60/60 loss 0.0398
+all-people checkpoint m2_stgcn.pt saved and not evaluated
+train_seconds 4400.5 all_people_seconds 1457.7
+RUN_DIR=C:\Users\yassi\OneDrive\Bureau\projet DL BIG DATA\experiments\20261104_m2_stgcn
