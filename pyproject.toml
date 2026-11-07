@@ -16,4 +16,5 @@ pythonpath = ["src"]
 testpaths = ["tests"]
 markers = [
     "data: tests that need the real MM-Fit and EC3D datasets",
+    "kafka: integration tests that need a Kafka broker on KAFKA_BOOTSTRAP",
 ]

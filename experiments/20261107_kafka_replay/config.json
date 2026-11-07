@@ -1,0 +1,8 @@
+{
+  "name": "kafka_replay",
+  "session": "w20_replay",
+  "seconds": 120,
+  "broker": "docker apache/kafka",
+  "pose_video": "w20_rgb.mp4",
+  "hr_source": "w20_sw_l_hr.npy"
+}

@@ -649,3 +649,13 @@ Step X.Y done
 - [ ] git commit -m "Step X.Y: ..."
 - [ ] user confirmed → next step
 ```
+
+---
+
+## 6 · Revised plan (Nov 7, 2026): MM-Fit replaces own recordings
+
+We have no own recordings (injury). Do not ask for or invent them. MM-Fit RGB video (Zenodo 7672767, CC BY 4.0) plus watch IMU/HR (`sw_l_hr` / `sw_r_hr`; missing in w05, w10, w18) replaces that role. Replay writes go to `REPLAY_DIR`, never `own_recordings/`.
+
+MM-Fit has no RPE and no proven session→person map. Personal baselines are **within one session**: for set *k* of an exercise, use sets 1…*k−1* of that exercise in the same session; set 1 has `has_baseline = 0` and falls back to global stats (past data only, no leakage). Every RPE use in steps 2.5–3.4 is dropped or replaced (Spearman vs `set_idx_in_exercise` for Model 3).
+
+**Order:** 2.3 Kafka replay (pose + HR from w20 video / `sw_l_hr`) → 2.4 Models 1–2 on MediaPipe from raw MM-Fit video vs dataset pose (RQ4; sync via generalised `video_sync.py`) → 2.5 Spark rep table + within-session baselines → 2.6 Week 2 package → 3.1 Model 3 sequences (MM-Fit splits, causal features, no RPE) → 3.2 train B1–B5 on train/val/test_unseen (risk AUC, lead time, false alarms, set-index Spearman; HR ablation) → 3.3 coach `--replay` only → 3.4 results + limits → 3.5 rehearsal / `v1.0`. If short on time: keep 2.3, 2.5, 3.1, 3.2, 3.4; shrink 2.4 to w20 and 3.3 to text.

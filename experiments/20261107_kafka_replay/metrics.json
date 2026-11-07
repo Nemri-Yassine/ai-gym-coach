@@ -1,0 +1,39 @@
+{
+  "broker": "docker apache/kafka:latest",
+  "seconds": 120,
+  "session": "w20_replay",
+  "pose.keypoints": {
+    "msg_per_s_median": 29.78,
+    "median_latency_ms": 48.0,
+    "producer": {
+      "session": "w20_replay",
+      "path": "C:\\Users\\yassi\\OneDrive\\Bureau\\projet DL BIG DATA\\data\\raw\\mm-fit-video\\w20_rgb.mp4",
+      "frames": 3597,
+      "fps_source": 30.0,
+      "seconds": 120.04683479999949,
+      "msg_per_s": 29.963305621449134
+    }
+  },
+  "watch.hr": {
+    "msg_per_s_median": 0.79,
+    "median_latency_ms": 19.15,
+    "producer": {
+      "session": "w20_replay",
+      "source": "C:\\Users\\yassi\\OneDrive\\Bureau\\projet DL BIG DATA\\data\\raw\\mm-fit\\w20\\w20_sw_l_hr.npy",
+      "messages": 62,
+      "seconds": 119.88970260000497,
+      "msg_per_s": 0.5171419951457735
+    }
+  },
+  "sink": {
+    "dir": "C:\\Users\\yassi\\OneDrive\\Bureau\\projet DL BIG DATA\\data\\interim\\replay\\w20_replay\\stream",
+    "written": {
+      "pose.keypoints": 3575,
+      "watch.hr": 62,
+      "watch.imu": 0,
+      "coach.events": 0
+    },
+    "replay": true
+  },
+  "live_watch_tested": false
+}
