@@ -29,10 +29,14 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.3 | Kafka streaming of pose and HR (replay) | ✅ Done · Nov 7, 2026 |
 | 2.4 | Models 1–2 on raw MM-Fit video (RQ4) | ✅ Done · Nov 7, 2026 · w20 only |
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
-| 2.6–3.5 | Week 2 package, Model 3, coach, report | ⬜ |
+| 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
+| 3.1 | Model 3 sequences and labels (MM-Fit) | ✅ Done · Nov 7, 2026 |
+| 3.2–3.5 | Model 3 train, coach, report, tag | ⬜ |
 
 ### Log
 
+- **2026-11-07 · Step 3.1.** Model 3 set sequences from MM-Fit only: 615 sets (train 300 / val 86 / test_unseen 139). Labels: fatigue position, breakdown (speed −20% or form_score < 0.5), risk (breakdown within 2 reps). General + personal norms; no RPE; causal features.
+- **2026-11-07 · Step 2.6.** Week 2 package in `reports/week2.md` (M2 conclusion, Kafka, RQ4 w20, rep table, data-source change).
 - **2026-11-07 · Step 2.5.** Spark rep table: **5,918** MM-Fit reps, 616 sets; within-session baselines (`Window.partitionBy(session, exercise).orderBy(set_idx).rowsBetween(unboundedPreceding, -1)`); `has_baseline` rate 0.67. No RPE. Cross-session pseudo-users skipped (time). Summary: `data/processed/rep_table_summary.json`.
 - **2026-11-07 · Step 2.4.** RQ4 on raw MM-Fit `w20` RGB → MediaPipe vs dataset pose (extra `test_unseen` videos w00/w12/w13 left downloading; shrunk to w20). Sync: 8/10 sets within 3 frames. M1 macro-F1 pose-only **0.85 → 0.80**; pose+IMU **0.66 → 0.48**. Rep MAE **0.93 → 1.56**. Model 2 RF mean P(correct) on squat/lunge (no form labels): 0.08 / 0.14. Table: `reports/rq4_first_look.md`.
 - **2026-11-07 · Step 2.3.** Kafka via Docker `apache/kafka` (KRaft binaries blocked: `wmic` missing on this Windows). Replay of `w20_rgb.mp4` + `w20_sw_l_hr`: pose **29.8 msg/s** median latency **48 ms**; HR **0.79 msg/s**, **19 ms**. Sink writes under `data/interim/replay/` only. Live Galaxy Watch link is optional and **untested**. Setup: `docs/kafka_setup.md`. Metrics: `experiments/20261107_kafka_replay/`.
