@@ -28,10 +28,13 @@ def test_lead_time_metric():
 
 
 def test_train_quick():
-    from awc.training.train_m3 import run_variant
-    from awc.features.fatigue_dataset import M3_DIR
+    from awc.features.fatigue_dataset import M3_DIR, build_all
+    from awc.training.train_m3 import evaluate_rule, run_variant, speed_loss_scores
+
     if not (M3_DIR / "sets_general.npz").is_file():
-        from awc.features.fatigue_dataset import build_all
-        build_all()
+        build_all(use_form=False)
     m = run_variant("B5", quick=True, epochs=1)
     assert "risk_auc" in m
+    # continuous B1 score is not a step function
+    sc = speed_loss_scores([1.0, 1.0, 0.9, 0.7])
+    assert sc[3] > sc[2] > 0

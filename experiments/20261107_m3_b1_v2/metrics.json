@@ -1,0 +1,41 @@
+{
+  "variant": "B1",
+  "b1_drop_25": {
+    "risk_auc": 0.7506381404525556,
+    "lead_time": 0.36585365853658536,
+    "pct_warned_1plus": 0.17073170731707318,
+    "false_alarms": 0.2,
+    "spearman_set_idx": NaN,
+    "spearman_speed_loss": NaN,
+    "n_sets": 139,
+    "thresh": 0.5,
+    "drop": 0.25,
+    "alert_rate": 0.26618705035971224
+  },
+  "b1_drop_20": {
+    "risk_auc": 0.7506381404525556,
+    "lead_time": 0.5121951219512195,
+    "pct_warned_1plus": 0.24390243902439024,
+    "false_alarms": 4.2,
+    "spearman_set_idx": NaN,
+    "spearman_speed_loss": NaN,
+    "n_sets": 139,
+    "thresh": 0.5,
+    "drop": 0.2,
+    "alert_rate": 0.3237410071942446
+  },
+  "risk_auc": 0.7506381404525556,
+  "lead_time": 0.36585365853658536,
+  "pct_warned_1plus": 0.17073170731707318,
+  "false_alarms": 0.2,
+  "alert_rate_25": 0.26618705035971224,
+  "alert_rate_20": 0.3237410071942446,
+  "spearman_diagnostics": {
+    "spearman_n_reps_vs_set_idx": -0.05922114833927096,
+    "mean_n_reps_by_set_idx": {
+      "1": 9.446808510638299,
+      "2": 9.369565217391305,
+      "3": 9.478260869565217
+    }
+  }
+}

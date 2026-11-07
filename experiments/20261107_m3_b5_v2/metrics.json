@@ -1,0 +1,74 @@
+{
+  "variant": "B5",
+  "thresh_mode": "youden",
+  "thresh_val_mean": 0.557431697845459,
+  "val_tuned": {
+    "risk_auc": 0.5998782292373143,
+    "risk_auc_std": 0.0,
+    "lead_time": 0.14634146341463414,
+    "lead_time_std": 0.0,
+    "pct_warned_1plus": 0.0975609756097561,
+    "pct_warned_1plus_std": 0.0,
+    "false_alarms": 18.8,
+    "false_alarms_std": 0.0,
+    "spearman_set_idx": -0.05395687100797359,
+    "spearman_set_idx_std": 0.0,
+    "spearman_speed_loss": -0.10862097933429163,
+    "spearman_speed_loss_std": 0.0
+  },
+  "thresh_0.7": {
+    "risk_auc": 0.5998782292373143,
+    "risk_auc_std": 0.0,
+    "lead_time": 0.0,
+    "lead_time_std": 0.0,
+    "pct_warned_1plus": 0.0,
+    "pct_warned_1plus_std": 0.0,
+    "false_alarms": 0.0,
+    "false_alarms_std": 0.0,
+    "spearman_set_idx": -0.05395687100797359,
+    "spearman_set_idx_std": 0.0,
+    "spearman_speed_loss": -0.10862097933429163,
+    "spearman_speed_loss_std": 0.0
+  },
+  "seeds": [
+    {
+      "seed": 42,
+      "thresh_val": 0.557431697845459,
+      "val_tuned": {
+        "risk_auc": 0.5998782292373143,
+        "lead_time": 0.14634146341463414,
+        "pct_warned_1plus": 0.0975609756097561,
+        "false_alarms": 18.8,
+        "spearman_set_idx": -0.05395687100797359,
+        "spearman_speed_loss": -0.10862097933429163,
+        "n_sets": 139,
+        "thresh": 0.557431697845459
+      },
+      "thresh_0.7": {
+        "risk_auc": 0.5998782292373143,
+        "lead_time": 0.0,
+        "pct_warned_1plus": 0.0,
+        "false_alarms": 0.0,
+        "spearman_set_idx": -0.05395687100797359,
+        "spearman_speed_loss": -0.10862097933429163,
+        "n_sets": 139,
+        "thresh": 0.7
+      }
+    }
+  ],
+  "exercise_only_auc": 0.7734354769097972,
+  "spearman_diagnostics": {
+    "spearman_n_reps_vs_set_idx": -0.05922114833927096,
+    "mean_n_reps_by_set_idx": {
+      "1": 9.446808510638299,
+      "2": 9.369565217391305,
+      "3": 9.478260869565217
+    }
+  },
+  "risk_auc": 0.5998782292373143,
+  "lead_time": 0.14634146341463414,
+  "pct_warned_1plus": 0.0975609756097561,
+  "false_alarms": 18.8,
+  "spearman_set_idx": -0.05395687100797359,
+  "spearman_speed_loss": -0.10862097933429163
+}
