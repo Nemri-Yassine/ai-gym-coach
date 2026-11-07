@@ -1,0 +1,73 @@
+{
+  "date": "20261107",
+  "session": "w20_replay",
+  "n_demos": 2,
+  "median_model_latency_ms": 0.834,
+  "median_e2e_latency_ms": 74.566,
+  "p90_e2e_latency_ms": 830.563,
+  "n_reps_scored": 28,
+  "demos": [
+    {
+      "n_reps": 14,
+      "n_pose_msgs": 1114,
+      "median_model_latency_ms": 0.8461000034003519,
+      "median_e2e_latency_ms": 74.56591796875,
+      "messages": [
+        {
+          "rep": 1,
+          "msg": "Slow down, control the movement.",
+          "risk": 0.4231961667537689,
+          "model_latency_ms": 1.5604999935021624,
+          "e2e_latency_ms": 37.375732421875,
+          "exercise": "squats",
+          "type": "slow"
+        },
+        {
+          "rep": 4,
+          "msg": "Stop the set.",
+          "risk": 0.5070501565933228,
+          "model_latency_ms": 0.7044999947538599,
+          "e2e_latency_ms": 976.056640625,
+          "exercise": "squats",
+          "type": "stop"
+        }
+      ],
+      "alert_thresh": 0.48488783836364746,
+      "slow_thresh": 0.33488783836364744
+    },
+    {
+      "n_reps": 14,
+      "n_pose_msgs": 1109,
+      "median_model_latency_ms": 0.7753500030958094,
+      "median_e2e_latency_ms": 88.4932861328125,
+      "messages": [
+        {
+          "rep": 1,
+          "msg": "Slow down, control the movement.",
+          "risk": 0.4030490219593048,
+          "model_latency_ms": 2.0684000046458095,
+          "e2e_latency_ms": 27.5869140625,
+          "exercise": "squats",
+          "type": "slow"
+        },
+        {
+          "rep": 4,
+          "msg": "Stop the set.",
+          "risk": 0.5098490715026855,
+          "model_latency_ms": 0.5987000040477142,
+          "e2e_latency_ms": 1159.796875,
+          "exercise": "squats",
+          "type": "stop"
+        }
+      ],
+      "alert_thresh": 0.48488783836364746,
+      "slow_thresh": 0.33488783836364744
+    }
+  ],
+  "slow_down_at_rep1_still_present": true,
+  "note": "Slow down still fires near rep 1: early-rep risk ~0.40-0.45 sits above slow_thresh (alert-0.15). Not the old form-polluted every-squat@rep2 pattern, but the cue is not gone.",
+  "latency_definitions": {
+    "model": "rep end to coach message (inference only)",
+    "e2e": "frame pc_ts_ms to coach message (producer MediaPipe already done + Kafka + models)"
+  }
+}

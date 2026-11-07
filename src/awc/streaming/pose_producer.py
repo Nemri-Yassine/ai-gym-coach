@@ -62,7 +62,7 @@ def _open_landmarker(model_path=POSE_MODEL):
     return vision.PoseLandmarker.create_from_options(options)
 
 
-def run_video(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, realtime=True):
+def run_video(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, realtime=True, start_frame=0):
     """Replay a video file. Returns stats dict. Does not score models."""
     cap = cv2.VideoCapture(str(path))
     if not cap.isOpened():
@@ -71,6 +71,9 @@ def run_video(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, realti
     if not np.isfinite(fps) or fps <= 1:
         fps = float(VIDEO_FPS)
     frame_period = 1.0 / fps
+    start_frame = max(0, int(start_frame))
+    if start_frame > 0:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
     ensure_topics(bootstrap)
     producer = make_producer(bootstrap)
     sent = 0
@@ -78,7 +81,7 @@ def run_video(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, realti
     wall0 = time.time() * 1000.0
     try:
         with _open_landmarker() as landmarker:
-            index = 0
+            index = start_frame
             next_due = time.perf_counter()
             while True:
                 if max_seconds is not None and (time.perf_counter() - t0) >= max_seconds:
@@ -92,7 +95,6 @@ def run_video(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, realti
                     if sleep_for > 0:
                         time.sleep(sleep_for)
                     next_due += frame_period
-                pc_ts_ms = int(wall0 + index * 1000.0 / fps)
                 # Prefer wall clock at send so monitor latency reflects real pipeline delay.
                 pc_ts_ms = int(time.time() * 1000)
                 msg = frame_to_message(session, index, pc_ts_ms, bgr, landmarker)
@@ -108,6 +110,7 @@ def run_video(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, realti
         "session": session,
         "path": str(path),
         "frames": sent,
+        "start_frame": start_frame,
         "fps_source": fps,
         "seconds": elapsed,
         "msg_per_s": sent / elapsed if elapsed > 0 else 0.0,
@@ -159,11 +162,15 @@ def main(argv=None):
     p.add_argument("--session", required=True)
     p.add_argument("--bootstrap", default=KAFKA_BOOTSTRAP)
     p.add_argument("--max-seconds", type=float, default=None)
+    p.add_argument("--start-frame", type=int, default=0, help="Seek into the video before publishing")
     p.add_argument("--no-realtime", action="store_true", help="Do not sleep between frames")
     args = p.parse_args(argv)
     if args.video:
         path = REPLAY_POSE_VIDEO if args.video in ("w20", "default") else args.video
-        stats = run_video(path, args.session, args.bootstrap, args.max_seconds, realtime=not args.no_realtime)
+        stats = run_video(
+            path, args.session, args.bootstrap, args.max_seconds,
+            realtime=not args.no_realtime, start_frame=args.start_frame,
+        )
     else:
         stats = run_camera(args.camera_url, args.session, args.bootstrap, args.max_seconds)
     print(stats, flush=True)

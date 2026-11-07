@@ -58,22 +58,29 @@ def run_replay_csv(path, session, bootstrap=KAFKA_BOOTSTRAP, max_seconds=None, r
 
 
 def run_replay_mmfit(path=REPLAY_HR_NPY, session="w20_replay", bootstrap=KAFKA_BOOTSTRAP,
-                     max_seconds=None, realtime=True):
+                     max_seconds=None, realtime=True, start_seconds=0.0):
     schedule = load_mmfit_hr_npy(path)
-    return _run_schedule(schedule, session, bootstrap, max_seconds, realtime, source=str(path))
+    return _run_schedule(
+        schedule, session, bootstrap, max_seconds, realtime, source=str(path),
+        start_seconds=start_seconds,
+    )
 
 
-def _run_schedule(schedule, session, bootstrap, max_seconds, realtime, source):
+def _run_schedule(schedule, session, bootstrap, max_seconds, realtime, source, start_seconds=0.0):
     ensure_topics(bootstrap)
     producer = make_producer(bootstrap)
     sent = 0
     t0 = time.perf_counter()
+    start_seconds = max(0.0, float(start_seconds))
     try:
         for delay_s, bpm in schedule:
-            if max_seconds is not None and delay_s > max_seconds:
+            if delay_s < start_seconds:
+                continue
+            rel = delay_s - start_seconds
+            if max_seconds is not None and rel > max_seconds:
                 break
             if realtime:
-                target = t0 + delay_s
+                target = t0 + rel
                 sleep_for = target - time.perf_counter()
                 if sleep_for > 0:
                     time.sleep(sleep_for)
@@ -92,6 +99,7 @@ def _run_schedule(schedule, session, bootstrap, max_seconds, realtime, source):
         "source": source,
         "messages": sent,
         "seconds": elapsed,
+        "start_seconds": start_seconds,
         "msg_per_s": sent / elapsed if elapsed > 0 else 0.0,
     }
 
@@ -145,6 +153,7 @@ def main(argv=None):
     p.add_argument("--hr-npy", default="", help="Replay an MM-Fit sw_l_hr.npy (default: w20)")
     p.add_argument("--bootstrap", default=KAFKA_BOOTSTRAP)
     p.add_argument("--max-seconds", type=float, default=None)
+    p.add_argument("--start-seconds", type=float, default=0.0, help="Skip schedule before this video time (s)")
     p.add_argument("--no-realtime", action="store_true")
     args = p.parse_args(argv)
     if args.source == "replay":
@@ -156,6 +165,7 @@ def main(argv=None):
             path = Path(args.hr_npy) if args.hr_npy else REPLAY_HR_NPY
             stats = run_replay_mmfit(
                 path, args.session, args.bootstrap, args.max_seconds, realtime=not args.no_realtime,
+                start_seconds=args.start_seconds,
             )
     else:
         stats = run_live(args.source, args.session, args.token, args.port, args.bootstrap, args.max_seconds)
