@@ -5,6 +5,8 @@ Own recordings were not available (injury). Comparison uses MM-Fit RGB (Zenodo 7
 
 **No form labels** on MM-Fit: Model 2 column is mean P(correct) only, not accuracy.
 
+**Domain shift (RQ4 finding, not a bug):** the EC3D-trained Model 2 random forest does **not** carry over to MM-Fit. Even on dataset pose, mean P(correct) on squats is about **0.08** (see table). Different skeleton source, camera and people mean `form_score < 0.5` fires on most MM-Fit squat/lunge reps — so Model 3 labels must not use form to define breakdown (speed-only from Step 3.1b).
+
 | Session | Sync within 3 fr. | M1 macro-F1 dataset (pose / both) | M1 macro-F1 MediaPipe (pose / both) | Rep MAE dataset | Rep MAE MediaPipe | M2 P(correct) ds / mp |
 |---|---:|---:|---:|---:|---:|---:|
 | w20 | 8/10 (0.80) | 0.850 / 0.660 | 0.800 / 0.480 | 0.93 | 1.56 | 0.08 / 0.14 |

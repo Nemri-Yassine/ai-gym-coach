@@ -1,8 +1,13 @@
 """Model 3 labels and causal features (synthetic)."""
+import json
+
 import numpy as np
 import pandas as pd
+import pytest
 
+from awc.config import PROCESSED
 from awc.features.fatigue_dataset import (
+    M3_DIR,
     breakdown_index,
     build_set_records,
     features_are_causal,
@@ -19,14 +24,20 @@ def test_fatigue_label_range():
 
 
 def test_breakdown_detection():
-    speeds = [1, 1, 0.95, 0.85, 0.78]
+    # speed-only default: 0.78 is first ≤ 0.8 * mean(1,1)
+    speeds = [1, 1, 0.95, 0.85, 0.78, 0.7]
     assert breakdown_index(speeds, speed_drop=0.20) == 4
+    assert breakdown_index(speeds, speed_drop=0.20, use_form=False) == 4
+    # form alone must NOT fire when use_form=False
+    form = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    assert breakdown_index([1, 1, 1, 1, 1, 1], form, use_form=False) is None
+    assert breakdown_index([1, 1, 1, 1, 1, 1], form, use_form=True, form_thresh=0.5) == 2
 
 
 def test_risk_horizon():
+    # breakdown at 4, horizon 2 → risk from index 2 through end
     risk = risk_labels(6, breakdown_i=4, horizon=2)
-    # t=2 warns (4 in 2..4), t=3,4 also; t=5 no (breakdown already at 4, but 4>=5? no)
-    assert list(risk) == [0, 0, 1, 1, 1, 0]
+    assert list(risk) == [0, 0, 1, 1, 1, 1]
 
 
 def test_personal_norm_fallback():
@@ -52,18 +63,37 @@ def test_personal_norm_fallback():
          "base_speed_mean": 1.0, "base_speed_std": 0.1,
          "base_hr_rise_mean": 1.0, "base_hr_rise_std": 0.1},
     ])
-    # force train split by renaming session into MMFIT train list
     rep_df["session"] = "w01"
     base_df["session"] = "w01"
     raw = build_set_records(rep_df, base_df)
     assert raw[0]["has_baseline"] == 0
     normed, stats = normalize_records(raw, mode="personal")
-    # set 1 falls back to global — finite features
     assert np.isfinite(normed[0]["X"]).all()
 
 
 def test_features_are_causal():
     x = np.zeros((4, 8), dtype=np.float32)
-    x[:, 6] = [0, 1 / 3, 2 / 3, 1]  # rep_frac
-    x[:, 7] = [0, 1, 2, 3]  # time_since_start
+    x[:, 6] = [0, 1 / 3, 2 / 3, 1]
+    x[:, 7] = [0, 1, 2, 3]
     assert features_are_causal({"X": x})
+
+
+@pytest.mark.data
+def test_breakdown_rates_not_extreme():
+    """Flag exercises with breakdown rate > 90% or < 5%; those must be named in the README."""
+    from pathlib import Path
+
+    from awc.config import ROOT
+
+    path = M3_DIR / "breakdown_stats.json"
+    if not path.is_file():
+        pytest.skip("breakdown_stats.json missing; run build_all first")
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    bad = [r for r in rows if r["n_sets"] >= 10 and (r["breakdown_rate"] > 0.90 or r["breakdown_rate"] < 0.05)]
+    if not bad:
+        return
+    readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+    missing = [r["exercise"] for r in bad if r["exercise"].replace("_", " ") not in readme and r["exercise"] not in readme]
+    assert not missing, (
+        f"extreme breakdown rates {bad} must be named in README.md (missing: {missing})"
+    )

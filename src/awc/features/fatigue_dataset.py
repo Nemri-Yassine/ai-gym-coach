@@ -4,8 +4,9 @@ Normalisations: general (global train z-score) vs personal (within-session basel
 from step 2.5, fallback to global when has_baseline = 0).
 
 Labels: fatigue = rep_idx/(n-1); breakdown = speed drop ≥ threshold vs first-2-rep
-mean or form_score < 0.5; risk = breakdown at this rep or within the next 2.
-Features at rep t use only reps ≤ t (causal).
+mean (form_score is an optional extra, off by default — EC3D RF does not carry to MM-Fit);
+risk = 1 from breakdown_i − horizon through the end of the set (once broken, stay "stop").
+Features at rep t use only reps ≤ t (causal). form_score remains an *input* with its mask.
 """
 from __future__ import annotations
 
@@ -34,8 +35,13 @@ def _split_of(session: str) -> str:
     return "unused"
 
 
-def breakdown_index(speeds, form_scores=None, speed_drop=0.20, form_thresh=0.5):
-    """First rep index where speed dropped ≥ speed_drop vs mean of first 2, or form_score < thresh."""
+def breakdown_index(speeds, form_scores=None, speed_drop=0.20, form_thresh=0.5, use_form=False):
+    """First rep index where speed dropped ≥ speed_drop vs mean of first 2.
+
+    use_form=False (default): speed only. EC3D-trained Model 2 does not carry over to
+    MM-Fit, so form_score must not define the label. When use_form=True, also fire if
+    form_score < form_thresh (legacy / ablation only).
+    """
     speeds = np.asarray(speeds, dtype=np.float64)
     n = len(speeds)
     if n < 3:
@@ -46,20 +52,23 @@ def breakdown_index(speeds, form_scores=None, speed_drop=0.20, form_thresh=0.5):
     form_scores = np.asarray(form_scores if form_scores is not None else [np.nan] * n, dtype=np.float64)
     for i in range(2, n):
         speed_hit = np.isfinite(speeds[i]) and speeds[i] <= (1.0 - speed_drop) * base
-        form_hit = np.isfinite(form_scores[i]) and form_scores[i] < form_thresh
+        form_hit = use_form and np.isfinite(form_scores[i]) and form_scores[i] < form_thresh
         if speed_hit or form_hit:
             return int(i)
     return None
 
 
 def risk_labels(n, breakdown_i, horizon=2):
-    """risk[t] = 1 if breakdown at t .. t+horizon."""
+    """risk[t] = 1 from (breakdown_i − horizon) through the end of the set.
+
+    Once the set has broken down, the right call stays "stop", so risk stays 1
+    after the breakdown as well as in the warning window before it.
+    """
     risk = np.zeros(n, dtype=np.float32)
     if breakdown_i is None:
         return risk
-    for t in range(n):
-        if breakdown_i <= t + horizon and breakdown_i >= t:
-            risk[t] = 1.0
+    start = max(0, int(breakdown_i) - int(horizon))
+    risk[start:] = 1.0
     return risk
 
 
@@ -69,7 +78,7 @@ def fatigue_labels(n):
     return (np.arange(n, dtype=np.float32) / float(n - 1))
 
 
-def build_set_records(rep_df: pd.DataFrame, base_df: pd.DataFrame, speed_drop=0.20):
+def build_set_records(rep_df: pd.DataFrame, base_df: pd.DataFrame, speed_drop=0.20, use_form=False):
     """List of set dicts with raw features and labels (before normalisation)."""
     base_key = base_df.set_index(["session", "exercise", "set_id"])
     records = []
@@ -87,7 +96,7 @@ def build_set_records(rep_df: pd.DataFrame, base_df: pd.DataFrame, speed_drop=0.
         hr_mask = g["hr_mask"].to_numpy(dtype=np.float64)
         time_since = np.cumsum(duration) - duration
         rep_frac = np.arange(n, dtype=np.float64) / max(n - 1, 1)
-        bd = breakdown_index(speed, form, speed_drop=speed_drop)
+        bd = breakdown_index(speed, form, speed_drop=speed_drop, use_form=use_form)
         feats = np.column_stack([
             duration, rom, speed, form, hr_end, hr_rise, rep_frac, time_since,
         ]).astype(np.float32)
@@ -209,15 +218,48 @@ def save_dataset(records, stats, out_dir=M3_DIR, name="general"):
     return path, counts
 
 
-def build_all(speed_drop=0.20):
+def breakdown_stats(records):
+    """Per-exercise: n sets, breakdown rate, median breakdown rep index."""
+    rows = []
+    for ex in sorted({r["exercise"] for r in records}):
+        subset = [r for r in records if r["exercise"] == ex]
+        bds = [r["breakdown_i"] for r in subset if r["breakdown_i"] is not None]
+        rate = len(bds) / max(len(subset), 1)
+        med = float(np.median(bds)) if bds else None
+        rows.append({
+            "exercise": ex,
+            "n_sets": len(subset),
+            "breakdown_rate": float(rate),
+            "median_breakdown_rep": med,
+        })
+    return rows
+
+
+def build_all(speed_drop=0.20, use_form=False):
     rep_df = pd.read_parquet(REP_TABLE)
     base_df = pd.read_parquet(BASELINES)
-    raw = build_set_records(rep_df, base_df, speed_drop=speed_drop)
+    raw = build_set_records(rep_df, base_df, speed_drop=speed_drop, use_form=use_form)
+    stats_rows = breakdown_stats(raw)
+    (M3_DIR).mkdir(parents=True, exist_ok=True)
+    (M3_DIR / "breakdown_stats.json").write_text(json.dumps(stats_rows, indent=2), encoding="utf-8")
+    for row in stats_rows:
+        print(
+            f"{row['exercise']}: sets={row['n_sets']} "
+            f"breakdown_rate={row['breakdown_rate']:.3f} "
+            f"median_bd_rep={row['median_breakdown_rep']}",
+            flush=True,
+        )
     general, stats = normalize_records(raw, mode="general")
     personal, _ = normalize_records(raw, mode="personal", stats=stats)
     p1, c1 = save_dataset(general, stats, name="general")
     p2, c2 = save_dataset(personal, stats, name="personal")
-    return {"general": (str(p1), c1), "personal": (str(p2), c2), "n_raw": len(raw)}
+    return {
+        "general": (str(p1), c1),
+        "personal": (str(p2), c2),
+        "n_raw": len(raw),
+        "breakdown_stats": stats_rows,
+        "use_form": use_form,
+    }
 
 
 def features_are_causal(record) -> bool:

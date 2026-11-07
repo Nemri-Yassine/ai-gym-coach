@@ -31,13 +31,16 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
 | 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
 | 3.1 | Model 3 sequences and labels (MM-Fit) | ✅ Done · Nov 7, 2026 |
-| 3.2 | Model 3 + RQ2/RQ3 comparisons | ✅ Done · Nov 7, 2026 |
+| 3.1b | Speed-only breakdown; risk held to end of set | ✅ Done · Nov 7, 2026 |
+| 3.2 | Model 3 + RQ2/RQ3 comparisons | ✅ Done · Nov 7, 2026 · superseded by 3.2b |
+| 2.4b–3.3b, 3.2b | Post-v1.0 fixes | ⏳ In progress |
 | 3.3 | Replay coach (text; voice optional) | ✅ Done · Nov 7, 2026 |
 | 3.4 | Evaluation and final report | ✅ Done · Nov 7, 2026 |
 | 3.5 | Rehearsal + v1.0 tag | ✅ Done · Nov 7, 2026 |
 
 ### Log
 
+- **2026-11-07 · Step 3.1b.** Breakdown is **speed-only** (`use_form=False`); risk stays 1 from breakdown−2 to end of set. Squats breakdown rate **0.42** (was ~100% with form). Extreme: **jumping_jacks** rate **0.018** (< 5%) — reported here, not hidden. Stats: `data/processed/m3/breakdown_stats.json`.
 - **2026-11-07 · Step 3.5.** Fresh `pytest -q` green; coach replay run twice; tag `v1.0`.
 - **2026-11-07 · Step 3.4.** `reports/results.md` + `reports/final_report.md` (limits: no own data, no RPE, within-session baseline, shared speed label, watch untested, MM-Fit reps assumed correct).
 - **2026-11-07 · Step 3.3.** Replay coach on w20 (text, `--no-voice`): median latency rep→message **< 1 ms** offline; voice path present but optional. `experiments/20261107_coach_replay/`.
