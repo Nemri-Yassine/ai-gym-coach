@@ -1,0 +1,28 @@
+{
+  "sessions": [
+    {
+      "session": "w20",
+      "n_sets_m1": 27,
+      "m1_macro_f1_dataset_pose_only": 0.85,
+      "m1_macro_f1_dataset_both": 0.6599999999999999,
+      "m1_macro_f1_mediapipe_pose_only": 0.8,
+      "m1_macro_f1_mediapipe_both": 0.48,
+      "rep_mae_dataset": 0.9259259259259259,
+      "rep_mae_mediapipe": 1.5555555555555556,
+      "sync": {
+        "a": 3.0,
+        "b": 0.00169,
+        "pivot": 2178.0,
+        "n_sets": 10,
+        "n_within_3": 8,
+        "frac_within_3": 0.8,
+        "source": "config_w20_measured"
+      },
+      "form_p_correct_mean_dataset": 0.08096045197740112,
+      "form_p_correct_mean_mediapipe": 0.13536723163841807,
+      "form_note": "MM-Fit has no form labels; numbers are Model 2 RF P(correct) only",
+      "n_form_reps_dataset": 59,
+      "n_form_reps_mediapipe": 59
+    }
+  ]
+}

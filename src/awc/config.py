@@ -12,6 +12,8 @@ MMFIT_VIDEO_DIR = RAW / "mm-fit-video"  # RGB videos for replay / sync checks
 REPCOUNT_DIR = RAW / "repcount"         # RepCount-A test split (Lance), public gym videos with rep counts
 INTERIM = DATA / "interim"              # synced, cleaned, normalized (Parquet)
 REPLAY_DIR = INTERIM / "replay"         # Kafka sink output for replay sessions (never own_recordings)
+MMFIT_VIDEO_INTERIM = INTERIM / "mmfit_video"  # MediaPipe pose from raw MM-Fit RGB, sensor clock
+VIDEO_SYNC_PATH = INTERIM / "video_sync.json"  # per-session video↔sensor linear fits
 PROCESSED = DATA / "processed"          # model-ready windows and per-rep tensors
 M2_REPS = PROCESSED / "m2_reps.npz"     # EC3D reps for Model 2 (3D sequences; angles applied later)
 

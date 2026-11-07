@@ -94,6 +94,70 @@ def resample_times(seq, times_ms, fps_out=VIDEO_FPS) -> np.ndarray:
     return out.reshape(len(t_out), *seq.shape[1:])
 
 
+def _open_landmarker(model_path=POSE_MODEL):
+    import mediapipe as mp
+    from mediapipe.tasks import python as mp_python
+    from mediapipe.tasks.python import vision
+
+    options = vision.PoseLandmarkerOptions(
+        base_options=mp_python.BaseOptions(model_asset_path=str(model_path)),
+        running_mode=vision.RunningMode.VIDEO,
+        num_poses=1,
+    )
+    return vision.PoseLandmarker.create_from_options(options)
+
+
+def _detect_bgr(landmarker, bgr, ts_ms):
+    import cv2
+    import mediapipe as mp
+
+    height, width = bgr.shape[:2]
+    rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
+    result = landmarker.detect_for_video(image, int(ts_ms))
+    if result.pose_landmarks:
+        lm = [(p.x, p.y) for p in result.pose_landmarks[0]]
+        return landmarks_to_pixels(lm, width, height)
+    return np.full((18, 2), np.nan, dtype=np.float32)
+
+
+def extract_pose_ranges(video_path, ranges, model_path=POSE_MODEL):
+    """Run Pose Landmarker on selected [start, end] inclusive video-frame ranges.
+
+    Returns dict: (start, end) → (T, 18, 2) float32 pixels, y up (native video fps, no resample).
+    Timestamps for MediaPipe are monotonic across the whole file.
+    """
+    import cv2
+
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        raise RuntimeError(f"cannot open {video_path}")
+    fps = cap.get(cv2.CAP_PROP_FPS) or VIDEO_FPS
+    if not np.isfinite(fps) or fps <= 1:
+        fps = float(VIDEO_FPS)
+    wanted = sorted((int(a), int(b)) for a, b in ranges)
+    out = {}
+    if not wanted:
+        cap.release()
+        return out
+    with _open_landmarker(model_path) as landmarker:
+        for start, end in wanted:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, start)
+            frames = []
+            for index in range(start, end + 1):
+                ok, bgr = cap.read()
+                if not ok:
+                    frames.append(np.full((18, 2), np.nan, dtype=np.float32))
+                    continue
+                ts = int(round(index * 1000 / fps))
+                frames.append(_detect_bgr(landmarker, bgr, ts))
+            arr = np.asarray(frames, dtype=np.float64).reshape(-1, 18, 2)
+            filled = fill_gaps(arr, max_gap=int(round(MAX_GAP_SECONDS * fps)))
+            out[(start, end)] = filled.astype(np.float32)
+    cap.release()
+    return out
+
+
 def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
     """Run Pose Landmarker on every frame. Returns (pose (T, 18, 2) at 30 fps, source fps, source frames).
 
@@ -101,9 +165,6 @@ def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
     it is the clock: the video's fps is ignored. Without it (public videos), the video fps is used.
     """
     import cv2
-    import mediapipe as mp
-    from mediapipe.tasks import python as mp_python
-    from mediapipe.tasks.python import vision
 
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
@@ -111,29 +172,16 @@ def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
     fps = cap.get(cv2.CAP_PROP_FPS) or VIDEO_FPS
     if not np.isfinite(fps) or fps <= 1:
         fps = VIDEO_FPS
-    options = vision.PoseLandmarkerOptions(
-        base_options=mp_python.BaseOptions(model_asset_path=str(model_path)),
-        running_mode=vision.RunningMode.VIDEO,
-        num_poses=1,
-    )
     frames = []
-    with vision.PoseLandmarker.create_from_options(options) as landmarker:
+    with _open_landmarker(model_path) as landmarker:
         index = 0
         while True:
             ok, bgr = cap.read()
             if not ok:
                 break
-            height, width = bgr.shape[:2]
-            rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-            image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
             ts = (int(frame_times_ms[index] - frame_times_ms[0]) if frame_times_ms is not None
                   and index < len(frame_times_ms) else int(round(index * 1000 / fps)))
-            result = landmarker.detect_for_video(image, ts)
-            if result.pose_landmarks:
-                lm = [(p.x, p.y) for p in result.pose_landmarks[0]]
-                frames.append(landmarks_to_pixels(lm, width, height))
-            else:
-                frames.append(np.full((18, 2), np.nan, dtype=np.float32))
+            frames.append(_detect_bgr(landmarker, bgr, ts))
             index += 1
     cap.release()
     raw = np.asarray(frames, dtype=np.float64).reshape(-1, 18, 2)
