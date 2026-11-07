@@ -28,20 +28,23 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.2 | Model 2 benchmark on EC3D | ✅ Done · Nov 4, 2026 |
 | 2.3 | Kafka streaming of pose and HR (replay) | ✅ Done · Nov 7, 2026 |
 | 2.4 | Models 1–2 on raw MM-Fit video (RQ4) | ✅ Done · Nov 7, 2026 · w20 only |
+| 2.4b | RQ4 on four MM-Fit videos + auto sync | ✅ Done · Nov 7, 2026 |
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
 | 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
 | 3.1 | Model 3 sequences and labels (MM-Fit) | ✅ Done · Nov 7, 2026 |
 | 3.1b | Speed-only breakdown; risk held to end of set | ✅ Done · Nov 7, 2026 |
 | 3.2 | Model 3 + RQ2/RQ3 comparisons | ✅ Done · Nov 7, 2026 · superseded by 3.2b |
 | 3.2b | Fair B1, val thresholds, exercise-only control | ✅ Done · Nov 7, 2026 |
-| 2.4b | RQ4 on four MM-Fit videos + auto sync | ⏳ In progress |
 | 3.3 | Replay coach (text; voice optional) | ✅ Done · Nov 7, 2026 |
 | 3.3b | Replay coach through Kafka (e2e latency) | ✅ Done · Nov 7, 2026 |
-| 3.4 | Evaluation and final report | ✅ Done · Nov 7, 2026 |
+| 3.4 | Evaluation and final report | ✅ Done · Nov 7, 2026 · refreshed for v1.1 |
 | 3.5 | Rehearsal + v1.0 tag | ✅ Done · Nov 7, 2026 |
+| — | Final report PDF + week 2–3 slides + v1.1 | ✅ Done · Nov 7, 2026 |
 
 ### Log
 
+- **2026-11-07 · Final report + week 2–3 slides.** `reports/AI_Workout_Coach_Final_Report.pdf`, `reports/validation2/AI_Workout_Coach_Week2-3.html`. Tag `v1.1`.
+- **2026-11-07 · Step 2.4b.** RQ4 on w00/w12/w13/w20 with auto sync. Only **w20** sync≥70% (10/12); w00/w12/w13 marked † and excluded from mean. Auto vs measured on w20: mean |Δ| **1.42** frames. Table: `reports/rq4_first_look.md`.
 - **2026-11-07 · Step 3.3b.** Coach consumes Kafka `pose.keypoints` / `watch.hr`, publishes `coach.events`. Two w20 demos (seek frame 2100): median **model 0.83 ms**, median **e2e 75 ms** (p90 e2e ~831 ms). **Slow down at rep 1 still present** (early risk ~0.40–0.45 > slow_thresh). Commands: `docs/demo.md`. Metrics: `experiments/20261107_coach_kafka/`.
 - **2026-11-07 · Step 3.2b.** Fair B1 continuous AUC **0.751** (was 0.500). B4 **0.641 ± 0.022** — does **not** beat B1 or exercise-only control (**0.773**). RQ2/RQ3 still negative for B4. Old “beats apps” claim withdrawn. Table: `reports/m3_results.md`.
 - **2026-11-07 · Step 3.1b.** Breakdown is **speed-only** (`use_form=False`); risk stays 1 from breakdown−2 to end of set. Squats breakdown rate **0.42** (was ~100% with form). Extreme: **jumping_jacks** rate **0.018** (< 5%) — reported here, not hidden. Stats: `data/processed/m3/breakdown_stats.json`.

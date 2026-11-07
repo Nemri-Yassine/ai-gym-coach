@@ -5,10 +5,18 @@ Own recordings were not available (injury). Comparison uses MM-Fit RGB (Zenodo 7
 
 **No form labels** on MM-Fit: Model 2 column is mean P(correct) only, not accuracy.
 
-**Domain shift (RQ4 finding, not a bug):** the EC3D-trained Model 2 random forest does **not** carry over to MM-Fit. Even on dataset pose, mean P(correct) on squats is about **0.08** (see table). Different skeleton source, camera and people mean `form_score < 0.5` fires on most MM-Fit squat/lunge reps — so Model 3 labels must not use form to define breakdown (speed-only from Step 3.1b).
-
 | Session | Sync within 3 fr. | M1 macro-F1 dataset (pose / both) | M1 macro-F1 MediaPipe (pose / both) | Rep MAE dataset | Rep MAE MediaPipe | M2 P(correct) ds / mp |
 |---|---:|---:|---:|---:|---:|---:|
-| w20 | 8/10 (0.80) | 0.850 / 0.660 | 0.800 / 0.480 | 0.93 | 1.56 | 0.08 / 0.14 |
+| w00 † | 0/12 (0.00) | 1.000 / 0.800 | 0.891 / 0.818 | 0.53 | 0.87 | 0.39 / 0.27 |
+| w12 † | 2/12 (0.17) | 0.778 / 0.778 | 0.778 / 0.778 | 0.32 | 1.00 | 0.25 / 0.28 |
+| w13 † | 2/12 (0.17) | 1.000 / 0.827 | 0.891 / 0.800 | 0.73 | 0.63 | 0.24 / 0.28 |
+| w20 | 10/12 (0.83) | 0.850 / 0.660 | 0.800 / 0.480 | 0.93 | 1.37 | 0.08 / 0.13 |
+| **mean** (sync≥70%) | — | 0.850 / 0.660 | 0.800 / 0.480 | 0.93 | 1.37 | 0.08 / 0.13 |
 
-Metrics: `experiments/20261107_rq4_mmfit_video/metrics.json`. Extra `test_unseen` videos (w00, w12, w13) were started from Zenodo 7672767 but not finished in time; this table is **w20 only**.
+† sync < 70% of sets within 3 frames — shown but excluded from the mean.
+
+**Domain shift (RQ4 finding, not a bug):** the EC3D-trained Model 2 random forest does **not** carry over to MM-Fit. Even on dataset pose, mean P(correct) on squats is about **0.08**. Different skeleton source, camera and people.
+
+**Auto sync validation (w20):** fitted `source=auto` vs config measured map — mean |Δ| **1.42** frames on sampled video frames (frac_within_3=0.8333333333333334).
+
+Metrics: `experiments/20261107_rq4_mmfit_video/metrics.json`.

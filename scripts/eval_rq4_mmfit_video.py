@@ -260,18 +260,51 @@ def main(argv=None):
         "| Session | Sync within 3 fr. | M1 macro-F1 dataset (pose / both) | M1 macro-F1 MediaPipe (pose / both) | Rep MAE dataset | Rep MAE MediaPipe | M2 P(correct) ds / mp |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
+    good = []
     for m in results:
         sync = m.get("sync") or {}
         frac = sync.get("frac_within_3")
+        poor = frac is not None and frac < 0.70
+        if not poor:
+            good.append(m)
+        mark = " †" if poor else ""
         sync_s = "—" if frac is None else f"{sync.get('n_within_3')}/{sync.get('n_sets')} ({frac:.2f})"
         lines.append(
-            f"| {m['session']} | {sync_s} | "
+            f"| {m['session']}{mark} | {sync_s} | "
             f"{m['m1_macro_f1_dataset_pose_only']:.3f} / {m['m1_macro_f1_dataset_both']:.3f} | "
             f"{m['m1_macro_f1_mediapipe_pose_only']:.3f} / {m['m1_macro_f1_mediapipe_both']:.3f} | "
             f"{m['rep_mae_dataset']:.2f} | {m['rep_mae_mediapipe']:.2f} | "
-            f"{m['form_p_correct_mean_dataset']:.2f} / {m['form_p_correct_mean_mediapipe']:.2f} |"
+            f"{(m['form_p_correct_mean_dataset'] or 0):.2f} / {(m['form_p_correct_mean_mediapipe'] or 0):.2f} |"
         )
-    lines += ["", f"Metrics: `{run / 'metrics.json'}`"]
+    if good:
+        def avg(key):
+            vals = [g[key] for g in good if g.get(key) is not None]
+            return float(np.mean(vals)) if vals else float("nan")
+        lines.append(
+            f"| **mean** (sync≥70%) | — | "
+            f"{avg('m1_macro_f1_dataset_pose_only'):.3f} / {avg('m1_macro_f1_dataset_both'):.3f} | "
+            f"{avg('m1_macro_f1_mediapipe_pose_only'):.3f} / {avg('m1_macro_f1_mediapipe_both'):.3f} | "
+            f"{avg('rep_mae_dataset'):.2f} | {avg('rep_mae_mediapipe'):.2f} | "
+            f"{avg('form_p_correct_mean_dataset'):.2f} / {avg('form_p_correct_mean_mediapipe'):.2f} |"
+        )
+    lines += [
+        "",
+        "† sync < 70% of sets within 3 frames — shown but excluded from the mean.",
+        "",
+        "**Domain shift (RQ4 finding, not a bug):** the EC3D-trained Model 2 random forest does **not** carry "
+        "over to MM-Fit. Even on dataset pose, mean P(correct) on squats is about **0.08**. "
+        "Different skeleton source, camera and people.",
+        "",
+    ]
+    w20 = sync_all.get("w20") or {}
+    if w20.get("vs_measured_mean_abs") is not None:
+        lines.append(
+            f"**Auto sync validation (w20):** fitted `source=auto` vs config measured map — "
+            f"mean |Δ| **{w20['vs_measured_mean_abs']:.2f}** frames on sampled video frames "
+            f"(frac_within_3={w20.get('frac_within_3')})."
+        )
+        lines.append("")
+    lines.append(f"Metrics: `experiments/{run.name}/metrics.json`.")
     REPORTS.mkdir(parents=True, exist_ok=True)
     (REPORTS / "rq4_first_look.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("wrote", REPORTS / "rq4_first_look.md", flush=True)

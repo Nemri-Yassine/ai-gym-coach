@@ -98,7 +98,7 @@ def fit_sync_for_session(session_id, video_path, max_sets=12):
         raise RuntimeError(f"{session_id}: only {len(video_anchors)} sync anchors")
     fit = fit_session_from_set_offsets(video_anchors, sensor_anchors)
     fit["session"] = session_id
-    fit["source"] = "cross_corr_midhip"
+    fit["source"] = "auto"
     return fit
 
 
@@ -117,15 +117,19 @@ def process_session(session_id, fit_sync=False, max_sync_sets=12):
 
     all_fits = load_sync()
     if fit_sync or session_id not in all_fits:
-        if fit_sync or session_id != "w20":
-            print(f"fitting sync for {session_id}…", flush=True)
-            fit = fit_sync_for_session(session_id, video_path, max_sets=max_sync_sets)
-        else:
-            fit = default_w20_fit()
-            fit["session"] = session_id
-            fit["n_sets"] = None
-            fit["n_within_3"] = None
-            fit["frac_within_3"] = None
+        print(f"fitting sync for {session_id}…", flush=True)
+        fit = fit_sync_for_session(session_id, video_path, max_sets=max_sync_sets)
+        if session_id == "w20":
+            measured = default_w20_fit()
+            fit["measured_config"] = measured
+            # Compare auto vs measured at a few video frames
+            diffs = []
+            for vf in (1000, 5000, 20000, 50000):
+                auto_s = sensor_from_video(vf, fit["a"], fit["b"], fit["pivot"])
+                meas_s = sensor_from_video(vf, measured["a"], measured["b"], measured["pivot"])
+                diffs.append(float(auto_s - meas_s))
+            fit["vs_measured_frame_diffs"] = diffs
+            fit["vs_measured_mean_abs"] = float(np.mean(np.abs(diffs)))
         all_fits[session_id] = fit
         save_sync(all_fits)
         print(json.dumps(fit, indent=2), flush=True)
