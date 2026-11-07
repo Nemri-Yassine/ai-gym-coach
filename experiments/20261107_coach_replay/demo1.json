@@ -1,0 +1,55 @@
+﻿set0 rep1: Slow down, control the movement. (risk=0.59, 1 ms)
+set0 rep5: Good rep. (risk=0.19, 0 ms)
+set1 rep1: Slow down, control the movement. (risk=0.58, 0 ms)
+set1 rep4: Good rep. (risk=0.19, 0 ms)
+set2 rep1: Slow down, control the movement. (risk=0.58, 0 ms)
+set2 rep3: Good rep. (risk=0.27, 0 ms)
+{
+  "session": "w20",
+  "messages": [
+    {
+      "set": 0,
+      "rep": 1,
+      "msg": "Slow down, control the movement.",
+      "risk": 0.591086208820343,
+      "latency_ms": 1.443499990273267
+    },
+    {
+      "set": 0,
+      "rep": 5,
+      "msg": "Good rep.",
+      "risk": 0.18860377371311188,
+      "latency_ms": 0.30899999546818435
+    },
+    {
+      "set": 1,
+      "rep": 1,
+      "msg": "Slow down, control the movement.",
+      "risk": 0.5826658010482788,
+      "latency_ms": 0.3318999952170998
+    },
+    {
+      "set": 1,
+      "rep": 4,
+      "msg": "Good rep.",
+      "risk": 0.1919722706079483,
+      "latency_ms": 0.3082000039285049
+    },
+    {
+      "set": 2,
+      "rep": 1,
+      "msg": "Slow down, control the movement.",
+      "risk": 0.5803832411766052,
+      "latency_ms": 0.42070000199601054
+    },
+    {
+      "set": 2,
+      "rep": 3,
+      "msg": "Good rep.",
+      "risk": 0.26683539152145386,
+      "latency_ms": 0.29889999132137746
+    }
+  ],
+  "median_latency_ms": 0.3232000017305836,
+  "n_reps": 30
+}

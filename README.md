@@ -31,10 +31,17 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
 | 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
 | 3.1 | Model 3 sequences and labels (MM-Fit) | ✅ Done · Nov 7, 2026 |
-| 3.2–3.5 | Model 3 train, coach, report, tag | ⬜ |
+| 3.2 | Model 3 + RQ2/RQ3 comparisons | ✅ Done · Nov 7, 2026 |
+| 3.3 | Replay coach (text; voice optional) | ✅ Done · Nov 7, 2026 |
+| 3.4 | Evaluation and final report | ✅ Done · Nov 7, 2026 |
+| 3.5 | Rehearsal + v1.0 tag | ✅ Done · Nov 7, 2026 |
 
 ### Log
 
+- **2026-11-07 · Step 3.5.** Fresh `pytest -q` green; coach replay run twice; tag `v1.0`.
+- **2026-11-07 · Step 3.4.** `reports/results.md` + `reports/final_report.md` (limits: no own data, no RPE, within-session baseline, shared speed label, watch untested, MM-Fit reps assumed correct).
+- **2026-11-07 · Step 3.3.** Replay coach on w20 (text, `--no-voice`): median latency rep→message **< 1 ms** offline; voice path present but optional. `experiments/20261107_coach_replay/`.
+- **2026-11-07 · Step 3.2.** Model 3 B1–B5 on test_unseen: B4 AUC **0.803** (does **not** win). RQ2: B4 0.803 vs B3 0.814; RQ3: B4 0.803 vs B2 0.884; B4 beats B1 (0.50). Table: `reports/m3_results.md`.
 - **2026-11-07 · Step 3.1.** Model 3 set sequences from MM-Fit only: 615 sets (train 300 / val 86 / test_unseen 139). Labels: fatigue position, breakdown (speed −20% or form_score < 0.5), risk (breakdown within 2 reps). General + personal norms; no RPE; causal features.
 - **2026-11-07 · Step 2.6.** Week 2 package in `reports/week2.md` (M2 conclusion, Kafka, RQ4 w20, rep table, data-source change).
 - **2026-11-07 · Step 2.5.** Spark rep table: **5,918** MM-Fit reps, 616 sets; within-session baselines (`Window.partitionBy(session, exercise).orderBy(set_idx).rowsBetween(unboundedPreceding, -1)`); `has_baseline` rate 0.67. No RPE. Cross-session pseudo-users skipped (time). Summary: `data/processed/rep_table_summary.json`.

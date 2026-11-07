@@ -1,0 +1,102 @@
+{
+  "demo1": {
+    "session": "w20",
+    "messages": [
+      {
+        "set": 0,
+        "rep": 1,
+        "msg": "Slow down, control the movement.",
+        "risk": 0.591086208820343,
+        "latency_ms": 1.916299996082671
+      },
+      {
+        "set": 0,
+        "rep": 5,
+        "msg": "Good rep.",
+        "risk": 0.18860377371311188,
+        "latency_ms": 0.3226999979233369
+      },
+      {
+        "set": 1,
+        "rep": 1,
+        "msg": "Slow down, control the movement.",
+        "risk": 0.5826658010482788,
+        "latency_ms": 0.3826000029221177
+      },
+      {
+        "set": 1,
+        "rep": 4,
+        "msg": "Good rep.",
+        "risk": 0.1919722706079483,
+        "latency_ms": 0.2680999896256253
+      },
+      {
+        "set": 2,
+        "rep": 1,
+        "msg": "Slow down, control the movement.",
+        "risk": 0.5803832411766052,
+        "latency_ms": 0.34220000088680536
+      },
+      {
+        "set": 2,
+        "rep": 3,
+        "msg": "Good rep.",
+        "risk": 0.26683539152145386,
+        "latency_ms": 0.26610000350046903
+      }
+    ],
+    "median_latency_ms": 0.3226999979233369,
+    "n_reps": 30
+  },
+  "demo2": {
+    "session": "w20",
+    "messages": [
+      {
+        "set": 0,
+        "rep": 1,
+        "msg": "Slow down, control the movement.",
+        "risk": 0.591086208820343,
+        "latency_ms": 0.5138999986229464
+      },
+      {
+        "set": 0,
+        "rep": 5,
+        "msg": "Good rep.",
+        "risk": 0.18860377371311188,
+        "latency_ms": 0.3715999919222668
+      },
+      {
+        "set": 1,
+        "rep": 1,
+        "msg": "Slow down, control the movement.",
+        "risk": 0.5826658010482788,
+        "latency_ms": 0.4200999974273145
+      },
+      {
+        "set": 1,
+        "rep": 4,
+        "msg": "Good rep.",
+        "risk": 0.1919722706079483,
+        "latency_ms": 0.3615000023273751
+      },
+      {
+        "set": 2,
+        "rep": 1,
+        "msg": "Slow down, control the movement.",
+        "risk": 0.5803832411766052,
+        "latency_ms": 0.43649999133776873
+      },
+      {
+        "set": 2,
+        "rep": 3,
+        "msg": "Good rep.",
+        "risk": 0.26683539152145386,
+        "latency_ms": 0.49330000183545053
+      }
+    ],
+    "median_latency_ms": 0.428699997428339,
+    "n_reps": 30
+  },
+  "median_latency_ms": 0.3226999979233369,
+  "voice": false
+}
