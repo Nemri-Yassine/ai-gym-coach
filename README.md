@@ -19,7 +19,8 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 0 | Project proposal and validation presentation | ✅ Done · Oct 7, 2026 |
 | 1 | Project structure, git, dataset loaders | ✅ Done · Oct 7, 2026 |
 | 1.1 | Environment, Spark helper, run tracking | ✅ Done · Oct 22, 2026 |
-| 1.2 | Capture decision, recorder, recording protocol | ✅ Code done · Oct 22, 2026 · sessions not recorded yet |
+| 1.2 | Capture decision, recorder, recording protocol | ✅ Code done · Oct 22, 2026 · gym station Nov 9 |
+| — | Gym station (iPhone Wi-Fi → laptop + watch HR) | ✅ Done · Nov 9, 2026 |
 | 1.3 | Spark sync of MM-Fit to Parquet | ✅ Done · Oct 22, 2026 |
 | 1.4 | One skeleton for every source, Model 1 windows | ✅ Done · Oct 22, 2026 |
 | 1.5 | Model 1 benchmark and rep counting | ✅ Done · Oct 22, 2026 |
@@ -43,6 +44,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-09 · Gym station.** iPhone Safari → laptop over HTTPS/WebSocket (`python -m awc.station`); live chunk upload to `data/raw/own_recordings/`; BLE or Pulsoid HR; clock sync; control UI + QR. Docs: `docs/gym_station.md`. Check: `scripts/station_check.py`.
 - **2026-11-07 · Final report + week 2–3 slides.** `reports/AI_Workout_Coach_Final_Report.pdf`, `reports/validation2/AI_Workout_Coach_Week2-3.html`. Tag `v1.1`.
 - **2026-11-07 · Step 2.4b.** RQ4 on w00/w12/w13/w20 with auto sync. Only **w20** sync≥70% (10/12); w00/w12/w13 marked † and excluded from mean. Auto vs measured on w20: mean |Δ| **1.42** frames. Table: `reports/rq4_first_look.md`.
 - **2026-11-07 · Step 3.3b.** Coach consumes Kafka `pose.keypoints` / `watch.hr`, publishes `coach.events`. Two w20 demos (seek frame 2100): median **model 0.83 ms**, median **e2e 75 ms** (p90 e2e ~831 ms). **Slow down at rep 1 still present** (early risk ~0.40–0.45 > slow_thresh). Commands: `docs/demo.md`. Metrics: `experiments/20261107_coach_kafka/`.

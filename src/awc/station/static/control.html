@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWC Gym Station · Control</title>
+<style>
+:root{--bg:#0B1016;--panel:#141C25;--line:#26313C;--ink:#EEF2F6;--muted:#8C9AA7;--accent:#7393FF;--rec:#FF5A5F;--ok:#4CC487;--warn:#EFB043}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:18px;display:grid;gap:14px}
+h1{font:800 28px/1 system-ui;margin:0} h1 b{color:var(--accent)}
+.sub{color:var(--muted);margin:4px 0 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.lbl{font:700 11px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:inherit}
+.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:700;background:var(--line);color:inherit;cursor:pointer}
+.btn.primary{background:var(--accent);color:#0B1016}
+.btn.rec{background:var(--rec);color:#fff}
+.btn.ok{background:var(--ok);color:#0B1016}
+.btn:disabled{opacity:.4}
+.ex{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.ex button[aria-pressed=true]{background:var(--accent);color:#0B1016}
+.preview{width:100%;aspect-ratio:3/4;max-height:52vh;object-fit:cover;background:#000;border-radius:12px}
+.bpm{font:800 64px/1 system-ui;color:var(--rec)}
+.bpm.warn{color:var(--warn)}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--line);font:700 12px ui-monospace,monospace}
+.pill.rec{background:var(--rec);color:#fff}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.qr{width:160px;height:160px;background:#fff;border-radius:8px}
+.rpe{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.rpe button[aria-pressed=true]{background:var(--accent);color:#0B1016}
+.stepper{display:flex;gap:10px;align-items:center}
+.stepper button{width:48px;height:48px;font-size:22px;font-weight:800}
+.hidden{display:none!important}
+.chart{width:100%;height:70px;background:var(--bg);border-radius:8px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div>
+    <h1>AWC <b>Gym Station</b></h1>
+    <p class="sub">Laptop control · iPhone camera over Wi-Fi · watch HR</p>
+  </div>
+
+  <section class="card" id="setup">
+    <div class="grid">
+      <div>
+        <div class="lbl">Session</div>
+        <div class="row">
+          <select id="user"><option>yassine</option><option>partner</option></select>
+          <input id="sessionId" value="s01" style="width:100px">
+          <select id="sessionType"><option>fatigue</option><option>form</option><option>mixed</option></select>
+        </div>
+        <div class="lbl" style="margin-top:12px">Camera source</div>
+        <div class="row">
+          <select id="camSource"><option value="iphone">iPhone Safari (Wi-Fi)</option><option value="webcam">Webcam fallback (Camo/Iriun/DroidCam)</option></select>
+        </div>
+        <div class="lbl" style="margin-top:12px">Watch HR</div>
+        <div class="row">
+          <select id="hrSource"><option value="ble">A · Bluetooth LE</option><option value="pulsoid">B · Pulsoid</option><option value="demo">Demo</option><option value="none">None</option></select>
+          <input id="pulsoidToken" type="password" placeholder="Pulsoid token" class="hidden" style="min-width:220px">
+          <button class="btn" id="hrConnect">Connect HR</button>
+        </div>
+        <p class="sub" id="hrStatus">HR idle</p>
+        <button class="btn primary" id="startSession" style="margin-top:12px">Start session</button>
+      </div>
+      <div>
+        <div class="lbl">Phone URL + QR</div>
+        <p class="sub" id="phoneUrl">…</p>
+        <img class="qr" id="qr" alt="QR">
+        <p class="sub" id="phoneStatus">phone: disconnected</p>
+        <p class="sub" id="clockStatus">clock RTT: —</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hidden" id="session">
+    <div class="grid">
+      <div>
+        <img class="preview" id="preview" alt="preview">
+        <div class="row" style="margin-top:8px">
+          <span class="pill" id="recPill">ready</span>
+          <span id="timer">0:00</span>
+          <span id="upload">upload —</span>
+        </div>
+      </div>
+      <div>
+        <div class="lbl">Heart rate</div>
+        <div class="bpm" id="bpm">--</div>
+        <canvas class="chart" id="chart"></canvas>
+        <div class="lbl" style="margin-top:10px">Exercise</div>
+        <div class="ex" id="exGrid"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn ok" id="setBtn">Start set · Space</button>
+          <button class="btn" id="clap">Clap</button>
+          <button class="btn" id="endSession">End session</button>
+        </div>
+        <p class="sub" id="rest">rest 0:00</p>
+      </div>
+    </div>
+
+    <div class="card" id="details" style="margin-top:12px" hidden>
+      <div class="lbl">Save set #<span id="saveSetN"></span></div>
+      <div class="stepper"><button id="repMinus">−</button><b id="reps">10</b><button id="repPlus">+</button><span class="sub">reps</span></div>
+      <div class="lbl" style="margin-top:8px">RPE</div>
+      <div class="rpe" id="rpe"></div>
+      <div class="lbl" style="margin-top:8px">Form</div>
+      <select id="form"></select>
+      <div class="row" style="margin-top:8px">
+        <input id="weight" placeholder="weight kg" style="width:110px">
+        <input id="note" placeholder="note" style="flex:1;min-width:160px">
+      </div>
+      <button class="btn primary" id="saveSet" style="margin-top:10px" disabled>Save set</button>
+    </div>
+
+    <table class="table" style="margin-top:12px">
+      <thead><tr><th>#</th><th>exercise</th><th>reps</th><th>RPE</th><th>form</th><th>dur</th><th>HR mean/peak</th><th>video</th></tr></thead>
+      <tbody id="setTable"></tbody>
+    </table>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const S = {
+  exercise: "squats", reps: 10, rpe: null, formBy: {}, forms: {},
+  sessionOn: false, recording: false, setStart: null, restSince: Date.now(),
+  pending: null,
+};
+const EX = ["squats","lunges","pushups","situps","dumbbell_rows","bicep_curls","jumping_jacks","tricep_extensions","dumbbell_shoulder_press","lateral_shoulder_raises","plank"];
+
+async function api(path, body){
+  const opts = body === undefined ? {} : { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  return r.json();
+}
+function mmss(s){ s=Math.max(0,s|0); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
+
+(async function init(){
+  const setup = await api("/api/setup");
+  $("#phoneUrl").textContent = setup.phone_url;
+  if (setup.qr_data_url) $("#qr").src = setup.qr_data_url;
+  S.formBy = setup.form_by_exercise || {};
+  $("#exGrid").innerHTML = EX.map(e => `<button class="btn" data-e="${e}" aria-pressed="${e==="squats"}">${e.replaceAll("_"," ")}</button>`).join("");
+  $("#exGrid").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.exercise = b.dataset.e;
+    [...$("#exGrid").children].forEach(x => x.setAttribute("aria-pressed", x===b));
+    fillForm();
+  };
+  $("#rpe").innerHTML = Array.from({length:10},(_,i)=>`<button class="btn" data-v="${i+1}">${i+1}</button>`).join("");
+  $("#rpe").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.rpe = +b.dataset.v;
+    [...$("#rpe").children].forEach(x => x.setAttribute("aria-pressed", x===b));
+    $("#saveSet").disabled = !(S.pending && S.pending.upload_complete && S.rpe);
+  };
+  fillForm();
+  $("#hrSource").onchange = () => {
+    $("#pulsoidToken").classList.toggle("hidden", $("#hrSource").value !== "pulsoid");
+  };
+})();
+
+function fillForm(){
+  const opts = S.formBy[S.exercise] || ["correct"];
+  $("#form").innerHTML = opts.map(o => `<option>${o}</option>`).join("");
+}
+
+$("#hrConnect").onclick = async () => {
+  const source = $("#hrSource").value;
+  const body = { source, token: $("#pulsoidToken").value.trim() };
+  const r = await api("/api/hr/connect", body);
+  $("#hrStatus").textContent = r.error || `HR source ${source}`;
+};
+
+$("#startSession").onclick = async () => {
+  const r = await api("/api/session/start", {
+    user: $("#user").value, session_id: $("#sessionId").value.trim() || "s01",
+    session_type: $("#sessionType").value,
+  });
+  if (r.error) return alert(r.error);
+  S.sessionOn = true; S.restSince = Date.now();
+  $("#setup").classList.add("hidden"); $("#session").classList.remove("hidden");
+};
+
+async function toggleSet(){
+  if (!S.sessionOn) return;
+  if (!S.recording) {
+    if (!$("#details").hidden) return alert("Save the previous set first");
+    const r = await api("/api/set/start", {});
+    if (r.error) return alert(r.error);
+    S.recording = true; S.setStart = Date.now();
+    $("#setBtn").textContent = "End set · Space"; $("#setBtn").className = "btn rec";
+    $("#recPill").textContent = `REC set ${r.set}`; $("#recPill").className = "pill rec";
+  } else {
+    await api("/api/set/end", {});
+    S.recording = false; S.restSince = Date.now();
+    $("#setBtn").textContent = "Start set · Space"; $("#setBtn").className = "btn ok";
+    $("#recPill").textContent = "describe"; $("#recPill").className = "pill";
+  }
+}
+$("#setBtn").onclick = toggleSet;
+window.addEventListener("keydown", e => {
+  if (e.code === "Space" && S.sessionOn && document.activeElement.tagName !== "INPUT") {
+    e.preventDefault(); toggleSet();
+  }
+});
+$("#clap").onclick = () => api("/api/clap", {});
+$("#endSession").onclick = async () => { await api("/api/session/end", {}); location.reload(); };
+$("#repMinus").onclick = () => { S.reps = Math.max(1, S.reps-1); $("#reps").textContent = S.reps; };
+$("#repPlus").onclick = () => { S.reps += 1; $("#reps").textContent = S.reps; };
+
+$("#saveSet").onclick = async () => {
+  if (!S.pending || !S.rpe) return;
+  const body = {
+    exercise: S.exercise, reps: S.reps, rpe: S.rpe, form_label: $("#form").value,
+    weight_kg: $("#weight").value, note: $("#note").value,
+  };
+  const r = await api("/api/set/save", body);
+  if (r.error) return alert(r.error);
+  S.pending = null; S.rpe = null;
+  $("#details").hidden = true; $("#saveSet").disabled = true;
+  [...$("#rpe").children].forEach(x => x.setAttribute("aria-pressed","false"));
+};
+
+function drawChart(series){
+  const c = $("#chart"), g = c.getContext("2d");
+  const w = c.width = c.clientWidth, h = c.height = c.clientHeight;
+  g.clearRect(0,0,w,h);
+  if (!series || series.length < 2) return;
+  const ys = series.map(x => x[1]);
+  const min = Math.min(...ys)-5, max = Math.max(...ys)+5;
+  g.strokeStyle = "#FF5A5F"; g.lineWidth = 2; g.beginPath();
+  series.forEach((p,i) => {
+    const x = i/(series.length-1)*w;
+    const y = h - (p[1]-min)/(max-min)*h;
+    i ? g.lineTo(x,y) : g.moveTo(x,y);
+  });
+  g.stroke();
+}
+
+setInterval(async () => {
+  const st = await api("/api/status");
+  $("#phoneStatus").textContent = st.phone_connected ? `phone: connected${st.phone_battery!=null?` · batt ${st.phone_battery}%`:""}` : "phone: disconnected";
+  $("#clockStatus").textContent = st.clock_rtt_ms!=null ? `clock RTT median ${st.clock_rtt_ms.toFixed(1)} ms (offset ${st.clock_offset_ms?.toFixed?.(1)} ms)` : "clock RTT: —";
+  $("#hrStatus").textContent = `HR ${st.hr_status}`;
+  if (st.hr_bpm != null) {
+    $("#bpm").textContent = Math.round(st.hr_bpm);
+    $("#bpm").className = "bpm" + (st.hr_age_s != null && st.hr_age_s > 5 ? " warn" : "");
+  }
+  drawChart(st.hr_series);
+  if (st.preview_fresh_ms != null && st.preview_fresh_ms < 2000) {
+    $("#preview").src = "/api/preview.jpg?t=" + Date.now();
+  }
+  const now = Date.now();
+  if (S.recording && S.setStart) $("#timer").textContent = mmss((now-S.setStart)/1000);
+  else $("#timer").textContent = "0:00";
+  const rest = (now - S.restSince)/1000;
+  $("#rest").textContent = `rest ${mmss(rest)}` + (rest > 90 && !S.recording ? " · take a break?" : "");
+  $("#rest").style.color = rest > 90 && !S.recording ? "var(--warn)" : "";
+  if (st.current_set && st.upload[st.current_set]) {
+    const u = st.upload[st.current_set];
+    $("#upload").textContent = `upload ${u.acked}/${u.received} (pending ${u.pending})`;
+  }
+  if (st.pending_labels) {
+    S.pending = st.pending_labels;
+    $("#details").hidden = false;
+    $("#saveSetN").textContent = st.pending_labels.set;
+    $("#saveSet").disabled = !(st.pending_labels.upload_complete && S.rpe);
+    if (!st.pending_labels.upload_complete) $("#saveSet").textContent = "Waiting for upload…";
+    else $("#saveSet").textContent = "Save set";
+  }
+}, 500);
+</script>
+</body>
+</html>

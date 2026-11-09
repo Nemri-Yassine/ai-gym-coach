@@ -50,6 +50,12 @@ KAFKA_BOOTSTRAP = "localhost:9092"
 KAFKA_TOPICS = ("pose.keypoints", "watch.hr", "watch.imu", "coach.events")
 HADOOP_HOME = Path("C:/hadoop")
 
+# Gym station (iPhone Safari → laptop over Wi-Fi). Certs stay outside OneDrive / git.
+STATION_PORT = 8443
+STATION_CERT_DIR = TMP / "station_certs"
+STATION_CERT_FILE = STATION_CERT_DIR / "station.pem"
+STATION_KEY_FILE = STATION_CERT_DIR / "station-key.pem"
+
 # Official MM-Fit split from the authors' train_multimodal_ar.py.
 # test_unseen is the main RQ1 test (people never seen in training).
 MMFIT_SPLIT = {

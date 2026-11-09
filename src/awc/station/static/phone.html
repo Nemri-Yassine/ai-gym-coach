@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1016">
+<title>AWC Phone · Gym Station</title>
+<style>
+:root{--bg:#0B1016;--panel:#141C25;--line:#26313C;--ink:#EEF2F6;--muted:#8C9AA7;--accent:#7393FF;--rec:#FF5A5F;--ok:#4CC487;--warn:#EFB043;--f:system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 var(--f)}
+.wrap{max-width:560px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+h1{font:800 22px/1.1 system-ui;margin:0} h1 b{color:var(--accent)}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.btn{border:0;border-radius:12px;padding:18px;font-weight:800;font-size:18px;background:var(--accent);color:#0B1016;width:100%}
+.btn:disabled{opacity:.4}
+.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;max-height:55vh}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.hud{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;pointer-events:none}
+.pill{background:rgba(11,16,22,.75);border-radius:999px;padding:6px 12px;font:700 13px ui-monospace,monospace}
+.pill.rec{background:var(--rec);color:#fff}
+.warn{border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:10px;font-size:14px}
+.status{font:13px ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
+canvas{display:none}
+video#wake{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div>
+    <h1>AWC <b>Phone</b></h1>
+    <p class="sub">Laptop controls start/stop. Keep this screen open.</p>
+  </div>
+  <div class="warn" id="warn">Don't lock the phone / don't switch apps while filming.</div>
+  <div class="card">
+    <button class="btn" id="connectCam">Connect camera</button>
+    <p class="status" id="line">waiting for camera tap…</p>
+  </div>
+  <div class="cam" id="camBox" hidden>
+    <video id="preview" autoplay playsinline muted></video>
+    <div class="hud"><span class="pill" id="pill">idle</span><span class="pill" id="batt">batt —</span></div>
+  </div>
+</main>
+<video id="wake" muted playsinline loop></video>
+<canvas id="cv"></canvas>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const S = {
+  stream: null, recorder: null, mime: "", ws: NoneLike(),
+  setIndex: null, seq: 0, pending: new Map(), frames: [],
+  recording: false, chunksSent: 0, wake: null,
+};
+function NoneLike(){ return {readyState:3, send(){}, close(){}}; }
+
+function setLine(t){ $("#line").textContent = t; }
+function wsUrl(){
+  const u = new URL(location.href);
+  u.protocol = u.protocol === "https:" ? "wss:" : "ws:";
+  u.pathname = "/ws/phone"; u.search = ""; u.hash = "";
+  return u.toString();
+}
+async function wakeLock(){
+  try { S.wake = await navigator.wakeLock?.request("screen"); } catch(e) {}
+  // muted looping video fallback
+  const w = $("#wake");
+  if (!S.wake && w.captureStream) {
+    const c = document.createElement("canvas"); c.width=2; c.height=2;
+    c.getContext("2d").fillRect(0,0,2,2);
+    w.srcObject = c.captureStream(1);
+    w.play().catch(()=>{});
+  }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState==="visible") wakeLock(); });
+
+function pickMime(){
+  return ["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"]
+    .find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
+}
+
+$("#connectCam").onclick = async () => {
+  try {
+    S.stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+    });
+    const v = $("#preview"); v.srcObject = S.stream; await v.play().catch(()=>{});
+    S.mime = pickMime();
+    $("#camBox").hidden = false; $("#connectCam").disabled = true;
+    await wakeLock();
+    connectWs();
+    startPreviewLoop();
+    batteryLoop();
+    setLine("camera on · connecting to laptop…");
+  } catch (e) {
+    setLine("camera error: " + (e.message || e.name));
+  }
+};
+
+function connectWs(){
+  const ws = new WebSocket(wsUrl());
+  S.ws = ws;
+  ws.onopen = () => {
+    const st = S.stream?.getVideoTracks()?.[0]?.getSettings?.() || {};
+    ws.send(JSON.stringify({
+      type: "hello", ua: navigator.userAgent, mime: S.mime,
+      resolution: `${st.width||"?"}x${st.height||"?"}`, model: navigator.userAgent,
+      battery: S.battery,
+    }));
+    setLine(statusText());
+  };
+  ws.onclose = () => { setLine("disconnected · retrying…"); setTimeout(connectWs, 1500); };
+  ws.onmessage = ev => {
+    let msg; try { msg = JSON.parse(ev.data); } catch(e) { return; }
+    if (msg.type === "ping") {
+      ws.send(JSON.stringify({ type: "pong", t0: msg.t0, phone_ts: Date.now() }));
+    } else if (msg.type === "start_set") {
+      startSet(msg.set);
+    } else if (msg.type === "end_set") {
+      endSet();
+    } else if (msg.type === "ack_chunk") {
+      S.pending.delete(msg.seq);
+    } else if (msg.type === "set_done_ack") {
+      setLine(statusText() + ` · upload ${msg.complete ? "complete" : "waiting chunks"}`);
+    }
+  };
+}
+
+function statusText(){
+  const st = S.ws.readyState === 1 ? "connected" : "offline";
+  const rec = S.recording ? `recording set ${S.setIndex}` : "idle";
+  return `${st} · ${rec} · pending ${S.pending.size}`;
+}
+
+function startSet(n){
+  if (!S.stream) return;
+  S.setIndex = n; S.seq = 0; S.pending.clear(); S.frames = []; S.chunksSent = 0; S.recording = true;
+  S.phoneStart = Date.now();
+  const opts = S.mime ? { mimeType: S.mime, videoBitsPerSecond: 5e6 } : { videoBitsPerSecond: 5e6 };
+  const rec = new MediaRecorder(S.stream, opts);
+  rec.ondataavailable = async e => {
+    if (!e.data || !e.data.size) return;
+    const seq = S.seq++;
+    const buf = await e.data.arrayBuffer();
+    S.pending.set(seq, buf);
+    await uploadChunk(seq, buf);
+  };
+  rec.onstop = () => {
+    S.recording = false;
+    flushFrames();
+    if (S.ws.readyState === 1) {
+      S.ws.send(JSON.stringify({
+        type: "set_done", set: S.setIndex, n_chunks: S.seq,
+        phone_start_ms: S.phoneStart, phone_end_ms: Date.now(),
+      }));
+    }
+    $("#pill").textContent = `set ${S.setIndex} · done`;
+    $("#pill").className = "pill";
+    setLine(statusText());
+  };
+  rec.start(1000);
+  S.recorder = rec;
+  frameLoop();
+  $("#pill").textContent = `REC set ${n}`;
+  $("#pill").className = "pill rec";
+  setLine(statusText());
+}
+
+function endSet(){
+  if (!S.recorder) return;
+  try { S.recorder.requestData?.(); } catch(e) {}
+  S.recorder.stop();
+  S.recorder = null;
+}
+
+async function uploadChunk(seq, buf){
+  const url = `/api/upload/${S.setIndex}/${seq}`;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      const res = await fetch(url, { method: "POST", body: buf, headers: { "Content-Type": "application/octet-stream" } });
+      if (res.ok) {
+        const j = await res.json();
+        S.pending.delete(seq);
+        S.chunksSent++;
+        setLine(statusText());
+        return j;
+      }
+    } catch (e) {}
+    await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+  }
+}
+
+function frameLoop(){
+  const v = $("#preview");
+  if (!v.requestVideoFrameCallback) return;
+  const epoch = t => Math.round(performance.timeOrigin + t);
+  const cb = (now, meta) => {
+    if (!S.recording) return;
+    S.frames.push(epoch(meta.captureTime ?? meta.expectedDisplayTime ?? now));
+    if (S.frames.length >= 30) flushFrames();
+    v.requestVideoFrameCallback(cb);
+  };
+  v.requestVideoFrameCallback(cb);
+}
+function flushFrames(){
+  if (!S.frames.length || S.ws.readyState !== 1) return;
+  S.ws.send(JSON.stringify({ type: "frames", set: S.setIndex, frames: S.frames.slice() }));
+  S.frames = [];
+}
+
+function startPreviewLoop(){
+  const v = $("#preview"), c = $("#cv"), g = c.getContext("2d");
+  setInterval(() => {
+    if (!S.stream || S.ws.readyState !== 1) return;
+    const w = 480, h = Math.round(480 * (v.videoHeight || 720) / (v.videoWidth || 1280));
+    c.width = w; c.height = h;
+    g.drawImage(v, 0, 0, w, h);
+    c.toBlob(async blob => {
+      if (!blob) return;
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      let bin = "";
+      for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+      const b64 = btoa(bin);
+      try { S.ws.send(JSON.stringify({ type: "preview", jpeg_b64: b64 })); } catch(e) {}
+    }, "image/jpeg", 0.6);
+  }, 250);
+}
+
+async function batteryLoop(){
+  try {
+    const b = await navigator.getBattery?.();
+    if (!b) return;
+    const paint = () => {
+      S.battery = Math.round(b.level * 100);
+      $("#batt").textContent = `batt ${S.battery}%`;
+      if (S.ws.readyState === 1) S.ws.send(JSON.stringify({ type: "status", battery: S.battery }));
+    };
+    paint(); b.addEventListener("levelchange", paint);
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
