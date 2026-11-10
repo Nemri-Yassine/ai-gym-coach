@@ -16,6 +16,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from demo_video import compress, resolve_own, run, run_side_by_side  # noqa: E402
 
 OUT = ROOT / "reports" / "validation2" / "demo" / "week2"
+NORM = ["-vf", "fps=30,scale=1920:1080,setsar=1,format=yuv420p", "-c:v", "libx264", "-preset", "medium",
+        "-crf", "26", "-r", "30", "-video_track_timescale", "30000", "-an"]
 LOPO_SUMMARY = ROOT / "experiments" / "20261110_m1_lopo_own_summary" / "metrics.json"
 
 DEMOS = [
@@ -139,9 +141,27 @@ def make_montage(clips: list[Path], out: Path, titles: list[str]):
                     pass
                 break
         start = max(0.0, min(dur * 0.25, max(0.0, dur - 7.0)))
+        # Start the excerpt once the live label has settled on an exercise (first "decided"
+        # entry of the clip's timeline is when the overlay stops saying "Detecting…").
+        info = clip.with_suffix(".json")
+        if info.is_file():
+            try:
+                tl = json.loads(info.read_text(encoding="utf-8"))
+                # replay the vote rule of demo_video: decided once 20 exercise windows were seen
+                votes, decided = 0, None
+                for t_s, top, _conf in tl.get("timeline") or []:
+                    if top != "non_activity":
+                        votes += 1
+                        if votes >= 20:
+                            decided = float(t_s) + 0.5
+                            break
+                if decided is not None:
+                    start = max(0.0, min(decided, max(0.0, dur - 7.0)))
+            except (ValueError, KeyError, TypeError):
+                pass
         subprocess.run([
-            ffmpeg, "-y", "-loglevel", "error", "-ss", f"{start:.2f}", "-i", str(clip),
-            "-t", "6.5", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an", str(mid),
+            ffmpeg, "-y", "-loglevel", "error", "-i", str(clip), "-ss", f"{start:.2f}",
+            "-t", "6.5", *NORM, str(mid),
         ], check=False)
         if mid.is_file():
             # title strip overlay via card then clip
@@ -154,16 +174,22 @@ def make_montage(clips: list[Path], out: Path, titles: list[str]):
         "Adapting to a new person: 75% → 92% (n = 12 sets, separate experiment)",
     ], 4.5, "end")
 
+    # Every part gets the same codec settings, 30 fps constant and the same time base,
+    # so the concat demuxer can join them without mixing clocks (that caused the
+    # 20 s jump and the half-speed tail in the first montage).
+    normed = []
+    for i, part in enumerate(parts):
+        if not part.is_file():
+            continue
+        dst = tmp / f"norm_{i:02d}.mp4"
+        subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", str(part), *NORM, str(dst)], check=False)
+        if dst.is_file():
+            normed.append(dst)
     lst = tmp / "concat.txt"
-    lines = []
-    for p in parts:
-        if p.is_file():
-            lines.append(f"file '{p.resolve().as_posix()}'")
-    lst.write_text("\n".join(lines), encoding="utf-8")
+    lst.write_text("\n".join(f"file '{q.resolve().as_posix()}'" for q in normed), encoding="utf-8")
     subprocess.run([
         ffmpeg, "-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
-        "-i", str(lst), "-c:v", "libx264", "-preset", "slow", "-crf", "28",
-        "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", str(out),
+        "-i", str(lst), "-c", "copy", "-movflags", "+faststart", str(out),
     ], check=False)
     if out.is_file() and out.stat().st_size > 8e6:
         subprocess.run([
@@ -281,5 +307,15 @@ def main():
               f"{'✓' if e.get('ok') else ('✗' if e.get('ok') is False else '·')} {e.get('shows')}")
 
 
+def montage_only():
+    clips = [OUT / f"{d['file']}.mp4" for d in DEMOS]
+    titles = [d.get("caption") or d["shows"] for d in DEMOS]
+    out = make_montage(clips, OUT / "montage_week2.mp4", titles)
+    print("montage:", out)
+
+
 if __name__ == "__main__":
-    main()
+    if "--montage-only" in sys.argv:
+        montage_only()
+    else:
+        main()
