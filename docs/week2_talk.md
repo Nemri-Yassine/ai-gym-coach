@@ -1,4 +1,4 @@
-# Week 2 presentation · what to say (about 12 minutes, 17 slides)
+# Week 2 presentation · what to say (about 13 minutes, 18 slides)
 
 Open `reports/validation2/AI_Workout_Coach_Week2.html` in Chrome; keep the `demo/` folder next to it.
 **→ / ←** change slide · **F** fullscreen · **double-click** a video to make it fullscreen.
@@ -6,22 +6,23 @@ Open `reports/validation2/AI_Workout_Coach_Week2.html` in Chrome; keep the `demo
 | # | Slide | Say (short, simple) |
 |---|---|---|
 | 1 | Title | "This week we asked one question: do our models still work on real gym videos, with our phone, on our bodies?" |
-| 2 | The question | "Model 1 and Model 2 were trained on public datasets. RQ4 measures how much we lose on a real phone camera. Every week-2 step is done." |
-| 3 | Pipeline | "Every set goes through this chain: iPhone → skeleton → which exercise → reps → form. The watch sends heart rate on the same clock. Kafka and Spark handle the streams and the rep table. All on a laptop CPU." |
-| 4 | Station | "We built this ourselves: the iPhone streams each set live to the laptop, the watch sends heart rate over Bluetooth. 30 fps on every set, nothing lost. Heart rate is our weak point: about half the time covered." |
-| 5 | Our data | "Two of us, 20 sets, 9 exercises. The models never saw these videos. We pressed the wrong button 3 times; our written notes are the truth." |
-| 6 | **Demo** | Let the montage play. "Left is our video, right is what the model sees live: exercise, confidence, reps, heart rate, and the truth in grey." |
-| 7 | Results | "14 of 20 sets right without any training on our data. Perfect on 5 exercises, wrong on 4. On public data the same model is around 80%, so we lose about 10 points on our phone." |
-| 8 | It works | "Two people, two exercises, correct live." |
-| 9 | Our mistake | "Here we pressed 'squats' but did push-ups. The model said push-ups. It can check the labels we type." |
-| 10 | **Why it fails** | Click the 3 buttons. "Triceps: ours is a cable push-down from the side; the dataset only has overhead extensions. Lateral raises look like a jumping jack. One-arm rows from the side look like a push-up." |
-| 11 | Proof | "This plot shows our movement against the training data. The failures are systematic, not random: a different variant or a different camera view." |
-| 12 | The fix | "We adapted the model on one person and tested on the other. Yassine went from 75% to 92%. For Iheb it didn't change. With 8 and 12 sets this is a first signal, not a proof." |
-| 13 | Reps + HR | "Squats are counted exactly. Push-ups are off by about 2. The true counts are being re-checked by hand, so these are provisional. Heart rate rises during each set, as expected." |
-| 14 | **Form demo** | Let it play. "This is Model 2 on a person it never saw: left a correct squat, right knees inward. It flags the mistake. Same for lunges and plank. And here is a miss: we show it on purpose." |
-| 15 | **Form on real videos** | Click the 3 buttons. "On a public clip of half squats, Model 2 says 'not low enough' on all 10 reps: right. On a before/after clip it flags the bad squat, but also the corrected one. On our own correct squat it says 'front bent' every time. So it catches clear mistakes but still gives false alarms on phone video. Calibration on our own recordings is the week-3 fix." |
-| 16 | Form + big data | "The form model works in the lab, but on our correct squats it says 'bad form' every time. So we hide it in the demo until it's calibrated. Kafka streams at 30 messages per second; Spark builds the rep table." |
-| 17 | Lessons | "The models work where our gym looks like their data. Where it doesn't, we know why and how to fix it. Week 3: longer sessions, fatigue model on our data, more people." |
+| 2 | Reminder | "Quick reminder: most apps tell you what you did; ours tells you when to stop. Three models: exercise and reps, form, fatigue. Week 1 gave us the Spark pipeline and Model 1 at 95% on unseen people. This week: form, streaming, and above all our own gym recordings." |
+| 3 | The question | "Model 1 and Model 2 were trained on public datasets. RQ4 measures how much we lose on a real phone camera. Every week-2 step is done." |
+| 4 | Pipeline | "Every set goes through this chain: iPhone → skeleton → which exercise → reps → form. The watch sends heart rate on the same clock. Kafka and Spark handle the streams and the rep table. All on a laptop CPU." |
+| 5 | Station | "We built this ourselves: the iPhone streams each set live to the laptop, the watch sends heart rate over Bluetooth. 30 fps on every set, nothing lost. Heart rate is our weak point: about half the time covered." |
+| 6 | Our data | "Two of us, 20 sets, 9 exercises. The models never saw these videos. We pressed the wrong button 3 times; our written notes are the truth." |
+| 7 | **Demo** | Let the montage play. "Left is our video, right is what the model sees live: exercise, confidence, reps, heart rate, and the truth in grey." |
+| 8 | Results | "14 of 20 sets right without any training on our data. Perfect on 5 exercises, wrong on 4. On public data the same model is around 80%, so we lose about 10 points on our phone." |
+| 9 | It works | "Two people, two exercises, correct live." |
+| 10 | Our mistake | "Here we pressed 'squats' but did push-ups. The model said push-ups. It can check the labels we type." |
+| 11 | **Why it fails** | Click the 3 buttons. "Triceps: ours is a cable push-down from the side; the dataset only has overhead extensions. Lateral raises look like a jumping jack. One-arm rows from the side look like a push-up." |
+| 12 | Proof | "This plot shows our movement against the training data. The failures are systematic, not random: a different variant or a different camera view." |
+| 13 | The fix | "We adapted the model on one person and tested on the other. Yassine went from 75% to 92%. For Iheb it didn't change. With 8 and 12 sets this is a first signal, not a proof." |
+| 14 | Reps + HR | "Squats are counted exactly. Push-ups are off by about 2. The true counts are being re-checked by hand, so these are provisional. Heart rate rises during each set, as expected." |
+| 15 | **Form demo** | Let it play. "This is Model 2 on a person it never saw: left a correct squat, right knees inward. It flags the mistake. Same for lunges and plank. And here is a miss: we show it on purpose." |
+| 16 | **Form on real videos** | Click the 3 buttons. "On a public clip of half squats, Model 2 says 'not low enough' on all 10 reps: right. On a before/after clip it flags the bad squat, but also the corrected one. On our own correct squat it says 'front bent' every time. So it catches clear mistakes but still gives false alarms on phone video. Calibration on our own recordings is the week-3 fix." |
+| 17 | Form + big data | "The form model works in the lab, but on our correct squats it says 'bad form' every time. So we hide it in the demo until it's calibrated. Kafka streams at 30 messages per second; Spark builds the rep table." |
+| 18 | Lessons | "The models work where our gym looks like their data. Where it doesn't, we know why and how to fix it. Week 3: longer sessions, fatigue model on our data, more people." |
 
 ## Hard questions
 
