@@ -4,12 +4,16 @@ import pandas as pd
 import pytest
 
 from awc.bigdata.history import (
+    OWN_REP_COLUMNS,
     REP_COLUMNS,
     add_within_session_baselines,
+    build_own_rep_rows,
     build_rep_rows_for_session,
 )
-from awc.config import PROCESSED
-from awc.features.reps import rep_boundaries
+from awc.config import OWN_INTERIM, OWN_MANIFEST, OWN_REP_TABLE, PROCESSED
+from awc.data.own_manifest import load_manifest
+from awc.features.reps import count_reps, rep_boundaries
+from awc.features.skeleton import normalize
 
 
 def test_rep_boundaries_sine():
@@ -61,3 +65,36 @@ def test_rep_table_row_count():
         pytest.skip("rep_table.parquet not built yet")
     df = pd.read_parquet(path)
     assert len(df) > 5000
+
+
+@pytest.mark.data
+def test_own_rep_table_row_count_matches_counted_reps():
+    if not OWN_MANIFEST.is_file() or not OWN_INTERIM.is_dir():
+        pytest.skip("own interim / manifest missing")
+    if not OWN_REP_TABLE.is_file():
+        pytest.skip("own_rep_table.parquet not built yet")
+    df = pd.read_parquet(OWN_REP_TABLE)
+    assert len(df) > 0
+    assert set(["person", "exercise", "set"]).issubset(df.columns)
+    assert df["person"].notna().all()
+    assert df["exercise"].notna().all()
+    assert df["set"].notna().all()
+    # Row count equals sum of counted reps over sets that produced rows
+    expected = 0
+    for row in load_manifest():
+        if row["use"] not in ("eval", "test"):
+            continue
+        path = OWN_INTERIM / row["person"] / f"{row['session_folder']}_set{int(row['set']):02d}.parquet"
+        if not path.is_file():
+            continue
+        block = pd.read_parquet(path)
+        xs = block[[f"x{i}" for i in range(18)]].to_numpy(dtype=np.float64)
+        ys = block[[f"y{i}" for i in range(18)]].to_numpy(dtype=np.float64)
+        pose = np.stack([xs, ys], axis=-1)
+        good = np.isfinite(pose).all(axis=(1, 2))
+        if good.sum() < 16:
+            continue
+        count, bounds = count_reps(normalize(pose[good]), exercise=row["exercise"])
+        if count and bounds:
+            expected += count
+    assert len(df) == expected

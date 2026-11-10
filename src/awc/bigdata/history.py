@@ -15,8 +15,18 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from awc.config import INTERIM, MMFIT_CLASSES, MODELS, PROCESSED, VIDEO_FPS
+from awc.config import (
+    INTERIM,
+    MMFIT_CLASSES,
+    MODELS,
+    OWN_INTERIM,
+    OWN_MANIFEST,
+    OWN_REP_TABLE,
+    PROCESSED,
+    VIDEO_FPS,
+)
 from awc.data import mmfit
+from awc.data.own_manifest import load_manifest
 from awc.features.reps import count_reps, movement_signal, rep_boundaries
 from awc.features.skeleton import normalize
 from awc.features.sync import POSE_X, POSE_Y, session_split
@@ -31,6 +41,10 @@ REP_COLUMNS = [
     "set_idx_in_exercise", "rep_idx", "n_reps_in_set",
     "duration_s", "rom", "mean_speed", "form_score",
     "hr_mean", "hr_end", "hr_rise", "hr_mask",
+]
+
+OWN_REP_COLUMNS = REP_COLUMNS + [
+    "person", "set", "speed_rel_first2", "velocity_loss",
 ]
 
 
@@ -142,6 +156,155 @@ def build_rep_rows_for_session(session_id, synced_df: pd.DataFrame, rf_pack=None
                 "hr_mask": hr_mask_set,
             })
     return pd.DataFrame(rows, columns=REP_COLUMNS)
+
+
+def build_own_rep_rows(manifest_rows=None, rf_pack=None) -> pd.DataFrame:
+    """One row per detected rep from data/interim/own/ using the corrected manifest."""
+    if rf_pack is None:
+        rf_pack = _load_form_rf()
+    rows_in = manifest_rows if manifest_rows is not None else load_manifest(OWN_MANIFEST)
+    rows_in = [r for r in rows_in if r["use"] in ("eval", "test")]
+    out = []
+    # set_idx_in_exercise per person+exercise
+    counters: dict[tuple[str, str], int] = {}
+    for row in rows_in:
+        person = row["person"]
+        session = row["session_folder"]
+        set_n = int(row["set"])
+        exercise = row["exercise"]
+        path = OWN_INTERIM / person / f"{session}_set{set_n:02d}.parquet"
+        if not path.is_file():
+            print(f"skip own {person}/{session}/set{set_n:02d}: missing parquet", flush=True)
+            continue
+        df = pd.read_parquet(path)
+        if len(df) < 16:
+            continue
+        pose = _pose_from_df(df)
+        good = np.isfinite(pose).all(axis=(1, 2))
+        if good.sum() < 16:
+            continue
+        # keep timeline but drop all-NaN frames for counting
+        pose_use = pose[good]
+        pose_norm = normalize(pose_use)
+        count, bounds = count_reps(pose_norm, fps=VIDEO_FPS, exercise=exercise)
+        if count == 0 or not bounds:
+            continue
+        key = (person, exercise)
+        counters[key] = counters.get(key, 0) + 1
+        set_idx = counters[key]
+        hr = df["hr"].to_numpy(dtype=np.float64) if "hr" in df.columns else np.full(len(df), np.nan)
+        hr_mask_col = df["hr_mask"].to_numpy() if "hr_mask" in df.columns else np.zeros(len(df))
+        # map good-frame indices back onto full HR if needed: use good mask
+        hr_g = hr[good] if len(hr) == len(pose) else hr[: len(pose_use)]
+        hr_m = hr_mask_col[good] if len(hr_mask_col) == len(pose) else hr_mask_col[: len(pose_use)]
+        hr_mask_set = int(np.nanmax(hr_m) > 0) if len(hr_m) else 0
+        hr_start = float(hr_g[np.isfinite(hr_g)][0]) if np.isfinite(hr_g).any() else np.nan
+        session_date = session.split("_")[0] if "_" in session else session
+        set_reps = []
+        for rep_idx, (a, b) in enumerate(bounds):
+            duration_s, rom, speed = _rom_and_duration(pose_norm, a, b)
+            seg_hr = hr_g[a:b + 1]
+            seg_hr = seg_hr[np.isfinite(seg_hr)]
+            hr_mean = float(np.mean(seg_hr)) if len(seg_hr) else np.nan
+            hr_end = float(seg_hr[-1]) if len(seg_hr) else np.nan
+            hr_rise = (hr_end - hr_start) if np.isfinite(hr_end) and np.isfinite(hr_start) else np.nan
+            set_reps.append({
+                "source": "own",
+                "user": person,
+                "session": f"{person}/{session}",
+                "session_date": session_date,
+                "exercise": exercise,
+                "set_id": set_n,
+                "set_idx_in_exercise": int(set_idx),
+                "rep_idx": int(rep_idx),
+                "n_reps_in_set": int(count),
+                "duration_s": duration_s,
+                "rom": rom,
+                "mean_speed": speed,
+                "form_score": _form_score_for_rep(rf_pack, exercise, pose_norm, a, b),
+                "hr_mean": hr_mean,
+                "hr_end": hr_end,
+                "hr_rise": hr_rise,
+                "hr_mask": hr_mask_set,
+                "person": person,
+                "set": set_n,
+                "speed_rel_first2": np.nan,
+                "velocity_loss": np.nan,
+            })
+        # within-set: speed relative to mean of first 2 reps; velocity loss = 1 - rel
+        speeds = [r["mean_speed"] for r in set_reps]
+        base = float(np.nanmean(speeds[:2])) if speeds else np.nan
+        for r in set_reps:
+            if np.isfinite(base) and base > 1e-8 and np.isfinite(r["mean_speed"]):
+                rel = float(r["mean_speed"] / base)
+                r["speed_rel_first2"] = rel
+                r["velocity_loss"] = float(1.0 - rel)
+        out.extend(set_reps)
+        print(f"own {person}/{session}/set{set_n:02d}: {count} reps", flush=True)
+    return pd.DataFrame(out, columns=OWN_REP_COLUMNS)
+
+
+def add_own_within_set_spark(rep_df: pd.DataFrame, cores="local[2]") -> pd.DataFrame:
+    """Recompute speed_rel_first2 / velocity_loss with Spark window functions (sanity)."""
+    if rep_df.empty:
+        return rep_df.copy()
+    from pyspark.sql import functions as F
+    from pyspark.sql.window import Window
+
+    spark = get_spark("awc-own-history", cores=cores)
+    try:
+        sdf = spark.createDataFrame(rep_df.drop(columns=["speed_rel_first2", "velocity_loss"], errors="ignore"))
+        w_first2 = (
+            Window.partitionBy("person", "session", "set")
+            .orderBy("rep_idx")
+            .rowsBetween(Window.unboundedPreceding, 1)
+        )
+        # mean of first two rows' speeds as baseline for the whole set
+        sdf = sdf.withColumn("_base", F.avg("mean_speed").over(w_first2))
+        # freeze baseline as the value on rep_idx <= 1, then broadcast via max over set
+        w_set = Window.partitionBy("person", "session", "set")
+        sdf = sdf.withColumn(
+            "_base_set",
+            F.max(F.when(F.col("rep_idx") <= 1, F.col("_base")).otherwise(F.lit(None))).over(w_set),
+        )
+        sdf = sdf.withColumn(
+            "speed_rel_first2",
+            F.when(F.col("_base_set") > 0, F.col("mean_speed") / F.col("_base_set")).otherwise(F.lit(None)),
+        )
+        sdf = sdf.withColumn("velocity_loss", F.lit(1.0) - F.col("speed_rel_first2"))
+        sdf = sdf.drop("_base", "_base_set")
+        return sdf.toPandas()
+    finally:
+        spark.stop()
+
+
+def run_own(use_spark=True, cores="local[2]") -> dict:
+    """Build data/interim/own_rep_table.parquet from own interim pose."""
+    OWN_INTERIM.mkdir(parents=True, exist_ok=True)
+    rep_df = build_own_rep_rows()
+    if use_spark and not rep_df.empty:
+        try:
+            rep_df = add_own_within_set_spark(rep_df, cores=cores)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Spark own within-set failed ({exc}); keeping pandas values", flush=True)
+    OWN_REP_TABLE.parent.mkdir(parents=True, exist_ok=True)
+    rep_df.to_parquet(OWN_REP_TABLE, index=False)
+    # median velocity loss at the last rep per exercise
+    last_loss = {}
+    if not rep_df.empty:
+        last = rep_df.sort_values("rep_idx").groupby(["person", "session", "set", "exercise"], as_index=False).tail(1)
+        for ex, g in last.groupby("exercise"):
+            last_loss[ex] = float(np.nanmedian(g["velocity_loss"].to_numpy(dtype=np.float64)))
+    summary = {
+        "rep_rows": int(len(rep_df)),
+        "sets": int(rep_df.groupby(["person", "session", "set"]).ngroups) if len(rep_df) else 0,
+        "people": sorted(rep_df["person"].unique().tolist()) if len(rep_df) else [],
+        "median_velocity_loss_last_rep": last_loss,
+        "path": str(OWN_REP_TABLE),
+    }
+    (INTERIM / "own_rep_table_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    print(json.dumps(summary, indent=2), flush=True)
+    return summary
 
 
 def build_rep_table(sessions=None, use_spark=True) -> pd.DataFrame:
@@ -268,8 +431,12 @@ def main(argv=None):
     p.add_argument("--sessions", nargs="*", default=None)
     p.add_argument("--no-spark", action="store_true")
     p.add_argument("--cores", default="local[2]")
+    p.add_argument("--own", action="store_true", help="build own_rep_table.parquet from interim/own")
     args = p.parse_args(argv)
-    run(sessions=args.sessions, use_spark=not args.no_spark, cores=args.cores)
+    if args.own:
+        run_own(use_spark=not args.no_spark, cores=args.cores)
+    else:
+        run(sessions=args.sessions, use_spark=not args.no_spark, cores=args.cores)
 
 
 if __name__ == "__main__":
