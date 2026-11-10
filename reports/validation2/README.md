@@ -1,9 +1,9 @@
 # Validation 2 presentation (October 28, 2026)
 
-**Week 2 progress deck:**
+**Week 2 progress deck (demo-first):**
 
-- `AI_Workout_Coach_Week2.html`: self-contained Week 2 progress (own gym station, Model 2, Kafka, RQ4 on our videos). Same look as Week 1. Keys: ← → to move, F fullscreen.
-- Rebuild: `python scripts/docs/build_week2.py` (uses `src/week2_template.html` + `src/week2_data.js`).
+- `AI_Workout_Coach_Week2.html`: open from this folder (keep `demo/week2/*.mp4` next to it). Same look as Week 1. Keys: ← →, F fullscreen; click a video for fullscreen.
+- Rebuild: `python scripts/docs/build_week2.py` (uses `src/week2_template.html` + `src/week2_data.js`). Render demos: `python scripts/docs/render_week2_demos.py`.
 
 **Week 1 files for Wednesday:**
 

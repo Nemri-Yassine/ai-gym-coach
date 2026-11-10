@@ -1,9 +1,10 @@
-"""Build the week 2 progress presentation as ONE self-contained HTML file.
+"""Build the week 2 progress presentation (demo-first).
 
     python scripts/docs/build_week2.py
 
 Takes reports/validation2/src/week2_template.html + week2_data.js, pulls CSS from
-presentation/index.html (same look as week 1), inlines figures as base64.
+presentation/index.html (same look as week 1), inlines the diagnosis figure as base64.
+Videos stay as relative paths under demo/week2/ (keep that folder next to the HTML).
 Output: reports/validation2/AI_Workout_Coach_Week2.html
 """
 from __future__ import annotations
@@ -17,6 +18,7 @@ PRES = ROOT / "presentation"
 SRC = ROOT / "reports" / "validation2" / "src"
 OUT = ROOT / "reports" / "validation2" / "AI_Workout_Coach_Week2.html"
 FIGURES = ROOT / "reports" / "figures"
+DEMO = ROOT / "reports" / "validation2" / "demo" / "week2"
 
 
 def between(text: str, start: str, end: str, include_start: bool = True) -> str:
@@ -38,13 +40,9 @@ def build() -> Path:
     page = page.replace("/*INDEX_STYLE*/", style)
     page = page.replace("/*DATA*/", data)
 
-    cm = FIGURES / "m1_confusion_own.png"
     diag = FIGURES / "own_m1_diagnosis.png"
-    if not cm.is_file():
-        raise FileNotFoundError(cm)
     if not diag.is_file():
         raise FileNotFoundError(diag)
-    page = page.replace("/*FIG_CONFUSION*/", data_uri(cm, "image/png"))
     page = page.replace("/*FIG_DIAGNOSIS*/", data_uri(diag, "image/png"))
 
     left = re.findall(r"/\*(INDEX_\w+|DATA|FIG_\w+)\*/", page)
@@ -54,6 +52,13 @@ def build() -> Path:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     print(f"wrote {OUT} ({OUT.stat().st_size // 1024} KB)")
+    if DEMO.is_dir():
+        vids = sorted(DEMO.glob("*.mp4"))
+        print(f"demo videos beside HTML: {len(vids)} in {DEMO.relative_to(ROOT)}")
+        for v in vids:
+            print(f"  {v.name}: {v.stat().st_size / 1e6:.2f} MB")
+    else:
+        print("WARNING: demo/week2/ missing — open the HTML from reports/validation2/ after rendering")
     return OUT
 
 

@@ -1,6 +1,6 @@
 # Week 2 validation package · updated 10 Nov 2026
 
-**Presentation (HTML, offline):** [`reports/validation2/AI_Workout_Coach_Week2.html`](validation2/AI_Workout_Coach_Week2.html) · rebuild with `python scripts/docs/build_week2.py` (template + `week2_data.js`). Keys: ← →, F fullscreen.
+**Presentation (HTML, offline, demo-first):** open [`validation2/AI_Workout_Coach_Week2.html`](validation2/AI_Workout_Coach_Week2.html) in Chrome **from the `reports/validation2/` folder** (keep `demo/week2/` next to it). Rebuild: `python scripts/docs/build_week2.py`. Keys: ← →, F fullscreen; click a video for fullscreen. Annotated clips: `validation2/demo/week2/`.
 
 ## Own recordings (Nov 10 — closes the old “no own data” gap)
 

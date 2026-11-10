@@ -49,7 +49,8 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
-- **2026-11-10 · Week 2 progress presentation (HTML).** Self-contained deck `reports/validation2/AI_Workout_Coach_Week2.html` (14 slides: station, RQ4 own 0.70 n=20, M2, Kafka replay-only, LOPO, live latency 13.1 / 7.8 s). Rebuild: `python scripts/docs/build_week2.py`.
+- **2026-11-10 · Week 2 presentation rebuilt around demo videos.** `reports/validation2/AI_Workout_Coach_Week2.html` + `demo/week2/*.mp4` (montage, wrong-button, triceps failure, LOPO side-by-side). Open the HTML from `reports/validation2/` offline. Rebuild: `python scripts/docs/build_week2.py`.
+- **2026-11-10 · Week 2 demo videos.** Annotated own-phone demos in `reports/validation2/demo/week2/` (portrait overlay, HR, truth). Render: `python scripts/docs/render_week2_demos.py`.
 - **2026-11-10 · Fix 5 (M1 diagnosis + LOPO).** Trajectory figure `own_m1_diagnosis.png`; RQ4 notes on triceps/lateral/situps/rows vs MM-Fit. LOPO adaptation (MM-Fit train + one person → other): partner **0.625 → 0.625** (n=8), yassine **0.75 → 0.917** (n=12). Zero-shot remains the main RQ4 result. Checkpoints `models/m1_transformer_pose_lopo_*.pt`.
 - **2026-11-10 · Fix 4 (report hygiene).** Rounded RQ4 numbers (macro-F1 **0.511**); HR/Spark tables eval-only; `no_exercise_detected` when all windows are non_activity (n=2 eval); per-set table in `rq4_own.md`; clock RTT medians **3.5 ms** (not “tens of ms”); Spark `segmentation_failed` (4 sets) excluded from velocity medians.
 - **2026-11-10 · Fix 3 (honest live latency).** Cached “0.84 s” skipped MediaPipe. Full pose mean **13.1 s**; live_fast (every 2nd frame + 480px) mean **7.8 s**, exercise match 3/3. Form hidden until calibrated (`--show-form`). Docker Kafka daemon down — not claimed. `experiments/20261110_station_latency/`.

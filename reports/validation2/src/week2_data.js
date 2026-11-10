@@ -141,4 +141,13 @@ const WEEK2 = {
     "Calibrate form (or keep it hidden).",
     "Record lunges; more people.",
   ],
+
+  /* Relative to AI_Workout_Coach_Week2.html — keep demo/week2/ beside the HTML. */
+  videos: {
+    montage: "demo/week2/montage_week2.mp4",
+    wrong_button: "demo/week2/wrong_button_pushups.mp4",
+    failure: "demo/week2/failure_triceps.mp4",
+    adapt: "demo/week2/zero_shot_vs_adapted.mp4",
+    station: false,  // set true once station_demo.mp4 is recorded (docs/demo.md)
+  },
 };
