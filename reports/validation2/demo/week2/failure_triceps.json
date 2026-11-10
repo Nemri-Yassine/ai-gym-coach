@@ -11,7 +11,7 @@
  "truth_reps": 10,
  "reps_note": "typed, unverified",
  "segments": [],
- "processing_fps_mean": 49.5,
+ "processing_fps_mean": 46.8,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [

@@ -4,14 +4,21 @@
  "frames": 785,
  "seconds": 26.1,
  "model": "m1_transformer_pose",
- "exercise": null,
+ "exercise": "bicep_curls",
  "truth_exercise": "bicep_curls",
- "exercise_ok": false,
- "reps_counted": 0,
+ "exercise_ok": true,
+ "reps_counted": 9,
  "truth_reps": 10,
  "reps_note": "typed, unverified",
- "segments": [],
- "processing_fps_mean": 55.3,
+ "segments": [
+  {
+   "exercise": "bicep_curls",
+   "start_s": 5.8,
+   "end_s": 26.1,
+   "reps": 9
+  }
+ ],
+ "processing_fps_mean": 49.6,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [
@@ -1182,5 +1189,5 @@
  ],
  "banner": null,
  "file": "bicep_curls_yassine.mp4",
- "megabytes": 2.52
+ "megabytes": 2.53
 }

@@ -68,6 +68,49 @@ def font(size, bold=False):
     return ImageFont.load_default()
 
 
+_SYM = "✓✗"
+_SYM_CACHE = {}
+
+
+def sym_font(size):
+    """Segoe UI has no ✓ / ✗ glyphs; Segoe UI Symbol does."""
+    if size not in _SYM_CACHE:
+        try:
+            _SYM_CACHE[size] = ImageFont.truetype("seguisym.ttf", size)
+        except OSError:
+            _SYM_CACHE[size] = None
+    return _SYM_CACHE[size]
+
+
+def draw_text(d, xy, s, font=None, fill=None):
+    """d.text that draws ✓ / ✗ with a font that has them."""
+    x, y = xy
+    s = str(s)
+    if not any(c in s for c in _SYM):
+        d.text((x, y), s, font=font, fill=fill)
+        return
+    size = getattr(font, "size", 20)
+    for ch_run in _split_sym(s):
+        f = (sym_font(size) or font) if ch_run in _SYM else font
+        d.text((x, y), ch_run, font=f, fill=fill)
+        x += d.textlength(ch_run, font=f)
+
+
+def _split_sym(s):
+    out, cur = [], ""
+    for c in s:
+        if c in _SYM:
+            if cur:
+                out.append(cur)
+            out.append(c)
+            cur = ""
+        else:
+            cur += c
+    if cur:
+        out.append(cur)
+    return out
+
+
 def load_model(name):
     stem = name[:-3] if str(name).endswith(".pt") else name
     ckpt = torch.load(MODELS / f"{stem}.pt", map_location="cpu", weights_only=False)
@@ -233,25 +276,25 @@ def draw_landscape_overlay(frame, pose_px, state, scale):
     draw_skeleton(d, pose_px, 0, 0, scale, thick=4)
     pw, ph = 380, 236
     d.rounded_rectangle([16, 16, 16 + pw, 16 + ph], 16, fill=BG + (205,))
-    d.text((32, 28), "AI WORKOUT COACH · LIVE", font=font(15, True), fill=ACCENT)
+    draw_text(d, (32, 28), "AI WORKOUT COACH · LIVE", font=font(15, True), fill=ACCENT)
     ex = state["exercise"]
-    d.text((32, 54), NAMES.get(ex, ex), font=font(34, True), fill=INK if ex != "non_activity" else MUTED)
+    draw_text(d, (32, 54), NAMES.get(ex, ex), font=font(34, True), fill=INK if ex != "non_activity" else MUTED)
     if state.get("final"):
-        d.text((32, 98), "RESULT FOR THE WHOLE VIDEO", font=font(15, True), fill=OK)
+        draw_text(d, (32, 98), "RESULT FOR THE WHOLE VIDEO", font=font(15, True), fill=OK)
     else:
         conf = state["conf"]
         d.rounded_rectangle([32, 104, 32 + 280, 116], 6, fill=(38, 49, 60, 255))
         d.rounded_rectangle([32, 104, 32 + max(12, int(280 * conf)), 116], 6, fill=ACCENT + (255,))
-        d.text((322, 98), f"{conf * 100:.0f}%", font=font(18, True), fill=INK)
-    d.text((32, 130), "REPS", font=font(15, True), fill=MUTED)
-    d.text((32, 146), str(state["reps"]), font=font(64, True), fill=OK if state["reps"] else INK)
-    d.text((150, 158), state["sub"], font=font(15), fill=MUTED)
-    d.text((150, 180), f"{state['fps']:.0f} fps on CPU", font=font(15), fill=MUTED)
-    d.text((150, 202), "Model 1, camera only, last 3 s", font=font(15), fill=MUTED)
+        draw_text(d, (322, 98), f"{conf * 100:.0f}%", font=font(18, True), fill=INK)
+    draw_text(d, (32, 130), "REPS", font=font(15, True), fill=MUTED)
+    draw_text(d, (32, 146), str(state["reps"]), font=font(64, True), fill=OK if state["reps"] else INK)
+    draw_text(d, (150, 158), state["sub"], font=font(15), fill=MUTED)
+    draw_text(d, (150, 180), f"{state['fps']:.0f} fps on CPU", font=font(15), fill=MUTED)
+    draw_text(d, (150, 202), "Model 1, camera only, last 3 s", font=font(15), fill=MUTED)
     if state.get("footer"):
         tw = d.textlength(state["footer"], font=font(17))
         d.rounded_rectangle([W - tw - 40, H - 46, W - 16, H - 14], 10, fill=BG + (205,))
-        d.text((W - tw - 28, H - 42), state["footer"], font=font(17), fill=INK)
+        draw_text(d, (W - tw - 28, H - 42), state["footer"], font=font(17), fill=INK)
     return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
 
@@ -270,10 +313,10 @@ def draw_portrait_canvas(bgr, pose_px, state, meta, probs, model_name, banner=No
     draw_skeleton(d, pose_px, 0, 0, scale, thick=6)
 
     px = vw + 36
-    d.text((px, 28), "AI WORKOUT COACH · LIVE", font=font(18, True), fill=ACCENT)
+    draw_text(d, (px, 28), "AI WORKOUT COACH · LIVE", font=font(18, True), fill=ACCENT)
     if banner:
         d.rounded_rectangle([px, 58, OUT_W - 28, 108], 12, fill=(40, 20, 24, 240))
-        d.text((px + 16, 70), banner, font=font(20, True), fill=STOP)
+        draw_text(d, (px + 16, 70), banner, font=font(20, True), fill=STOP)
 
     y0 = 130 if banner else 70
     ex = state["exercise"]
@@ -281,52 +324,53 @@ def draw_portrait_canvas(bgr, pose_px, state, meta, probs, model_name, banner=No
     truth = meta.get("truth_exercise")
     if truth and ex not in ("non_activity", None) and state.get("decided"):
         mark = "  ✓" if ex == truth else "  ✗"
-    d.text((px, y0), NAMES.get(ex, ex or "—") + mark, font=font(48, True),
-           fill=INK if ex != "non_activity" else MUTED)
+    label = NAMES.get(ex, ex or "—") if state.get("decided") else "Detecting…"
+    draw_text(d, (px, y0), label + mark, font=font(48, True),
+           fill=INK if state.get("decided") else MUTED)
     conf = float(state.get("conf") or 0.0)
     bar_w = OUT_W - px - 48
     d.rounded_rectangle([px, y0 + 64, px + bar_w, y0 + 80], 8, fill=(38, 49, 60, 255))
     d.rounded_rectangle([px, y0 + 64, px + max(14, int(bar_w * conf)), y0 + 80], 8, fill=ACCENT + (255,))
-    d.text((px + bar_w - 70, y0 + 58), f"{conf * 100:.0f}%", font=font(20, True), fill=INK)
+    draw_text(d, (px + bar_w - 70, y0 + 58), f"{conf * 100:.0f}%", font=font(20, True), fill=INK)
 
     yy = y0 + 100
     for name, p in topk(probs, 3):
-        d.text((px, yy), NAMES.get(name, name), font=font(16), fill=MUTED)
+        draw_text(d, (px, yy), NAMES.get(name, name), font=font(16), fill=MUTED)
         bw = int((OUT_W - px - 200) * p)
         d.rounded_rectangle([px + 200, yy + 4, px + 200 + max(4, bw), yy + 16], 4, fill=ACCENT + (200,))
-        d.text((OUT_W - 90, yy), f"{p * 100:.0f}%", font=font(15, True), fill=INK)
+        draw_text(d, (OUT_W - 90, yy), f"{p * 100:.0f}%", font=font(15, True), fill=INK)
         yy += 26
 
     yy += 10
-    d.text((px, yy), "REPS", font=font(16, True), fill=MUTED)
+    draw_text(d, (px, yy), "REPS", font=font(16, True), fill=MUTED)
     rep_col = OK if state.get("rep_flash") else (OK if state["reps"] else INK)
-    d.text((px, yy + 22), str(state["reps"]), font=font(92, True), fill=rep_col)
+    draw_text(d, (px, yy + 22), str(state["reps"]), font=font(92, True), fill=rep_col)
 
     hr = state.get("hr")
-    d.text((px + 220, yy), "HEART RATE", font=font(16, True), fill=MUTED)
-    d.text((px + 220, yy + 28), "—" if hr is None else f"{hr:.0f}", font=font(56, True),
+    draw_text(d, (px + 220, yy), "HEART RATE", font=font(16, True), fill=MUTED)
+    draw_text(d, (px + 220, yy + 28), "—" if hr is None else f"{hr:.0f}", font=font(56, True),
            fill=STOP if hr is not None else MUTED)
-    d.text((px + 220, yy + 100), "bpm", font=font(18), fill=MUTED)
+    draw_text(d, (px + 220, yy + 100), "bpm", font=font(18), fill=MUTED)
     spark = hr_spark(meta.get("hr") or [], state.get("pc_ts") or 0.0)
     img.paste(spark, (px + 220, yy + 130), spark)
 
     yy = yy + 200
-    d.text((px, yy), "GROUND TRUTH", font=font(14, True), fill=MUTED)
+    draw_text(d, (px, yy), "GROUND TRUTH", font=font(14, True), fill=MUTED)
     treps = meta.get("truth_reps")
     treps_s = "—" if treps is None else f"{treps} ({meta.get('reps_note', 'typed, unverified')})"
-    d.text((px, yy + 22), f"Exercise: {NAMES.get(truth, truth) if truth else '—'}", font=font(18), fill=MUTED)
-    d.text((px, yy + 48), f"Reps: {treps_s}", font=font(18), fill=MUTED)
+    draw_text(d, (px, yy + 22), f"Exercise: {NAMES.get(truth, truth) if truth else '—'}", font=font(18), fill=MUTED)
+    draw_text(d, (px, yy + 48), f"Reps: {treps_s}", font=font(18), fill=MUTED)
     if meta.get("button") and truth and meta["button"] != truth:
-        d.text((px, yy + 74), f"Button pressed: {NAMES.get(meta['button'], meta['button'])}",
+        draw_text(d, (px, yy + 74), f"Button pressed: {NAMES.get(meta['button'], meta['button'])}",
                font=font(17, True), fill=STOP)
 
     if state.get("form_line"):
-        d.text((px, yy + 110), state["form_line"], font=font(17), fill=MUTED)
+        draw_text(d, (px, yy + 110), state["form_line"], font=font(17), fill=MUTED)
 
     foot = (f"{meta.get('person', '')} · set {meta.get('set', '')} · {model_name} · "
             f"{state['fps']:.0f} fps")
-    d.text((px, OUT_H - 48), foot, font=font(16), fill=MUTED)
-    d.text((px, OUT_H - 28), state.get("sub") or "", font=font(15), fill=MUTED)
+    draw_text(d, (px, OUT_H - 48), foot, font=font(16), fill=MUTED)
+    draw_text(d, (px, OUT_H - 28), state.get("sub") or "", font=font(15), fill=MUTED)
     return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
 
@@ -349,11 +393,11 @@ def end_card(state, meta, model_name, reason=None, size=(OUT_W, OUT_H)):
     if treps is not None:
         line += f" / true {treps}"
     line += hr_bit
-    d.text((80, 360), "RESULT", font=font(28, True), fill=ACCENT)
-    d.text((80, 420), line, font=font(36, True), fill=OK if ok else STOP)
+    draw_text(d, (80, 360), "RESULT", font=font(28, True), fill=ACCENT)
+    draw_text(d, (80, 420), line, font=font(36, True), fill=OK if ok else STOP)
     if reason:
-        d.text((80, 500), reason, font=font(24), fill=MUTED)
-    d.text((80, 980), f"{meta.get('key', '')} · {model_name}", font=font(18), fill=MUTED)
+        draw_text(d, (80, 500), reason, font=font(24), fill=MUTED)
+    draw_text(d, (80, 980), f"{meta.get('key', '')} · {model_name}", font=font(18), fill=MUTED)
     return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
 
@@ -384,18 +428,22 @@ def _score_step(model, inputs, poses, times, ts, probs_s, state, seg_start, seg_
         p = torch.softmax(logits, 1).numpy()[0]
     probs_s = p if probs_s is None else EMA * p + (1 - EMA) * probs_s
     top = MMFIT_CLASSES[int(np.argmax(probs_s))]
-    if top == state["exercise"]:
-        candidate, streak = None, 0
-    else:
-        streak = streak + 1 if top == candidate else 1
-        candidate = top
-        if streak >= SWITCH_STEPS:
-            state["exercise"], candidate, streak = top, None, 0
-            state["decided"] = top != "non_activity"
-            if top != "non_activity" and top != seg_ex:
-                back = (WINDOW_S + SWITCH_STEPS * EVERY / fps) * 1000
-                seg_ex, seg_start, state["reps"] = top, max(0.0, ts - back), 0
-                segments.append({"exercise": top, "start_s": round(seg_start / 1000, 1), "end_s": None, "reps": 0})
+    # Same rule as the reported numbers (eval_own_recordings / eval_public_videos):
+    # majority vote of the exercise windows seen so far, "no exercise" windows excluded.
+    # An exercise is shown once there are 2 s of exercise windows (SWITCH_STEPS model steps).
+    votes = state.setdefault("votes", {})
+    first = state.setdefault("vote_t0", {})
+    if top != "non_activity":
+        votes[top] = votes.get(top, 0) + 1
+        first.setdefault(top, ts)
+    if sum(votes.values()) >= SWITCH_STEPS:
+        leader = max(votes, key=lambda k: (votes[k], -first[k]))
+        if leader != state["exercise"]:
+            state["exercise"] = leader
+            state["decided"] = True
+            if leader != seg_ex:
+                seg_ex, seg_start, state["reps"] = leader, max(0.0, first[leader] - WINDOW_S * 1000), 0
+                segments.append({"exercise": leader, "start_s": round(seg_start / 1000, 1), "end_s": None, "reps": 0})
     state["conf"] = float(probs_s[int(np.argmax(probs_s))])
     state["sub"] = "reps since the exercise started" if seg_ex else "looking for an exercise"
     timeline.append([round(ts / 1000, 2), MMFIT_CLASSES[int(np.argmax(probs_s))], round(state["conf"], 3)])
@@ -699,9 +747,9 @@ def run_side_by_side(own_spec, model_left, model_right, out, max_seconds=None, c
                 if truth and pack["state"].get("decided") and ex != "non_activity":
                     mark = " ✓" if ex == truth else " ✗"
                 d.rectangle([i * half, 0, (i + 1) * half, 56], fill=BG + (255,))
-                d.text((i * half + 20, 12), f"{label}: {NAMES.get(ex, ex)}{mark}",
+                draw_text(d, (i * half + 20, 12), f"{label}: {NAMES.get(ex, ex) if pack['state'].get('decided') else 'Detecting…'}{mark}",
                        font=font(22, True), fill=INK)
-                d.text((i * half + 20, OUT_H - 40), f"reps {pack['state']['reps']} · {pack['stem']}",
+                draw_text(d, (i * half + 20, OUT_H - 40), f"reps {pack['state']['reps']} · {pack['stem']}",
                        font=font(16), fill=MUTED)
                 canvas = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
             writer.write(canvas)
@@ -721,14 +769,14 @@ def run_side_by_side(own_spec, model_left, model_right, out, max_seconds=None, c
     # end card
     img = Image.new("RGB", size, BG)
     d = ImageDraw.Draw(img)
-    d.text((80, 320), "Zero-shot vs adapted", font=font(36, True), fill=ACCENT)
-    d.text((80, 400), f"Truth: {NAMES.get(meta.get('truth_exercise'), meta.get('truth_exercise'))}",
+    draw_text(d, (80, 320), "Zero-shot vs adapted", font=font(36, True), fill=ACCENT)
+    draw_text(d, (80, 400), f"Truth: {NAMES.get(meta.get('truth_exercise'), meta.get('truth_exercise'))}",
            font=font(28), fill=INK)
-    d.text((80, 460), f"Left  {results[0]['model']}: {NAMES.get(results[0]['exercise'], results[0]['exercise'])} "
+    draw_text(d, (80, 460), f"Left  {results[0]['model']}: {NAMES.get(results[0]['exercise'], results[0]['exercise'])} "
            f"{'✓' if results[0]['ok'] else '✗'}", font=font(28, True), fill=OK if results[0]["ok"] else STOP)
-    d.text((80, 520), f"Right {results[1]['model']}: {NAMES.get(results[1]['exercise'], results[1]['exercise'])} "
+    draw_text(d, (80, 520), f"Right {results[1]['model']}: {NAMES.get(results[1]['exercise'], results[1]['exercise'])} "
            f"{'✓' if results[1]['ok'] else '✗'}", font=font(28, True), fill=OK if results[1]["ok"] else STOP)
-    d.text((80, 600), meta["key"], font=font(20), fill=MUTED)
+    draw_text(d, (80, 600), meta["key"], font=font(20), fill=MUTED)
     card = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
     for _ in range(int(fps * 2)):
         writer.write(card)

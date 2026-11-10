@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Workout Coach · Week 2</title>
+<style>
+:root{
+  --bg:#0A0E13; --panel:#121922; --panel2:#18212C; --line:#243040; --ink:#EEF2F6; --muted:#8B98A6; --dim:#5D6B7A;
+  --accent:#7393FF; --ok:#4CC487; --bad:#FF5A5F; --warn:#EFB043; --hr:#FF6B7A;
+  --f:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Cascadia Mono","Consolas",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:var(--f);overflow:hidden}
+#viewport{position:fixed;inset:0;background:#000;overflow:hidden}
+#deck{width:1600px;height:900px;position:absolute;left:50%;top:50%;transform-origin:center center;background:var(--bg)}
+.slide{position:absolute;inset:0;padding:56px 72px 64px;display:none;flex-direction:column;gap:22px;opacity:0;transition:opacity .35s ease}
+.slide.on{display:flex}
+.slide.show{opacity:1}
+.eyebrow{font:600 15px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:76px;line-height:1.02;margin:0;font-weight:800;letter-spacing:-.02em}
+h2{font-size:46px;line-height:1.08;margin:0;font-weight:750;letter-spacing:-.01em}
+h2 em{font-style:normal;color:var(--accent)}
+.lede{font-size:23px;color:var(--muted);margin:0;max-width:1150px;line-height:1.4}
+.lede b{color:var(--ink);font-weight:600}
+.row{display:flex;gap:24px;min-height:0}
+.col{display:flex;flex-direction:column;gap:16px;min-height:0}
+.grow{flex:1;min-height:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 24px}
+.card h3{margin:0 0 8px;font-size:15px;font:600 14px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.big{font-size:84px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.big small{font-size:28px;color:var(--muted);font-weight:600;margin-left:6px}
+.ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)} .acc{color:var(--accent)} .mut{color:var(--muted)}
+.note{font-size:16px;color:var(--muted);line-height:1.45}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font:600 13px var(--mono);border:1px solid var(--line);color:var(--muted);vertical-align:middle}
+.tag.warn{color:var(--warn);border-color:#5a4a22}
+.tag.ok{color:var(--ok);border-color:#24533b}
+.tag.bad{color:var(--bad);border-color:#5b2a2d}
+video{display:block;width:100%;height:100%;object-fit:contain;background:#000;border-radius:14px}
+.vid{position:relative;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line);min-height:0}
+.vid .cap{position:absolute;left:14px;top:12px;font:600 14px var(--mono);background:rgba(10,14,19,.8);padding:5px 10px;border-radius:8px}
+ul.clean{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+ul.clean li{font-size:21px;line-height:1.35;padding-left:30px;position:relative}
+ul.clean li::before{content:"";position:absolute;left:4px;top:11px;width:10px;height:10px;border-radius:3px;background:var(--accent)}
+ul.clean li.k::before{background:var(--ok)} ul.clean li.x::before{background:var(--bad)} ul.clean li.w::before{background:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:19px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font:600 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.n{text-align:right;font-family:var(--mono);font-weight:600}
+img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;background:#fff}
+/* chrome */
+#bar{position:absolute;left:0;bottom:0;height:4px;background:var(--accent);transition:width .35s}
+#foot{position:absolute;left:72px;right:72px;bottom:20px;display:flex;justify-content:space-between;font:500 14px var(--mono);color:var(--dim)}
+#nav{position:fixed;right:18px;bottom:16px;display:flex;gap:8px;z-index:5;opacity:.25;transition:opacity .2s}
+#nav:hover{opacity:1}
+#nav button{background:#18212C;color:#EEF2F6;border:1px solid #243040;border-radius:10px;width:40px;height:36px;font-size:18px;cursor:pointer}
+/* pipeline diagram */
+.pipe{display:flex;align-items:stretch;gap:0}
+.node{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:10px;min-width:0;min-height:200px}
+.node .t{font-size:25px;font-weight:700;line-height:1.15}
+.node .d{font-size:17px;color:var(--muted);line-height:1.4}
+.node .k{font:600 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.node.m{border-color:#33467a;background:#141c2e}
+.arrow{width:34px;display:grid;place-items:center;color:var(--dim);font-size:26px;flex:0 0 34px}
+/* per-exercise bars */
+.exbars{display:flex;flex-direction:column;gap:9px}
+.exb{display:grid;grid-template-columns:230px 1fr 92px;align-items:center;gap:14px;font-size:19px}
+.exb .track{height:22px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.exb .fill{height:100%;border-radius:6px}
+.exb .v{font-family:var(--mono);font-weight:600;text-align:right;font-size:17px}
+.exb .why{grid-column:2 / 4;font-size:14px;color:var(--muted);margin-top:-6px}
+/* thumbnails */
+.thumbs{display:grid;grid-template-columns:repeat(8,1fr);gap:12px}
+.thumb{aspect-ratio:9/16}
+.thumb{position:relative;border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.thumb video{object-fit:cover;border-radius:0}
+.thumb span{position:absolute;left:8px;right:8px;bottom:8px;font:600 13px var(--mono);text-shadow:0 1px 6px #000;line-height:1.3}
+/* tabs */
+.tabs{display:flex;gap:10px}
+.tabs button{font:600 16px var(--f);padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.tabs button[aria-pressed=true]{background:#2a1418;border-color:#5b2a2d;color:var(--ink)}
+.title-bg{position:absolute;inset:0;opacity:.16;filter:saturate(.7) blur(1px)}
+.title-bg video{object-fit:cover;border-radius:0}
+.v169{aspect-ratio:16/9;height:100%;max-width:100%;margin:0 auto}
+.vrow{display:flex;gap:20px;justify-content:center;min-height:0}
+.vrow .vid{aspect-ratio:16/9;flex:0 1 auto;height:100%}
+.title-fg{position:relative;z-index:1;margin-top:auto;margin-bottom:auto;display:flex;flex-direction:column;gap:22px}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="deck">
+
+<!-- 1 · TITLE -->
+<section class="slide" data-title="Title">
+  <div class="row grow" style="align-items:center;gap:48px">
+    <div class="col" style="flex:1;gap:24px">
+      <div class="eyebrow">AI Workout Coach · Week 2 · Deep Learning &amp; Big Data</div>
+      <h1>Does our coach work on <span class="acc">real gym videos?</span></h1>
+      <p class="lede">We built a phone + smartwatch recording station, filmed <b>2 people in a real gym</b>, and ran our models on videos they had <b>never seen</b>.</p>
+      <p class="note">Yassine Nemri · Iheb Lamouchi · 10 Nov 2026</p>
+    </div>
+    <div class="vid" style="flex:1.25;aspect-ratio:16/9"><video data-start="6" data-src="demo/week2/squats_yassine.mp4" muted loop playsinline preload="metadata"></video><span class="cap">live result on our own video</span></div>
+  </div>
+</section>
+
+<!-- 2 · THE QUESTION -->
+<section class="slide" data-title="Question">
+  <div class="eyebrow">01 · The question of week 2</div>
+  <h2>Models trained on public datasets.<br>Do they still work <em>with our phone, in our gym, on our bodies?</em></h2>
+  <div class="row grow" style="margin-top:10px">
+    <div class="card col grow">
+      <h3>Trained on</h3>
+      <ul class="clean">
+        <li><b>Model 1</b> · which exercise + rep counting · trained on <b>MM-Fit</b> (lab videos, 10 exercises)</li>
+        <li><b>Model 2</b> · good or bad form · trained on <b>EC3D</b> (3D motion capture)</li>
+        <li><b>Big-data side</b> · Kafka streaming, Spark rep table</li>
+      </ul>
+    </div>
+    <div class="card col grow">
+      <h3>Week 2 plan → status</h3>
+      <table>
+        <tr><td>2.1–2.2 Model 2 on EC3D</td><td class="n ok">done</td></tr>
+        <tr><td>2.3 Kafka streaming</td><td class="n ok">done <span class="tag">replay</span></td></tr>
+        <tr><td>2.4 Models on <b>our own</b> videos (RQ4)</td><td class="n ok">done</td></tr>
+        <tr><td>2.5 Spark rep table</td><td class="n ok">done</td></tr>
+        <tr><td>2.6 Live demo with phone + watch</td><td class="n ok">done</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="lede">Research question <b>RQ4</b>: how much accuracy do we lose when we move from a dataset to a real phone camera?</p>
+</section>
+
+<!-- 3 · THE PIPELINE -->
+<section class="slide" data-title="Pipeline">
+  <div class="eyebrow">02 · The pipeline we run on every set</div>
+  <h2>From the iPhone camera to a coaching result</h2>
+  <p class="lede">Blue boxes are <b>our trained models</b>. Everything runs on a laptop CPU, no cloud.</p>
+  <div class="pipe" style="margin-top:8px">
+    <div class="node"><div class="k">Capture</div><div class="t">iPhone camera</div><div class="d">Safari page, 30 fps, sends each set live to the laptop over Wi-Fi</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="k">Pose</div><div class="t">MediaPipe skeleton</div><div class="d">18 joints per frame, normalised to the body size</div></div>
+    <div class="arrow">→</div>
+    <div class="node m"><div class="k">Model 1</div><div class="t">Which exercise?</div><div class="d">Transformer on the last 3 s, vote over the set</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="k">Counter</div><div class="t">How many reps?</div><div class="d">Peaks of the exercise's movement signal</div></div>
+    <div class="arrow">→</div>
+    <div class="node m"><div class="k">Model 2</div><div class="t">Good form?</div><div class="d">Squats / lunges / plank only</div></div>
+  </div>
+  <div class="pipe">
+    <div class="node"><div class="k">Watch</div><div class="t">Galaxy Watch 7</div><div class="d">Heart rate over Bluetooth to the laptop, same clock as the video</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="k">Streaming</div><div class="t">Kafka topics</div><div class="d">pose.keypoints · watch.hr · coach.events</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="k">Big data</div><div class="t">Spark rep table</div><div class="d">one row per rep: speed, range, heart rate, baselines</div></div>
+    <div class="arrow">→</div>
+    <div class="node" style="flex:2.2"><div class="k">Output, 8 s after each set</div><div class="t">e.g. "Push-ups · 11 reps · HR 108 → 121"</div><div class="d">shown on the laptop as a suggestion; the person still confirms the true numbers</div></div>
+  </div>
+</section>
+
+<!-- 4 · THE STATION -->
+<section class="slide" data-title="Station">
+  <div class="eyebrow">03 · Step 1 · We built the recording station</div>
+  <h2>A real gym, a phone on a tripod, a watch on the wrist</h2>
+  <div class="row grow">
+    <div class="col" style="flex:1.1">
+      <ul class="clean">
+        <li>The <b>iPhone</b> films in Safari and uploads each set <b>live</b> to the laptop. No cable, no file transfer.</li>
+        <li>The <b>watch</b> heart rate goes to the laptop over Bluetooth.</li>
+        <li>The <b>laptop</b> is the control screen: exercise, start / end, reps, effort, notes.</li>
+        <li>Phone and laptop clocks are synced, so video, heart rate and labels line up.</li>
+      </ul>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="row">
+        <div class="card grow"><h3>Video</h3><div class="big ok">30<small>fps</small></div><p class="note">on every set · 22 / 22 uploaded, nothing lost</p></div>
+        <div class="card grow"><h3>Clock sync</h3><div class="big">3.5<small>ms</small></div><p class="note">median phone ↔ laptop round trip</p></div>
+      </div>
+      <div class="card"><h3>Heart rate coverage</h3><div class="big warn">≈ 50<small>%</small></div><p class="note">The watch went silent for 20–80 s at times. We report it as a limitation.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · THE DATA -->
+<section class="slide" data-title="Our data">
+  <div class="eyebrow">04 · Step 2 · We recorded ourselves</div>
+  <h2>2 people · 20 sets · 9 exercises · <em>never seen in training</em></h2>
+  <div class="thumbs">
+    <div class="thumb"><video data-src="demo/week2/thumbs/squats_yassine.mp4" muted loop playsinline preload="metadata"></video><span>Squats<br>Yassine</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/pushups_partner.mp4" muted loop playsinline preload="metadata"></video><span>Push-ups<br>Iheb</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/shoulder_press_partner.mp4" muted loop playsinline preload="metadata"></video><span>Shoulder press<br>Iheb</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/jumping_jacks_partner.mp4" muted loop playsinline preload="metadata"></video><span>Jumping jacks<br>Iheb</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/bicep_curls_yassine.mp4" muted loop playsinline preload="metadata"></video><span>Bicep curls<br>Yassine</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/failure_triceps.mp4" muted loop playsinline preload="metadata"></video><span>Triceps<br>Yassine</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/failure_lateral.mp4" muted loop playsinline preload="metadata"></video><span>Lateral raises<br>Iheb</span></div>
+    <div class="thumb"><video data-src="demo/week2/thumbs/failure_rows.mp4" muted loop playsinline preload="metadata"></video><span>Rows<br>Yassine</span></div>
+  </div>
+  <div class="row">
+    <p class="note grow">Yassine 12 sets · Iheb 8 sets · push-ups, shoulder press, triceps, squats, bicep curls, jumping jacks, sit-ups, lateral raises, rows. No lunges yet.</p>
+    <p class="note grow">We pressed the wrong exercise button 3 times. The <b class="mut">written note</b> of each set is the truth, so labels were corrected from the notes, never from the model.</p>
+  </div>
+</section>
+
+<!-- 6 · DEMO -->
+<section class="slide" data-title="Demo">
+  <div class="eyebrow">05 · Demo · our models on our videos</div>
+  <div class="grow" style="min-height:0"><div class="vid v169"><video data-src="demo/week2/montage_week2.mp4" muted playsinline preload="metadata" controls></video></div></div>
+  <p class="note">Left: our video with the skeleton. Right: what the model sees, live (only past frames): the exercise, its confidence, the rep counter, the watch heart rate, and the ground truth in grey.</p>
+</section>
+
+<!-- 7 · RESULTS -->
+<section class="slide" data-title="Results">
+  <div class="eyebrow">06 · Result · RQ4, zero-shot (no training on our videos)</div>
+  <h2><span class="ok">14 of 20</span> sets recognised. <span class="mut">Perfect on 5 exercises, wrong on 4.</span></h2>
+  <div class="row grow">
+    <div class="card col" style="flex:1.35">
+      <h3>Model 1 · accuracy per exercise (n = sets)</h3>
+      <div class="exbars">
+        <div class="exb"><span>Push-ups</span><div class="track"><div class="fill" style="width:100%;background:var(--ok)"></div></div><span class="v">4 / 4</span></div>
+        <div class="exb"><span>Shoulder press</span><div class="track"><div class="fill" style="width:100%;background:var(--ok)"></div></div><span class="v">4 / 4</span></div>
+        <div class="exb"><span>Squats</span><div class="track"><div class="fill" style="width:100%;background:var(--ok)"></div></div><span class="v">2 / 2</span></div>
+        <div class="exb"><span>Bicep curls</span><div class="track"><div class="fill" style="width:100%;background:var(--ok)"></div></div><span class="v">2 / 2</span></div>
+        <div class="exb"><span>Jumping jacks</span><div class="track"><div class="fill" style="width:100%;background:var(--ok)"></div></div><span class="v">2 / 2</span></div>
+        <div class="exb"><span>Triceps</span><div class="track"><div class="fill" style="width:2%;background:var(--bad)"></div></div><span class="v bad">0 / 3</span></div>
+        <div class="exb"><span>Lateral raises</span><div class="track"><div class="fill" style="width:2%;background:var(--bad)"></div></div><span class="v bad">0 / 1</span></div>
+        <div class="exb"><span>Sit-ups</span><div class="track"><div class="fill" style="width:2%;background:var(--bad)"></div></div><span class="v bad">0 / 1</span></div>
+        <div class="exb"><span>Rows</span><div class="track"><div class="fill" style="width:2%;background:var(--bad)"></div></div><span class="v bad">0 / 1</span></div>
+      </div>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="card"><h3>Set accuracy</h3><div class="big">70<small>%</small></div><p class="note">14 / 20 · 95% CI 48–85% · Yassine 75% (n=12) · Iheb 62.5% (n=8)</p></div>
+      <div class="card"><h3>Same model, other data</h3>
+        <table>
+          <tr><td>MM-Fit test people (dataset pose)</td><td class="n">0.85 F1</td></tr>
+          <tr><td>MM-Fit, MediaPipe from video</td><td class="n">0.80 F1</td></tr>
+          <tr><td>Public gym videos (RepCount)</td><td class="n">81% acc</td></tr>
+          <tr><td><b>Our gym videos</b></td><td class="n acc">70% acc</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · SUCCESSES -->
+<section class="slide" data-title="It works">
+  <div class="eyebrow">07 · Where it works</div>
+  <h2>Two people, two exercises, <em>correct live</em></h2>
+  <div class="vrow grow">
+    <div class="vid"><video data-start="6" data-src="demo/week2/squats_yassine.mp4" muted loop playsinline preload="metadata"></video><span class="cap">Squats · Yassine</span></div>
+    <div class="vid"><video data-start="6" data-src="demo/week2/pushups_partner.mp4" muted loop playsinline preload="metadata"></video><span class="cap">Push-ups · Iheb</span></div>
+  </div>
+  <p class="note">These exercises look the same in MM-Fit and in our gym: same movement, a camera that sees the whole body. The model decides after a few seconds of movement, then counts the reps.</p>
+</section>
+
+<!-- 9 · WRONG BUTTON -->
+<section class="slide" data-title="Our mistake">
+  <div class="eyebrow">08 · A useful surprise</div>
+  <h2>We pressed <span class="bad">"Squats"</span>. We did push-ups. <span class="ok">The model said push-ups.</span></h2>
+  <div class="row grow">
+    <div class="vid" style="flex:1.6"><video data-start="6" data-src="demo/week2/wrong_button_pushups.mp4" muted loop playsinline preload="metadata"></video></div>
+    <div class="col" style="flex:1">
+      <div class="card"><h3>3 wrong buttons in our labels</h3>
+        <ul class="clean">
+          <li class="k">Squats → really push-ups: model <b>right</b></li>
+          <li class="k">Lateral raises → really bicep curls: model <b>right</b></li>
+          <li class="x">Squats → really triceps: model <b>no exercise</b></li>
+        </ul>
+      </div>
+      <p class="note">The model can check the labels a person types. That's how we found the mistakes; the corrections themselves come from our written notes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · FAILURES -->
+<section class="slide" data-title="Why it fails">
+  <div class="eyebrow">09 · Where it fails, and why</div>
+  <h2>The 4 failures are <em>systematic</em>: all 3 of our models fail on the same sets</h2>
+  <div class="tabs" id="failTabs">
+    <button aria-pressed="true" data-v="demo/week2/failure_triceps.mp4" data-w="tri">Triceps → no exercise</button>
+    <button aria-pressed="false" data-v="demo/week2/failure_lateral.mp4" data-w="lat">Lateral raises → jumping jacks</button>
+    <button aria-pressed="false" data-v="demo/week2/failure_rows.mp4" data-w="row">Rows → push-ups</button>
+  </div>
+  <div class="row grow">
+    <div class="vid" style="flex:1.6"><video data-start="5" id="failVid" data-src="demo/week2/failure_triceps.mp4" muted loop playsinline preload="metadata"></video></div>
+    <div class="col" style="flex:1">
+      <div class="card grow" id="failWhy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · DIAGNOSIS -->
+<section class="slide" data-title="Diagnosis">
+  <div class="eyebrow">10 · Proof: our movement vs the training data</div>
+  <h2>Our variant moves differently from <em>MM-Fit's</em> version</h2>
+  <div class="row grow">
+    <div class="grow" style="min-height:0;display:grid;place-items:center"><img class="fig" src="{{IMG:reports/figures/own_m1_diagnosis.png}}" alt="Diagnosis"></div>
+    <div class="col" style="width:420px">
+      <ul class="clean">
+        <li class="x"><b>Triceps:</b> ours is a cable push-down near the hip; MM-Fit's is overhead.</li>
+        <li class="x"><b>Lateral raises:</b> same arm arc as a jumping jack.</li>
+        <li class="x"><b>Sit-ups:</b> legs flat on the floor; looks like a push-up from the side.</li>
+        <li class="x"><b>Rows:</b> one arm, bent over, side view; the low arm looks like a push-up arm.</li>
+      </ul>
+      <p class="note">Mean joint height over one rep: our sets vs MM-Fit's true class vs the class the model picked.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 · ADAPTATION -->
+<section class="slide" data-title="The fix">
+  <div class="eyebrow">11 · The fix: show the model a few of our videos</div>
+  <h2>Train on one person, test on the other: <span class="ok">75% → 92%</span> for Yassine</h2>
+  <div class="row grow">
+    <div class="vid" style="flex:1.5"><video data-start="0" data-src="demo/week2/zero_shot_vs_adapted.mp4" muted loop playsinline preload="metadata"></video></div>
+    <div class="col" style="flex:1">
+      <div class="card"><h3>Leave-one-person-out</h3>
+        <table>
+          <tr><th>Test person</th><th>Before</th><th>After</th></tr>
+          <tr><td>Yassine (n=12)</td><td class="n">75%</td><td class="n ok">92%</td></tr>
+          <tr><td>Iheb (n=8)</td><td class="n">62.5%</td><td class="n">62.5%</td></tr>
+        </table>
+      </div>
+      <p class="note">Left: original model · right: model adapted on the <b>other</b> person. The test person is never used for training. It helps when the other person did the same variants. With 8 and 12 sets this is a first signal, not a proof; the main RQ4 number stays the zero-shot 70%.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 · REPS + HR -->
+<section class="slide" data-title="Reps + HR">
+  <div class="eyebrow">12 · Rep counting and heart rate</div>
+  <h2>Reps are close on clean exercises; <em>heart rate follows the effort</em></h2>
+  <div class="row grow">
+    <div class="col" style="flex:1">
+      <div class="card"><h3>Rep counting on our videos <span class="tag warn">provisional</span></h3>
+        <table>
+          <tr><td>Squats</td><td class="n ok">10 / 10, both sets</td></tr>
+          <tr><td>Push-ups</td><td class="n">off by 2 on average</td></tr>
+          <tr><td>Bicep curls</td><td class="n bad">far off on 1 of 2 sets</td></tr>
+          <tr><td>All sets (MAE)</td><td class="n">3.2 reps</td></tr>
+        </table>
+        <p class="note" style="margin-top:10px">The station pre-filled "10" as the rep count, so these true counts are being re-counted by hand from the videos. Numbers will be updated.</p>
+      </div>
+    </div>
+    <div class="col" style="flex:1.1">
+      <div class="card grow" style="display:flex;flex-direction:column;gap:8px"><h3>Heart rate during a session (watch)</h3>
+        <div class="grow" style="min-height:0;display:grid;place-items:center"><img class="fig" src="{{IMG:reports/figures/own_hr_session.png}}" alt="Heart rate"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13b · MODEL 2 DEMO -->
+<section class="slide" data-title="Form demo">
+  <div class="eyebrow">13 · Demo · Model 2 checks the form</div>
+  <h2>Correct rep vs. mistake, on a person the model <em>never saw</em></h2>
+  <div class="grow" style="min-height:0"><div class="vid v169"><video data-src="demo/week2/form_demo.mp4" muted playsinline preload="metadata" controls></video></div></div>
+  <p class="note">EC3D motion capture (no camera video exists, so we animate the skeleton the model reads). For each person, Model 2 is trained on the <b>other</b> people only. Left: a correct rep · right: a rep with a mistake. Examples picked where it is right, plus one miss on purpose; overall it gets 58–78% of a new person's reps right.</p>
+</section>
+
+<!-- 14 · MODEL 2 + BIG DATA -->
+<section class="slide" data-title="Form + big data">
+  <div class="eyebrow">14 · Model 2 numbers and the big-data side</div>
+  <h2>Form model: good in the lab, <em>not ready for our camera</em></h2>
+  <div class="row" style="align-items:flex-start">
+    <div class="card col grow"><h3>Model 2 · EC3D, leave-one-person-out</h3>
+      <table>
+        <tr><th></th><th>Squat</th><th>Lunge</th><th>Plank</th></tr>
+        <tr><td>ST-GCN</td><td class="n">55.6%</td><td class="n">68.5%</td><td class="n">70.2%</td></tr>
+        <tr><td>Random forest</td><td class="n">53.8%</td><td class="n ok">71.6%</td><td class="n ok">82.8%</td></tr>
+      </table>
+      <p class="note">On <b>our correct squats</b> it gives P(correct) = <b class="bad">0.06</b>: it would say "bad form" on every rep. So the live demo <b>hides</b> form until it's calibrated on our camera.</p>
+    </div>
+    <div class="card col grow"><h3>Streaming and Spark</h3>
+      <table>
+        <tr><td>Kafka pose stream</td><td class="n">29.8 msg/s · 48 ms</td></tr>
+        <tr><td>Kafka heart-rate stream</td><td class="n">0.79 msg/s · 19 ms</td></tr>
+        <tr><td>Spark rep table, MM-Fit</td><td class="n">5,918 reps</td></tr>
+        <tr><td>Spark rep table, our data</td><td class="n">269 reps</td></tr>
+        <tr><td>Result after each set</td><td class="n">≈ 8 s</td></tr>
+      </table>
+      <p class="note">Kafka numbers are from the replay; the live station path was not measured (Docker was off).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 · LESSONS -->
+<section class="slide" data-title="Lessons">
+  <div class="eyebrow">15 · What we learned · what's next</div>
+  <h2>The models work where our gym looks like their data.<br><em>Where it doesn't, we know why and how to fix it.</em></h2>
+  <div class="row" style="align-items:flex-start;margin-top:10px">
+    <div class="card col grow"><h3>Learned</h3>
+      <ul class="clean">
+        <li class="k">5 exercises transfer perfectly to a phone in a real gym</li>
+        <li class="x">Failures come from a different variant or camera view, not from noise</li>
+        <li class="k">A few of our own videos fix part of it (75% → 92%)</li>
+        <li class="w">Form models trained on motion capture don't transfer without calibration</li>
+      </ul>
+    </div>
+    <div class="card col grow"><h3>Limits (honest)</h3>
+      <ul class="clean">
+        <li class="w">20 sets, 2 people, 1 day: small</li>
+        <li class="w">No lunges yet; triceps variant differs</li>
+        <li class="w">Watch heart rate ≈ 50% coverage</li>
+        <li class="w">Rep counts being re-checked by hand</li>
+      </ul>
+    </div>
+    <div class="card col grow"><h3>Week 3</h3>
+      <ul class="clean">
+        <li>Longer sessions to real fatigue (RPE 8–9)</li>
+        <li>Model 3: fatigue risk on our own data</li>
+        <li>More people; adapt on our variants</li>
+        <li>Calibrate the form model on our camera</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div id="foot"><span>AI Workout Coach · Week 2</span><span id="count"></span></div>
+<div id="bar"></div>
+</div></div>
+<div id="nav"><button id="prev" aria-label="Previous">‹</button><button id="next" aria-label="Next">›</button><button id="fs" aria-label="Fullscreen">⤢</button></div>
+
+<script>
+const deck = document.getElementById("deck");
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+
+function fit(){
+  const s = Math.min(innerWidth / 1600, innerHeight / 900);
+  deck.style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+
+function videosOf(sl){ return [...sl.querySelectorAll("video")]; }
+function activate(sl){
+  videosOf(sl).forEach(v => {
+    if (!v.getAttribute("src") && v.dataset.src) v.src = v.dataset.src;
+    const t0 = parseFloat(v.dataset.start || 0);
+    const seek = () => { try { v.currentTime = t0; } catch(e) {} };
+    if (v.readyState >= 1) seek(); else v.addEventListener("loadedmetadata", seek, { once: true });
+    v.play().catch(()=>{});
+  });
+}
+function deactivate(sl){ videosOf(sl).forEach(v => v.pause()); }
+
+function go(i){
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  const prev = slides[cur];
+  if (prev && prev !== slides[i]) { deactivate(prev); prev.classList.remove("show"); prev.classList.remove("on"); }
+  cur = i;
+  const sl = slides[cur];
+  sl.classList.add("on");
+  requestAnimationFrame(() => sl.classList.add("show"));
+  activate(sl);
+  document.getElementById("count").textContent = `${cur + 1} / ${slides.length} · ${sl.dataset.title}`;
+  document.getElementById("bar").style.width = `${(cur + 1) / slides.length * 100}%`;
+  try { history.replaceState(null, "", "#" + (cur + 1)); } catch(e) {}
+}
+
+addEventListener("keydown", e => {
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+  else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+  else if (e.key === "Home") go(0);
+  else if (e.key === "End") go(slides.length - 1);
+  else if (e.key.toLowerCase() === "f") toggleFs();
+});
+document.getElementById("prev").onclick = () => go(cur - 1);
+document.getElementById("next").onclick = () => go(cur + 1);
+document.getElementById("fs").onclick = () => toggleFs();
+function toggleFs(){
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(()=>{});
+}
+// click a video (not one with controls) = play it fullscreen
+document.querySelectorAll(".vid video, .thumb video").forEach(v => {
+  v.addEventListener("dblclick", () => v.requestFullscreen?.());
+});
+
+// failure tabs
+const WHY = {
+  tri: `<h3>Triceps · 0 / 3</h3><div class="big bad" style="font-size:44px">"No exercise"</div>
+        <p class="note" style="font-size:19px;color:var(--ink)">Ours is a <b>cable push-down</b>, filmed <b>from the side</b>, with the hands near the hip.</p>
+        <p class="note" style="font-size:19px">MM-Fit only has <b>overhead dumbbell</b> extensions, filmed from the front. The model has never seen this movement.</p>`,
+  lat: `<h3>Lateral raises · 0 / 1</h3><div class="big bad" style="font-size:44px">"Jumping jacks"</div>
+        <p class="note" style="font-size:19px;color:var(--ink)">The arms go up and out in the <b>same arc as a jumping jack</b>.</p>
+        <p class="note" style="font-size:19px">The model relies on the arms and ignores that the legs don't jump.</p>`,
+  row: `<h3>Rows · 0 / 1</h3><div class="big bad" style="font-size:44px">"Push-ups"</div>
+        <p class="note" style="font-size:19px;color:var(--ink)">A <b>one-arm row</b>, body bent forward, <b>seen from the side</b>.</p>
+        <p class="note" style="font-size:19px">The hanging arm looks like a push-up support arm. MM-Fit rows use both arms.</p>`,
+};
+const tabs = document.getElementById("failTabs"), fv = document.getElementById("failVid"), fw = document.getElementById("failWhy");
+fw.innerHTML = WHY.tri;
+tabs.onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  [...tabs.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+  fv.src = b.dataset.v; fv.addEventListener('loadedmetadata', () => { try { fv.currentTime = 5; } catch(e) {} }, { once: true }); fv.play().catch(()=>{});
+  fw.innerHTML = WHY[b.dataset.w];
+};
+
+const start = parseInt((location.hash || "#1").slice(1), 10);
+go(isFinite(start) ? start - 1 : 0);
+</script>
+</body>
+</html>

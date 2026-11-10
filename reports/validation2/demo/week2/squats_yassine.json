@@ -18,7 +18,7 @@
    "reps": 10
   }
  ],
- "processing_fps_mean": 32.6,
+ "processing_fps_mean": 64.3,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [

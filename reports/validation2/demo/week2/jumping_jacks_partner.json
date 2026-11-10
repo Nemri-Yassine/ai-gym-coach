@@ -18,7 +18,7 @@
    "reps": 11
   }
  ],
- "processing_fps_mean": 50.9,
+ "processing_fps_mean": 62.3,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [
@@ -534,5 +534,5 @@
  ],
  "banner": null,
  "file": "jumping_jacks_partner.mp4",
- "megabytes": 1.53
+ "megabytes": 1.54
 }

@@ -18,7 +18,7 @@
    "reps": 11
   }
  ],
- "processing_fps_mean": 53.3,
+ "processing_fps_mean": 44.3,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [
@@ -684,5 +684,5 @@
  ],
  "banner": "Button pressed: Squats \u00b7 Model says: Push-ups \u2713",
  "file": "wrong_button_pushups.mp4",
- "megabytes": 1.17
+ "megabytes": 1.15
 }

@@ -18,7 +18,7 @@
    "reps": 14
   }
  ],
- "processing_fps_mean": 43.1,
+ "processing_fps_mean": 61.4,
  "realtime_capable": true,
  "pose_found_ratio": 1.0,
  "timeline": [
@@ -839,5 +839,5 @@
  ],
  "banner": null,
  "file": "pushups_partner.mp4",
- "megabytes": 1.08
+ "megabytes": 1.05
 }

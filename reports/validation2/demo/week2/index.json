@@ -1,7 +1,7 @@
 [
   {
     "file": "squats_yassine.mp4",
-    "shows": "clean success: squats",
+    "shows": "success: squats (Yassine)",
     "own": "yassine/2026-11-10_SQUAT/1",
     "seconds": 25.1,
     "megabytes": 2.86,
@@ -13,10 +13,10 @@
   },
   {
     "file": "pushups_partner.mp4",
-    "shows": "success on partner",
+    "shows": "success: push-ups (partner)",
     "own": "partner/2026-11-10_PUSHUP/1",
     "seconds": 19.2,
-    "megabytes": 1.08,
+    "megabytes": 1.05,
     "exercise": "pushups",
     "truth": "pushups",
     "ok": true,
@@ -25,10 +25,10 @@
   },
   {
     "file": "shoulder_press_partner.mp4",
-    "shows": "success shoulder press",
+    "shows": "success: shoulder press (partner)",
     "own": "partner/2026-11-10_SHOULDERPRESS/1",
     "seconds": 27.1,
-    "megabytes": 2.16,
+    "megabytes": 2.15,
     "exercise": "dumbbell_shoulder_press",
     "truth": "dumbbell_shoulder_press",
     "ok": true,
@@ -37,10 +37,10 @@
   },
   {
     "file": "jumping_jacks_partner.mp4",
-    "shows": "success jumping jacks",
+    "shows": "success: jumping jacks (partner)",
     "own": "partner/2026-11-10_EX3IHEB/1",
     "seconds": 13.0,
-    "megabytes": 1.53,
+    "megabytes": 1.54,
     "exercise": "jumping_jacks",
     "truth": "jumping_jacks",
     "ok": true,
@@ -49,22 +49,22 @@
   },
   {
     "file": "bicep_curls_yassine.mp4",
-    "shows": "bicep curls success (reps may be off)",
+    "shows": "success: bicep curls (Yassine)",
     "own": "yassine/2026-11-10_TRICEPS/3",
     "seconds": 26.1,
-    "megabytes": 2.52,
-    "exercise": null,
+    "megabytes": 2.53,
+    "exercise": "bicep_curls",
     "truth": "bicep_curls",
-    "ok": false,
-    "reps_counted": 0,
+    "ok": true,
+    "reps_counted": 9,
     "truth_reps": 10
   },
   {
     "file": "wrong_button_pushups.mp4",
-    "shows": "button squats, model push-ups",
+    "shows": "we pressed 'squats', did push-ups; the model says push-ups",
     "own": "yassine/2026-11-10_s007/1",
     "seconds": 16.1,
-    "megabytes": 1.17,
+    "megabytes": 1.15,
     "exercise": "pushups",
     "truth": "pushups",
     "ok": true,
@@ -73,7 +73,7 @@
   },
   {
     "file": "failure_triceps.mp4",
-    "shows": "honest failure triceps",
+    "shows": "failure: triceps (cable push-down, side view)",
     "own": "yassine/2026-11-10_TRICEPS/2",
     "seconds": 23.1,
     "megabytes": 1.51,
@@ -84,11 +84,35 @@
     "truth_reps": 10
   },
   {
+    "file": "failure_lateral.mp4",
+    "shows": "failure: lateral raises read as jumping jacks",
+    "own": "partner/2026-11-10_s01/1",
+    "seconds": 26.1,
+    "megabytes": 1.93,
+    "exercise": "jumping_jacks",
+    "truth": "lateral_shoulder_raises",
+    "ok": false,
+    "reps_counted": 11,
+    "truth_reps": 10
+  },
+  {
+    "file": "failure_rows.mp4",
+    "shows": "failure: one-arm rows read as push-ups",
+    "own": "yassine/2026-11-10_DUMBLLROWS/1",
+    "seconds": 24.1,
+    "megabytes": 2.13,
+    "exercise": "pushups",
+    "truth": "dumbbell_rows",
+    "ok": false,
+    "reps_counted": 18,
+    "truth_reps": 10
+  },
+  {
     "file": "zero_shot_vs_adapted.mp4",
     "shows": "side-by-side LOPO on yassine/2026-11-10_TRICEPS/set01",
     "own": "yassine/2026-11-10_TRICEPS/1",
     "seconds": 21.1,
-    "megabytes": 2.1,
+    "megabytes": 2.07,
     "left": {
       "model": "m1_transformer_pose",
       "exercise": null,
@@ -106,8 +130,8 @@
   {
     "file": "montage_week2.mp4",
     "shows": "highlight reel",
-    "seconds": 60.9,
-    "megabytes": 2.51,
+    "seconds": 80.8,
+    "megabytes": 3.32,
     "ok": null
   },
   {
