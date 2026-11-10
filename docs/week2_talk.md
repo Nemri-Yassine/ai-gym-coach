@@ -1,4 +1,4 @@
-# Week 2 presentation · what to say (about 12 minutes, 16 slides)
+# Week 2 presentation · what to say (about 12 minutes, 17 slides)
 
 Open `reports/validation2/AI_Workout_Coach_Week2.html` in Chrome; keep the `demo/` folder next to it.
 **→ / ←** change slide · **F** fullscreen · **double-click** a video to make it fullscreen.
@@ -19,8 +19,9 @@ Open `reports/validation2/AI_Workout_Coach_Week2.html` in Chrome; keep the `demo
 | 12 | The fix | "We adapted the model on one person and tested on the other. Yassine went from 75% to 92%. For Iheb it didn't change. With 8 and 12 sets this is a first signal, not a proof." |
 | 13 | Reps + HR | "Squats are counted exactly. Push-ups are off by about 2. The true counts are being re-checked by hand, so these are provisional. Heart rate rises during each set, as expected." |
 | 14 | **Form demo** | Let it play. "This is Model 2 on a person it never saw: left a correct squat, right knees inward. It flags the mistake. Same for lunges and plank. And here is a miss: we show it on purpose." |
-| 15 | Form + big data | "The form model works in the lab, but on our correct squats it says 'bad form' every time. So we hide it in the demo until it's calibrated. Kafka streams at 30 messages per second; Spark builds the rep table." |
-| 16 | Lessons | "The models work where our gym looks like their data. Where it doesn't, we know why and how to fix it. Week 3: longer sessions, fatigue model on our data, more people." |
+| 15 | **Form on a real video** | "Now the same model on our own real video. This squat is correct, but it says 'front bent' on every rep. It learned from motion-capture skeletons; a phone skeleton looks different. That's why the live coach hides form until we calibrate it on our own recordings in week 3." |
+| 16 | Form + big data | "The form model works in the lab, but on our correct squats it says 'bad form' every time. So we hide it in the demo until it's calibrated. Kafka streams at 30 messages per second; Spark builds the rep table." |
+| 17 | Lessons | "The models work where our gym looks like their data. Where it doesn't, we know why and how to fix it. Week 3: longer sessions, fatigue model on our data, more people." |
 
 ## Hard questions
 
@@ -28,4 +29,5 @@ Open `reports/validation2/AI_Workout_Coach_Week2.html` in Chrome; keep the `demo
 - **"Isn't 20 sets too small?"** Yes. We give confidence intervals (48–85%) and say it's a first signal. Week 3 adds sessions.
 - **"Did you tune on your test videos?"** No. Our videos are test only. The adaptation trains on one person and tests on the other.
 - **"Who checks the rep counts?"** We re-count by hand from the videos (`scripts/review_reps.py`). Until then the rep numbers are marked provisional.
+- **"Can Model 2 detect a mistake on a real video?"** Not yet reliably: on our correct squats it flags every rep. On its own data it works on a person it never saw (EC3D demo). Calibrating on our own recorded mistakes is the week-3 fix.
 - **"Why hide the form model?"** It gives P(correct) = 0.06 on squats that were correct. Showing it would mislead the user.

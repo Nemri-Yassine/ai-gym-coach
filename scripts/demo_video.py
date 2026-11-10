@@ -111,6 +111,40 @@ def _split_sym(s):
     return out
 
 
+# ---------------------------------------------------------------- Model 2 (form), real per-rep scoring
+_M2 = {"pack": None}
+_M2_EX = {"squats": "squat", "lunges": "lunge"}
+
+
+def m2_score_reps(seq_norm, bounds, exercise):
+    """Model 2 random forest (models/m2_rf.pickle) on each finished rep. Returns [(pred_name, p_pred, [(name, p)])]."""
+    key = _M2_EX.get(exercise)
+    if key is None:
+        return []
+    if _M2["pack"] is None:
+        import pickle
+        with open(MODELS / "m2_rf.pickle", "rb") as fh:
+            _M2["pack"] = pickle.load(fh)
+    forest = _M2["pack"]["forests"].get(key)
+    if forest is None:
+        return []
+    from awc.data.ec3d import MISTAKES
+    from awc.features.form_dataset import MISTAKE_CODES, resample
+    from awc.features.form_features import feature_vector, features_2d
+    names = [MISTAKES[c] for c in MISTAKE_CODES[key]]
+    out = []
+    for a, b in bounds:
+        seg = seq_norm[a:b + 1]
+        if len(seg) < 8 or not np.isfinite(seg).all():
+            continue
+        proba = forest.predict_proba(feature_vector(features_2d(resample(seg, 64))).reshape(1, -1))[0]
+        full = np.zeros(len(names))
+        full[forest.classes_] = proba
+        i = int(np.argmax(full))
+        out.append((names[i], float(full[i]), sorted(zip(names, full.tolist()), key=lambda kv: -kv[1])))
+    return out
+
+
 def load_model(name):
     stem = name[:-3] if str(name).endswith(".pt") else name
     ckpt = torch.load(MODELS / f"{stem}.pt", map_location="cpu", weights_only=False)
@@ -364,7 +398,30 @@ def draw_portrait_canvas(bgr, pose_px, state, meta, probs, model_name, banner=No
         draw_text(d, (px, yy + 74), f"Button pressed: {NAMES.get(meta['button'], meta['button'])}",
                font=font(17, True), fill=STOP)
 
-    if state.get("form_line"):
+    if state.get("form_on"):
+        fy = yy + 112
+        draw_text(d, (px, fy), "FORM · MODEL 2 (per finished rep)", font=font(16, True), fill=ACCENT)
+        reps_f = state.get("form_reps") or []
+        if not reps_f:
+            draw_text(d, (px, fy + 28), "waiting for the first full rep…", font=font(22), fill=MUTED)
+        else:
+            name, p, ranked = reps_f[-1]
+            good = name == "Correct"
+            draw_text(d, (px, fy + 26), f"Rep {len(reps_f)}: {name}", font=font(40, True), fill=OK if good else STOP)
+            by = fy + 82
+            for nm, pv in ranked[:3]:
+                draw_text(d, (px, by), nm, font=font(17), fill=MUTED)
+                bw = int((OUT_W - px - 260) * pv)
+                d.rounded_rectangle([px + 190, by + 5, px + 190 + max(4, bw), by + 19], 5,
+                                    fill=(OK if nm == "Correct" else STOP) + (220,))
+                draw_text(d, (OUT_W - 80, by), f"{pv * 100:.0f}%", font=font(16, True), fill=INK)
+                by += 28
+            dx = px
+            draw_text(d, (px, by + 8), "all reps:", font=font(16), fill=MUTED)
+            for nm, _, _ in reps_f:
+                d.ellipse([dx + 90, by + 12, dx + 108, by + 30], fill=(OK if nm == "Correct" else STOP) + (255,))
+                dx += 26
+    elif state.get("form_line"):
         draw_text(d, (px, yy + 110), state["form_line"], font=font(17), fill=MUTED)
 
     foot = (f"{meta.get('person', '')} · set {meta.get('set', '')} · {model_name} · "
@@ -451,7 +508,10 @@ def _score_step(model, inputs, poses, times, ts, probs_s, state, seg_start, seg_
         keep = [i for i, t in enumerate(times) if t >= seg_start and np.isfinite(poses[i]).all()]
         if len(keep) > 30:
             seq = resample_times(np.asarray([poses[i] for i in keep]), np.asarray([times[i] for i in keep]))
-            n, _ = count_reps(normalize(seq), fps=30, exercise=seg_ex)
+            seq_n = normalize(seq)
+            n, bounds = count_reps(seq_n, fps=30, exercise=seg_ex)
+            if state.get("form_on") and seg_ex in _M2_EX and len(bounds) > len(state.get("form_reps") or []):
+                state["form_reps"] = m2_score_reps(seq_n, bounds, seg_ex)
             prev = state["reps"]
             state["reps"] = max(state["reps"], int(n))
             state["rep_flash"] = state["reps"] > prev
@@ -561,8 +621,8 @@ def run(
                     if state["hr_start"] is None:
                         state["hr_start"] = bpm
                     state["hr_end"] = bpm
-            if show_form and state["exercise"] == "squats":
-                state["form_line"] = "Form: hidden by default (M2 P(correct) 0.06 on our camera)"
+            if show_form and state["exercise"] in _M2_EX:
+                state["form_on"] = True
             else:
                 state["form_line"] = None
 

@@ -351,15 +351,36 @@ img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-r
 
 <!-- 13b · MODEL 2 DEMO -->
 <section class="slide" data-title="Form demo">
-  <div class="eyebrow">13 · Demo · Model 2 checks the form</div>
+  <div class="eyebrow">13 · Demo · Model 2 checks the form (motion-capture data)</div>
   <h2>Correct rep vs. mistake, on a person the model <em>never saw</em></h2>
   <div class="grow" style="min-height:0"><div class="vid v169"><video data-src="demo/week2/form_demo.mp4" muted playsinline preload="metadata" controls></video></div></div>
   <p class="note">EC3D motion capture (no camera video exists, so we animate the skeleton the model reads). For each person, Model 2 is trained on the <b>other</b> people only. Left: a correct rep · right: a rep with a mistake. Examples picked where it is right, plus one miss on purpose; overall it gets 58–78% of a new person's reps right.</p>
 </section>
 
+<!-- 13c · MODEL 2 ON A REAL VIDEO -->
+<section class="slide" data-title="Form, real video">
+  <div class="eyebrow">13 · Model 2 on a real video (our correct squat)</div>
+  <h2>On a phone camera it flags <span class="bad">every rep</span>, even a good one</h2>
+  <div class="row grow">
+    <div class="vid" style="flex:1.6"><video data-start="12" data-src="demo/week2/form_real_squat.mp4" muted loop playsinline preload="metadata"></video></div>
+    <div class="col" style="flex:1">
+      <div class="card"><h3>What the model says</h3>
+        <div class="big bad" style="font-size:40px">"Front bent" · 9 / 9 reps</div>
+        <p class="note">The squat is correct (our label). Model 2 is about 77% sure it's "front bent" on every rep.</p>
+      </div>
+      <div class="card"><h3>Why</h3>
+        <p class="note" style="font-size:18px">It learned from motion-capture skeletons (EC3D). A phone skeleton, with a different camera angle, body proportions and noise, looks "bent" to it. Same effect on MM-Fit lab videos (P(correct) 0.08).</p>
+      </div>
+      <div class="card"><h3>Fix (week 3)</h3>
+        <p class="note" style="font-size:18px">Record our own correct and wrong reps, then calibrate on one person and test on the other. Until then, the live coach hides form.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 14 · MODEL 2 + BIG DATA -->
 <section class="slide" data-title="Form + big data">
-  <div class="eyebrow">14 · Model 2 numbers and the big-data side</div>
+  <div class="eyebrow">15 · Model 2 numbers and the big-data side</div>
   <h2>Form model: good in the lab, <em>not ready for our camera</em></h2>
   <div class="row" style="align-items:flex-start">
     <div class="card col grow"><h3>Model 2 · EC3D, leave-one-person-out</h3>
@@ -385,7 +406,7 @@ img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-r
 
 <!-- 15 · LESSONS -->
 <section class="slide" data-title="Lessons">
-  <div class="eyebrow">15 · What we learned · what's next</div>
+  <div class="eyebrow">16 · What we learned · what's next</div>
   <h2>The models work where our gym looks like their data.<br><em>Where it doesn't, we know why and how to fix it.</em></h2>
   <div class="row" style="align-items:flex-start;margin-top:10px">
     <div class="card col grow"><h3>Learned</h3>
