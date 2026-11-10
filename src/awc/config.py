@@ -34,14 +34,25 @@ W20_VIDEO_SENSOR_OFFSET = 3.0
 W20_VIDEO_SENSOR_SLOPE = 0.00169
 W20_VIDEO_SENSOR_PIVOT = 2178.0
 
-# Checkpoints / experiment folders. Env overrides keep pytest quick-trains out of the real trees.
+# Checkpoints / experiment folders. Prefer models_dir() / experiments_dir() so
+# AWC_MODELS_DIR / AWC_EXPERIMENTS_DIR env overrides are read at call time (pytest tmp).
 _MODELS_REAL = ROOT / "models"
-MODELS = Path(os.environ["AWC_MODELS_DIR"]) if os.environ.get("AWC_MODELS_DIR") else _MODELS_REAL
-EXPERIMENTS = (
-    Path(os.environ["AWC_EXPERIMENTS_DIR"])
-    if os.environ.get("AWC_EXPERIMENTS_DIR")
-    else (ROOT / "experiments")
-)
+_EXPERIMENTS_REAL = ROOT / "experiments"
+
+
+def models_dir() -> Path:
+    override = os.environ.get("AWC_MODELS_DIR")
+    return Path(override) if override else _MODELS_REAL
+
+
+def experiments_dir() -> Path:
+    override = os.environ.get("AWC_EXPERIMENTS_DIR")
+    return Path(override) if override else _EXPERIMENTS_REAL
+
+
+# Defaults for loaders / demos (real trees). Training writes go through models_dir().
+MODELS = _MODELS_REAL
+EXPERIMENTS = _EXPERIMENTS_REAL
 POSE_MODEL = _MODELS_REAL / "pose_landmarker_full.task"  # always the real MediaPipe weights
 POSE_MODEL_URL = ("https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
                   "pose_landmarker_full/float16/latest/pose_landmarker_full.task")

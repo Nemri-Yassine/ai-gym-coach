@@ -17,7 +17,7 @@ Model 3 numbers prefer `*_v2` (Step 3.2b: fair B1, speed-only labels, 3 seeds).
 ## RQ3 · Personal vs general (B4 vs B2) and vs rule (B1)
 
 - B2 (general+HR) AUC **0.7289578066876298** — better than B4 here.
-- B5 (general, no HR) AUC **0.5998782292373143**.
+- B5 (general, no HR) AUC **0.760** ± 0.009 (restored after quick-train overwrite; was wrongly 0.600).
 - Fair B1 continuous AUC **0.7506381404525556** (alert @25% / @20% in `reports/m3_results.md`).
 - Within-session personal baseline does not beat general normalisation on these labels.
 - Exercise-only control AUC **0.773** ≥ learned variants — see `reports/m3_results.md`.

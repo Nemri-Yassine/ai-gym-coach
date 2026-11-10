@@ -21,7 +21,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.preprocessing import OneHotEncoder
 
-from awc.config import MMFIT_CLASSES, MODELS, PROCESSED
+from awc.config import MMFIT_CLASSES, PROCESSED, models_dir
 from awc.features.fatigue_dataset import FEATURE_COLS, M3_DIR, build_all
 from awc.models.m3_fatigue import M3Model, pad_batch, rule_baseline_alert
 from awc.training.tracking import new_run, save_metrics, seed_everything
@@ -342,7 +342,8 @@ def _mean_std(values):
 
 def run_variant(name, quick=False, epochs=30, seeds=SEEDS, thresh_mode="youden"):
     cfg = VARIANTS[name]
-    run = new_run(f"m3_{name.lower()}_v2", {"variant": name, **cfg, "quick": quick, "seeds": list(seeds)})
+    run_name = f"m3_{name.lower()}_v2" + ("_quick" if quick else "")
+    run = new_run(run_name, {"variant": name, **cfg, "quick": quick, "seeds": list(seeds)})
     if cfg["rule"]:
         pack = load_npz("general")
         test = _records(pack, "test_unseen")
@@ -421,12 +422,13 @@ def run_variant(name, quick=False, epochs=30, seeds=SEEDS, thresh_mode="youden")
         if w05 and best_model is not None:
             metrics["w05_no_hr"] = evaluate_model(best_model, w05, thresh=chosen_thresh)
     if best_model is not None:
-        ckpt = MODELS / f"m3_{name.lower()}.pt"
-        MODELS.mkdir(parents=True, exist_ok=True)
+        out = models_dir()
+        out.mkdir(parents=True, exist_ok=True)
+        ckpt_name = f"m3_{name.lower()}" + ("_quick" if quick else "") + ".pt"
         torch.save({
             "variant": name, "state_dict": best_model.state_dict(),
             "in_dim": IN_DIM, "thresh": chosen_thresh,
-        }, ckpt)
+        }, out / ckpt_name)
     save_metrics(run, metrics)
     return metrics
 

@@ -1,4 +1,6 @@
 """Model 3 forward, rule baseline, lead-time metric, quick train."""
+from pathlib import Path
+
 import numpy as np
 import torch
 
@@ -27,9 +29,11 @@ def test_lead_time_metric():
     assert warning_lead_time(risk, 2, thresh=0.7) == 0.0  # alert after breakdown
 
 
-def test_train_quick():
+def test_train_quick(tmp_path, monkeypatch):
+    monkeypatch.setenv("AWC_MODELS_DIR", str(tmp_path / "models"))
+    monkeypatch.setenv("AWC_EXPERIMENTS_DIR", str(tmp_path / "experiments"))
     from awc.features.fatigue_dataset import M3_DIR, build_all
-    from awc.training.train_m3 import evaluate_rule, run_variant, speed_loss_scores
+    from awc.training.train_m3 import run_variant, speed_loss_scores
 
     if not (M3_DIR / "sets_general.npz").is_file():
         build_all(use_form=False)
@@ -38,3 +42,6 @@ def test_train_quick():
     # continuous B1 score is not a step function
     sc = speed_loss_scores([1.0, 1.0, 0.9, 0.7])
     assert sc[3] > sc[2] > 0
+    # quick never writes the real checkpoint name
+    assert (tmp_path / "models" / "m3_b5_quick.pt").is_file()
+    assert not (tmp_path / "models" / "m3_b5.pt").is_file()

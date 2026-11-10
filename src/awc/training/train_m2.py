@@ -21,7 +21,7 @@ from sklearn.metrics import f1_score
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from awc.config import FIGURES, M2_REPS, MODELS, REPORTS
+from awc.config import FIGURES, M2_REPS, REPORTS, models_dir
 from awc.evaluation.metrics import accuracy
 from awc.features.form_dataset import (
     EXERCISES,
@@ -519,8 +519,9 @@ def train(model_name, epochs=60, batch=BATCH, lr=1e-3, seed=42, quick=False):
         all_started = time.perf_counter()
         forests = _train_all_rf(cache, exercise, mistake, seed)
         all_s = time.perf_counter() - all_started
-        MODELS.mkdir(parents=True, exist_ok=True)
-        ckpt = MODELS / f"{name}.pickle"
+        out = models_dir()
+        out.mkdir(parents=True, exist_ok=True)
+        ckpt = out / f"{name}.pickle"
         with open(ckpt, "wb") as handle:
             pickle.dump({"model": "rf", "features": "2d", "forests": forests, "exercises": list(EXERCISES)}, handle)
         _log(run_dir, f"all-people checkpoint {ckpt.name} saved and not evaluated")
@@ -531,8 +532,9 @@ def train(model_name, epochs=60, batch=BATCH, lr=1e-3, seed=42, quick=False):
         )
         model, all_s = _train_all_net(model_name, cache, exercise, mistake, epochs, batch, lr, seed, run_dir)
         parameter_count = int(sum(p.numel() for p in model.parameters()))
-        MODELS.mkdir(parents=True, exist_ok=True)
-        ckpt = MODELS / f"{name}.pt"
+        out = models_dir()
+        out.mkdir(parents=True, exist_ok=True)
+        ckpt = out / f"{name}.pt"
         torch.save({
             "model": model_name,
             "state_dict": model.state_dict(),

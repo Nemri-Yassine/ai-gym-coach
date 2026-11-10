@@ -49,6 +49,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-10 · Fix 2 (test isolation).** Quick-trains honour `AWC_MODELS_DIR` / `AWC_EXPERIMENTS_DIR` and write `*_quick` checkpoints under tmp in pytest. Stray quick folders removed; B5 retrain: risk AUC **0.599 → 0.760 ± 0.009** (matches `reports/m3_results.md`).
 - **2026-11-10 · Fix 1 (verified reps).** Station no longer defaults reps/RPE to 10; Save set requires a typed count. Review UI: `python scripts/review_reps.py` → `data/own_reps_verified.csv`. Manifest keeps `reps_typed` / `reps_source`; eval MAE uses **verified only**. Typed-default MAE **3.17** is provisional (not a count) until review finishes.
 - **2026-11-10 · Weeks 1–2 complete (own data).** Gym station capture decision locked; week1/week2 reports refreshed; slides updated; tag `v1.2`. Key RQ4 own: M1 set acc **0.70** [0.48, 0.85], macro-F1 **0.51**, rep MAE **3.17** (typed default — provisional), M2 P(correct) **0.06**, Spark own **269** reps, live analysis **0.84/0.03/0.03 s**.
 - **2026-11-10 · Step 2.6b.** Station post-set analysis (background): pose → M1 → reps → M2 → HR → `data/interim/own_live/…/analysis_setNN.json`; shown on the control page (never into `sets.csv`). Latency on 3 cached sets: **0.84 / 0.03 / 0.03 s** (cold model load then warm). Optional `--kafka`. Demo: `docs/demo.md`.

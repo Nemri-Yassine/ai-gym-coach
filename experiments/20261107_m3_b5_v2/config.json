@@ -3,11 +3,11 @@
   "norm": "general",
   "hr": false,
   "rule": false,
-  "quick": true,
+  "quick": false,
   "seeds": [
     42,
     43,
     44
   ],
-  "git_commit": "25db5d9848eec84c3b025b165d4a1124441b5aff"
+  "git_commit": "36bb11847efbe846bba288aa72f71cd3f326a08d"
 }

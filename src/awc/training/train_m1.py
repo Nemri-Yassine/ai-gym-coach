@@ -11,7 +11,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from awc.config import MMFIT_CLASSES, MODELS, PROCESSED
+from awc.config import MMFIT_CLASSES, PROCESSED, models_dir
 from awc.evaluation.metrics import accuracy, confusion, macro_f1, per_class_f1, plot_confusion
 from awc.models.m1_recognition import M1Model
 from awc.training.tracking import new_run, save_metrics, seed_everything
@@ -183,8 +183,9 @@ def train(arch, inputs, epochs=30, batch=128, lr=1e-3, seed=42, quick=False):
                            title=f"M1 {arch} {inputs} test_unseen")
             metrics["confusion_test_unseen"] = cm.tolist()
 
-    MODELS.mkdir(parents=True, exist_ok=True)
-    ckpt = MODELS / f"{name}.pt"
+    out = models_dir()
+    out.mkdir(parents=True, exist_ok=True)
+    ckpt = out / f"{name}.pt"
     torch.save({"arch": arch, "inputs": inputs, "state_dict": model.state_dict(), "classes": MMFIT_CLASSES}, ckpt)
     metrics["checkpoint"] = ckpt.name
     save_metrics(run_dir, metrics)

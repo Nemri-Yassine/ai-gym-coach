@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from awc.config import EXPERIMENTS, ROOT
+from awc.config import ROOT, experiments_dir
 
 
 def seed_everything(seed=42):
@@ -35,8 +35,11 @@ def git_commit():
 
 
 def new_run(name, config) -> Path:
-    """Create experiments/<YYYYMMDD>_<name>/ and write config.json (includes git_commit)."""
-    run_dir = EXPERIMENTS / f"{datetime.now():%Y%m%d}_{name}"
+    """Create experiments/<YYYYMMDD>_<name>/ and write config.json (includes git_commit).
+
+    Honours AWC_EXPERIMENTS_DIR so pytest quick-trains never touch the real tree.
+    """
+    run_dir = experiments_dir() / f"{datetime.now():%Y%m%d}_{name}"
     run_dir.mkdir(parents=True, exist_ok=True)
     payload = dict(config)
     payload["git_commit"] = git_commit()

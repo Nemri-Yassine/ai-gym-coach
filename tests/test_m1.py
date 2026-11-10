@@ -1,6 +1,8 @@
 """Model 1 shapes, a few optimizer steps, and the --quick training entry point."""
+import os
 import subprocess
 import sys
+from pathlib import Path
 
 import torch
 from torch import nn
@@ -48,5 +50,14 @@ def test_one_step_decreases_loss():
     assert loss_value() < before
 
 
-def test_train_quick():
-    subprocess.check_call([sys.executable, "-m", "awc.training.train_m1", "--arch", "cnn", "--inputs", "pose", "--quick"])
+def test_train_quick(tmp_path):
+    env = {
+        **os.environ,
+        "AWC_MODELS_DIR": str(tmp_path / "models"),
+        "AWC_EXPERIMENTS_DIR": str(tmp_path / "experiments"),
+    }
+    subprocess.check_call(
+        [sys.executable, "-m", "awc.training.train_m1", "--arch", "cnn", "--inputs", "pose", "--quick"],
+        env=env,
+    )
+    assert (tmp_path / "models" / "m1_cnn_pose_quick.pt").is_file()

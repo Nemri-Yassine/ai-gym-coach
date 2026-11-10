@@ -1,0 +1,13 @@
+{
+  "variant": "B5",
+  "norm": "general",
+  "hr": false,
+  "rule": false,
+  "quick": false,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "git_commit": "36bb11847efbe846bba288aa72f71cd3f326a08d"
+}
