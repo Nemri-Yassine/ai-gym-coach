@@ -17,6 +17,16 @@ Open the control page (browser opens automatically). Scan the QR on the iPhone, 
 with the PIN, connect the watch via *Heart for Bluetooth*. Record a set; after upload
 the blue “Model: …” line appears under the form.
 
+### Screen-record the live station (Windows Game Bar)
+
+We could not capture `reports/validation2/demo/week2/station_demo.mp4` automatically.
+Record it by hand:
+
+1. Start the station (`python -m awc.station`) and open the control page full screen.
+2. Press **Win+G** to open Xbox Game Bar, then **Win+Alt+R** to start/stop recording.
+3. Film: live iPhone view → Start set → End set → wait for the suggestion line (~8 s with live_fast).
+4. Save the clip as `reports/validation2/demo/week2/station_demo.mp4` (H.264, muted is fine).
+
 Check analysis JSON (interim only):
 
 ```powershell

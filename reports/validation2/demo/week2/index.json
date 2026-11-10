@@ -1,0 +1,119 @@
+[
+  {
+    "file": "squats_yassine.mp4",
+    "shows": "clean success: squats",
+    "own": "yassine/2026-11-10_SQUAT/1",
+    "seconds": 25.1,
+    "megabytes": 2.86,
+    "exercise": "squats",
+    "truth": "squats",
+    "ok": true,
+    "reps_counted": 10,
+    "truth_reps": 10
+  },
+  {
+    "file": "pushups_partner.mp4",
+    "shows": "success on partner",
+    "own": "partner/2026-11-10_PUSHUP/1",
+    "seconds": 19.2,
+    "megabytes": 1.08,
+    "exercise": "pushups",
+    "truth": "pushups",
+    "ok": true,
+    "reps_counted": 14,
+    "truth_reps": 10
+  },
+  {
+    "file": "shoulder_press_partner.mp4",
+    "shows": "success shoulder press",
+    "own": "partner/2026-11-10_SHOULDERPRESS/1",
+    "seconds": 27.1,
+    "megabytes": 2.16,
+    "exercise": "dumbbell_shoulder_press",
+    "truth": "dumbbell_shoulder_press",
+    "ok": true,
+    "reps_counted": 12,
+    "truth_reps": 10
+  },
+  {
+    "file": "jumping_jacks_partner.mp4",
+    "shows": "success jumping jacks",
+    "own": "partner/2026-11-10_EX3IHEB/1",
+    "seconds": 13.0,
+    "megabytes": 1.53,
+    "exercise": "jumping_jacks",
+    "truth": "jumping_jacks",
+    "ok": true,
+    "reps_counted": 11,
+    "truth_reps": 10
+  },
+  {
+    "file": "bicep_curls_yassine.mp4",
+    "shows": "bicep curls success (reps may be off)",
+    "own": "yassine/2026-11-10_TRICEPS/3",
+    "seconds": 26.1,
+    "megabytes": 2.52,
+    "exercise": null,
+    "truth": "bicep_curls",
+    "ok": false,
+    "reps_counted": 0,
+    "truth_reps": 10
+  },
+  {
+    "file": "wrong_button_pushups.mp4",
+    "shows": "button squats, model push-ups",
+    "own": "yassine/2026-11-10_s007/1",
+    "seconds": 16.1,
+    "megabytes": 1.17,
+    "exercise": "pushups",
+    "truth": "pushups",
+    "ok": true,
+    "reps_counted": 11,
+    "truth_reps": 10
+  },
+  {
+    "file": "failure_triceps.mp4",
+    "shows": "honest failure triceps",
+    "own": "yassine/2026-11-10_TRICEPS/2",
+    "seconds": 23.1,
+    "megabytes": 1.51,
+    "exercise": null,
+    "truth": "tricep_extensions",
+    "ok": false,
+    "reps_counted": 0,
+    "truth_reps": 10
+  },
+  {
+    "file": "zero_shot_vs_adapted.mp4",
+    "shows": "side-by-side LOPO on yassine/2026-11-10_TRICEPS/set01",
+    "own": "yassine/2026-11-10_TRICEPS/1",
+    "seconds": 21.1,
+    "megabytes": 2.1,
+    "left": {
+      "model": "m1_transformer_pose",
+      "exercise": null,
+      "reps": 0,
+      "ok": false
+    },
+    "right": {
+      "model": "m1_transformer_pose_lopo_yassine",
+      "exercise": "tricep_extensions",
+      "reps": 2,
+      "ok": true
+    },
+    "ok": true
+  },
+  {
+    "file": "montage_week2.mp4",
+    "shows": "highlight reel",
+    "seconds": 60.9,
+    "megabytes": 2.51,
+    "ok": null
+  },
+  {
+    "file": null,
+    "shows": "live station screen recording",
+    "ok": null,
+    "note": "not auto-recorded \u2014 see docs/demo.md (Win+Alt+R)"
+  }
+]

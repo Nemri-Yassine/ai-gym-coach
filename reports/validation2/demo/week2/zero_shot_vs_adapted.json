@@ -1,0 +1,25 @@
+{
+ "own": "yassine/2026-11-10_TRICEPS/set01",
+ "frames": 634,
+ "seconds": 21.1,
+ "truth_exercise": "tricep_extensions",
+ "left": {
+  "model": "m1_transformer_pose",
+  "exercise": null,
+  "reps": 0,
+  "ok": false
+ },
+ "right": {
+  "model": "m1_transformer_pose_lopo_yassine",
+  "exercise": "tricep_extensions",
+  "reps": 2,
+  "ok": true
+ },
+ "size": [
+  1920,
+  1080
+ ],
+ "mode": "side_by_side",
+ "file": "zero_shot_vs_adapted.mp4",
+ "megabytes": 2.1
+}
