@@ -1,7 +1,7 @@
 # RQ4 first look · MM-Fit raw video vs dataset pose
 
-Own recordings were not available (injury). Comparison uses MM-Fit RGB (Zenodo 7672767)
-→ MediaPipe → same Model 1 / rep counter / Model 2 RF as the dataset pose pipeline.
+First look used MM-Fit RGB (Zenodo 7672767) as a stand-in while own sessions were missing.
+Own gym-station videos are now evaluated in [rq4_own.md](rq4_own.md).
 
 **No form labels** on MM-Fit: Model 2 column is mean P(correct) only, not accuracy.
 
@@ -20,3 +20,7 @@ Own recordings were not available (injury). Comparison uses MM-Fit RGB (Zenodo 7
 **Auto sync validation (w20):** fitted `source=auto` vs config measured map — mean |Δ| **1.42** frames on sampled video frames (frac_within_3=0.8333333333333334).
 
 Metrics: `experiments/20261107_rq4_mmfit_video/metrics.json`.
+
+## Own recordings (Nov 10, 2026)
+
+Real gym-station videos (2 people, 20 eval sets). Pose-only transformer set accuracy **0.7** (Wilson CI [0.48, 0.85]), macro-F1 **0.5111111111111111**, rep MAE **3.1666666666666665**. Full tables: [rq4_own.md](rq4_own.md).

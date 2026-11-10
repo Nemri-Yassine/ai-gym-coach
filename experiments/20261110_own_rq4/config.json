@@ -1,0 +1,13 @@
+{
+  "n_eval": 20,
+  "n_test": 2,
+  "primary": "m1_transformer_pose",
+  "checkpoints": [
+    "m1_transformer_pose",
+    "m1_cnn_pose",
+    "m1_lstm_pose",
+    "m1_transformer_both"
+  ],
+  "seed": 42,
+  "git_commit": "af7040407e57b537310983695dbbe1dd99cdcb46"
+}

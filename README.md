@@ -31,6 +31,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.4 | Models 1–2 on raw MM-Fit video (RQ4) | ✅ Done · Nov 7, 2026 · w20 only |
 | 2.4a | Own-recordings manifest (note-corrected labels) | ✅ Done · Nov 10, 2026 |
 | 2.4b-own | MediaPipe pose for own recordings | ✅ Done · Nov 10, 2026 |
+| 2.4c | Models 1–2 on own recordings (RQ4 own) | ✅ Done · Nov 10, 2026 |
 | 2.4b | RQ4 on four MM-Fit videos + auto sync | ✅ Done · Nov 7, 2026 |
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
 | 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
@@ -46,6 +47,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-10 · Step 2.4c.** RQ4 on own videos (pose-only transformer): set accuracy **0.70** (14/20, Wilson 95% [0.48, 0.85]), macro-F1 **0.51**; yassine 0.75 / partner 0.625; rep MAE **3.17** (exact 22%, ±1 50%, n=18); M2 mean P(correct) on correct squats **0.06** (false-alarm check). Wrong-button: M1 agreed with note on 2/3. Report: `reports/rq4_own.md`.
 - **2026-11-10 · Step 2.4b-own.** MediaPipe pose for **22**/22 own sets → `data/interim/own/`; mean person-detect **95.7%** (Nov 9 lunges test set 22% — poor framing); HR join ±2 s; figure `reports/figures/own_pose_check.png`. `python scripts/process_recording.py --all --workers 4`.
 - **2026-11-10 · Step 2.4a.** Own-recordings manifest `data/own_manifest.csv`: **22** sets (20 eval + 2 test), 2 people, 9 exercises; note wins over button (3 wrong-button corrections); HR coverage + `hr_ok` per set. RPE/weight ignored (RPE≈10, body weight typed). Rebuild: `python scripts/own_manifest.py --print`.
 - **2026-11-09 · Gym station.** iPhone Safari → laptop over HTTPS/WebSocket (`python -m awc.station`); live chunk upload to `data/raw/own_recordings/`; BLE or Pulsoid HR; clock sync; control UI + QR. Docs: `docs/gym_station.md`. Check: `scripts/station_check.py`.
