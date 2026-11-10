@@ -116,8 +116,11 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
         user = body.get("user", "yassine")
         session_id = (body.get("session_id") or "s01").strip()
         session_type = body.get("session_type", "fatigue")
-        on_date = date.fromisoformat(body["date"]) if body.get("date") else date.today()
-        folder = rec.session_dir(user, session_id, on_date=on_date)
+        try:
+            on_date = date.fromisoformat(body["date"]) if body.get("date") else date.today()
+            folder = rec.session_dir(user, session_id, on_date=on_date)
+        except ValueError as exc:
+            return JSONResponse({"error": f"{exc} (no spaces or slashes, e.g. s02)"}, status_code=400)
         meta = {
             "user": user,
             "date": on_date.isoformat(),
