@@ -1,5 +1,7 @@
 # Week 2 validation package · updated 10 Nov 2026
 
+**Presentation (HTML, offline):** [`reports/validation2/AI_Workout_Coach_Week2.html`](validation2/AI_Workout_Coach_Week2.html) · rebuild with `python scripts/docs/build_week2.py` (template + `week2_data.js`). Keys: ← →, F fullscreen.
+
 ## Own recordings (Nov 10 — closes the old “no own data” gap)
 
 Gym station: iPhone Safari → laptop HTTPS + Galaxy Watch 7 BLE. Manifest `data/own_manifest.csv`: **20 eval + 2 test** sets, **2 people**, **9** of 10 MM-Fit exercises (no lunges in eval). Session folders: yassine **9**, partner **6** (one day, several short sessions — not multi-week fatigue yet).
