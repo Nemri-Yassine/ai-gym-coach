@@ -359,6 +359,8 @@ def draw_portrait_canvas(bgr, pose_px, state, meta, probs, model_name, banner=No
     if truth and ex not in ("non_activity", None) and state.get("decided"):
         mark = "  ✓" if ex == truth else "  ✗"
     label = NAMES.get(ex, ex or "—") if state.get("decided") else "Detecting…"
+    if state.get("force_ex") and state.get("decided"):
+        label += " (given)"
     draw_text(d, (px, y0), label + mark, font=font(48, True),
            fill=INK if state.get("decided") else MUTED)
     conf = float(state.get("conf") or 0.0)
@@ -490,9 +492,10 @@ def _score_step(model, inputs, poses, times, ts, probs_s, state, seg_start, seg_
     # An exercise is shown once there are 2 s of exercise windows (SWITCH_STEPS model steps).
     votes = state.setdefault("votes", {})
     first = state.setdefault("vote_t0", {})
-    if top != "non_activity":
-        votes[top] = votes.get(top, 0) + 1
-        first.setdefault(top, ts)
+    voted = state.get("force_ex") or (top if top != "non_activity" else None)
+    if voted:
+        votes[voted] = votes.get(voted, 0) + 1
+        first.setdefault(voted, ts)
     if sum(votes.values()) >= SWITCH_STEPS:
         leader = max(votes, key=lambda k: (votes[k], -first[k]))
         if leader != state["exercise"]:
@@ -510,7 +513,13 @@ def _score_step(model, inputs, poses, times, ts, probs_s, state, seg_start, seg_
             seq = resample_times(np.asarray([poses[i] for i in keep]), np.asarray([times[i] for i in keep]))
             seq_n = normalize(seq)
             n, bounds = count_reps(seq_n, fps=30, exercise=seg_ex)
-            if state.get("form_on") and seg_ex in _M2_EX and len(bounds) > len(state.get("form_reps") or []):
+            if state.get("form_segments") and seg_ex in _M2_EX:
+                done = [(int((a * 1000 - seg_start) / 1000 * 30), int((b * 1000 - seg_start) / 1000 * 30))
+                        for a, b in state["form_segments"] if b * 1000 <= ts and a * 1000 >= seg_start]
+                done = [(max(0, a), min(len(seq_n) - 1, b)) for a, b in done]
+                if len(done) > len(state.get("form_reps") or []):
+                    state["form_reps"] = m2_score_reps(seq_n, done, seg_ex)
+            elif state.get("form_on") and seg_ex in _M2_EX and len(bounds) > len(state.get("form_reps") or []):
                 state["form_reps"] = m2_score_reps(seq_n, bounds, seg_ex)
             prev = state["reps"]
             state["reps"] = max(state["reps"], int(n))
@@ -532,6 +541,8 @@ def run(
     banner=None,
     end_reason=None,
     crf=28,
+    force_exercise=None,
+    form_segments=None,
 ):
     import mediapipe as mp
     from mediapipe.tasks import python as mp_python
@@ -578,6 +589,11 @@ def run(
     index, last_ts = 0, -1
     frame_times = meta.get("frame_times")
     hr_series = meta.get("hr") or []
+    if force_exercise:
+        state["force_ex"] = force_exercise
+    if form_segments:
+        state["form_segments"] = form_segments
+        state["form_on"] = True
 
     with vision.PoseLandmarker.create_from_options(options) as landmarker:
         while True:
@@ -678,6 +694,7 @@ def run(
         "processing_fps_mean": round(1 / float(np.mean(proc)), 1) if proc else None,
         "realtime_capable": bool(proc) and 1 / float(np.mean(proc)) >= fps,
         "pose_found_ratio": round(float(np.mean([np.isfinite(p).all() for p in poses])), 3) if poses else 0,
+        "form_reps": [{"verdict": n, "p": round(p, 3)} for n, p, _ in (state.get("form_reps") or [])],
         "timeline": timeline,
         "size": list(size),
         "banner": banner,
@@ -882,6 +899,8 @@ def main(argv=None):
     p.add_argument("--banner", default=None)
     p.add_argument("--end-reason", default=None)
     p.add_argument("--crf", type=int, default=28)
+    p.add_argument("--exercise", default=None, help="exercise given by the user (like the station button), e.g. squats")
+    p.add_argument("--form-segments", default=None, help="score these held windows as reps, seconds: '0-6,17-22.5'")
     a = p.parse_args(argv)
 
     if a.own and a.side_by_side_model:
@@ -908,7 +927,9 @@ def main(argv=None):
     path, s = run(
         video, out, a.model, a.truth_reps, a.title, a.width, a.max_seconds,
         own_meta=own_meta, show_form=a.show_form, banner=a.banner,
-        end_reason=a.end_reason, crf=a.crf,
+        end_reason=a.end_reason, crf=a.crf, force_exercise=a.exercise,
+        form_segments=[tuple(float(x) for x in seg.split("-")) for seg in a.form_segments.split(",")]
+        if a.form_segments else None,
     )
     print(f"wrote {path} ({s['megabytes']} MB)")
     mark = "✓" if s.get("exercise_ok") else "✗"

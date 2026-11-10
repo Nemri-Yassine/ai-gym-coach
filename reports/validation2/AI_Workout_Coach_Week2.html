@@ -79,7 +79,7 @@ img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-r
 /* tabs */
 .tabs{display:flex;gap:10px}
 .tabs button{font:600 16px var(--f);padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
-.tabs button[aria-pressed=true]{background:#2a1418;border-color:#5b2a2d;color:var(--ink)}
+.tabs button[aria-pressed=true]{background:#1d2740;border-color:#33467a;color:var(--ink)}
 .title-bg{position:absolute;inset:0;opacity:.16;filter:saturate(.7) blur(1px)}
 .title-bg video{object-fit:cover;border-radius:0}
 .v169{aspect-ratio:16/9;height:100%;max-width:100%;margin:0 auto}
@@ -357,24 +357,18 @@ img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-r
   <p class="note">EC3D motion capture (no camera video exists, so we animate the skeleton the model reads). For each person, Model 2 is trained on the <b>other</b> people only. Left: a correct rep · right: a rep with a mistake. Examples picked where it is right, plus one miss on purpose; overall it gets 58–78% of a new person's reps right.</p>
 </section>
 
-<!-- 13c · MODEL 2 ON A REAL VIDEO -->
-<section class="slide" data-title="Form, real video">
-  <div class="eyebrow">13 · Model 2 on a real video (our correct squat)</div>
-  <h2>On a phone camera it flags <span class="bad">every rep</span>, even a good one</h2>
+<!-- 13c · MODEL 2 ON REAL VIDEOS -->
+<section class="slide" data-title="Form, real videos">
+  <div class="eyebrow">13 · Model 2 on real videos (public clips + ours)</div>
+  <h2>It catches <span class="ok">half squats</span>, but still raises <span class="bad">false alarms</span></h2>
+  <div class="tabs" id="formTabs">
+    <button aria-pressed="true" data-v="demo/week2/form_public_halfsquat.mp4" data-t="6" data-w="half">Half squats → "Not low enough" ✓</button>
+    <button aria-pressed="false" data-v="demo/week2/form_public_before_after.mp4" data-t="0" data-w="ba">Her "wrong" squat vs. her corrected one</button>
+    <button aria-pressed="false" data-v="demo/week2/form_real_squat.mp4" data-t="12" data-w="ours">Our correct squat → "Front bent" ✗</button>
+  </div>
   <div class="row grow">
-    <div class="vid" style="flex:1.6"><video data-start="12" data-src="demo/week2/form_real_squat.mp4" muted loop playsinline preload="metadata"></video></div>
-    <div class="col" style="flex:1">
-      <div class="card"><h3>What the model says</h3>
-        <div class="big bad" style="font-size:40px">"Front bent" · 9 / 9 reps</div>
-        <p class="note">The squat is correct (our label). Model 2 is about 77% sure it's "front bent" on every rep.</p>
-      </div>
-      <div class="card"><h3>Why</h3>
-        <p class="note" style="font-size:18px">It learned from motion-capture skeletons (EC3D). A phone skeleton, with a different camera angle, body proportions and noise, looks "bent" to it. Same effect on MM-Fit lab videos (P(correct) 0.08).</p>
-      </div>
-      <div class="card"><h3>Fix (week 3)</h3>
-        <p class="note" style="font-size:18px">Record our own correct and wrong reps, then calibrate on one person and test on the other. Until then, the live coach hides form.</p>
-      </div>
-    </div>
+    <div class="vid" style="flex:1.6"><video id="formVid" data-start="6" data-src="demo/week2/form_public_halfsquat.mp4" muted loop playsinline preload="metadata"></video></div>
+    <div class="col" style="flex:1"><div class="card grow" id="formWhy"></div></div>
   </div>
 </section>
 
@@ -516,6 +510,31 @@ tabs.onclick = e => {
   [...tabs.children].forEach(x => x.setAttribute("aria-pressed", x === b));
   fv.src = b.dataset.v; fv.addEventListener('loadedmetadata', () => { try { fv.currentTime = 5; } catch(e) {} }, { once: true }); fv.play().catch(()=>{});
   fw.innerHTML = WHY[b.dataset.w];
+};
+
+// form tabs (Model 2 on real videos)
+const FWHY = {
+  half: `<h3>Public clip · barbell half squats</h3><div class="big ok" style="font-size:40px">"Not low enough" · 10 / 10 reps</div>
+         <p class="note" style="font-size:19px;color:var(--ink)">The squats are clearly too shallow. Model 2 names the right mistake on every rep (≈ 68%).</p>
+         <p class="note">Truth is our label by eye. The exercise is given, as with the station's exercise button: from behind, Model 1 reads this as triceps.</p>`,
+  ba: `<h3>Public clip · before / after</h3>
+         <p class="note" style="font-size:19px;color:var(--ink)">0–6 s, her "wrong" squat (feet too narrow): Model 2 says <b class="bad">"Not low enough"</b> (73%). It flags it as bad, but for another reason: EC3D has no "feet too narrow" class.</p>
+         <p class="note" style="font-size:19px;color:var(--ink)">17–22 s, her corrected squat: Model 2 says <b class="bad">"Front bent"</b> (55%), a false alarm.</p>
+         <p class="note">Held positions, scored as one rep each.</p>`,
+  ours: `<h3>Our own video · a correct squat</h3><div class="big bad" style="font-size:40px">"Front bent" · 9 / 9 reps</div>
+         <p class="note" style="font-size:19px;color:var(--ink)">Trained on motion-capture skeletons, Model 2 isn't calibrated for phone skeletons yet. A good squat looks "bent" to it.</p>
+         <p class="note"><b>Fix (week 3):</b> record our own correct and wrong reps and calibrate on one person, test on the other. Until then the live coach hides form.</p>`,
+};
+const ftabs = document.getElementById("formTabs"), fvid = document.getElementById("formVid"), fwhy = document.getElementById("formWhy");
+fwhy.innerHTML = FWHY.half;
+ftabs.onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  [...ftabs.children].forEach(x => x.setAttribute("aria-pressed", x === b));
+  const t = parseFloat(b.dataset.t || 0);
+  fvid.src = b.dataset.v;
+  fvid.addEventListener("loadedmetadata", () => { try { fvid.currentTime = t; } catch(e) {} }, { once: true });
+  fvid.play().catch(()=>{});
+  fwhy.innerHTML = FWHY[b.dataset.w];
 };
 
 const start = parseInt((location.hash || "#1").slice(1), 10);

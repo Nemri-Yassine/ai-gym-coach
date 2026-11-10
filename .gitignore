@@ -30,3 +30,6 @@ venv/
 *.zip
 .DS_Store
 Thumbs.db
+
+# third-party public clips used only in the local presentation (not ours, never committed)
+reports/validation2/demo/week2/form_public_*
