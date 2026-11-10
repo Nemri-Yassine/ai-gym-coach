@@ -187,6 +187,9 @@ def test_analysis_worker_on_cached_set():
     assert int(result["reps"]) >= 0
     assert "confidence" in result and "summary" in result
     assert "elapsed_s" in result
+    assert result.get("form_shown") is False
+    assert "not calibrated" in (result.get("form_note") or result["summary"]).lower()
+    assert "timings" in result and "pose_s" in result["timings"]
     path = analysis_path(person, session, set_n)
     assert path.is_file()
     # never writes into data/raw

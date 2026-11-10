@@ -38,6 +38,7 @@ class Runtime:
     last_offset_ms: float | None = None
     kafka_enabled: bool = False
     kafka_warned: bool = False
+    show_form: bool = False  # M2 uncalibrated on own camera; opt-in via --show-form
 
     def push_cmd(self, msg: dict):
         """Append a phone command. Safe to call while already holding self.lock."""

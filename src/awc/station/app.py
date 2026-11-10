@@ -376,6 +376,7 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
         schedule_analysis(
             folder, n, on_done=_on_done,
             kafka_publish=_make_kafka_publisher() if RUNTIME.kafka_enabled else None,
+            show_form=bool(RUNTIME.show_form),
         )
         return {"ok": True, "frames": info["video"]["frames"], "fps": info["video"]["fps"]}
 

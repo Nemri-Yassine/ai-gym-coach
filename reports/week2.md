@@ -11,16 +11,18 @@ RPE ignored (≈10 everywhere). Weight typed as body weight — ignored. Notes c
 | M1 set accuracy (pose-only transformer) | **0.70** (Wilson 95% [0.48, 0.85]) | 20 |
 | M1 macro-F1 (9 exercises) | **0.51** | 20 |
 | M1 accuracy yassine / partner | 0.75 / 0.625 | 12 / 8 |
-| Rep MAE (true exercise) | **3.17** (exact 22%, ±1 50%) | 18 |
-| Rep MAE (M1 exercise) | 3.67 | 18 |
+| Rep MAE (true exercise) | **3.17** (exact 22%, ±1 50%) — **typed default, not a count** until verified | 18 |
+| Rep MAE (M1 exercise) | 3.67 (typed default) | 18 |
 | M2 mean P(correct) on correct squats | **0.06** (% classified correct 0%) | 20 reps |
-| HR mean coverage yassine / partner | 0.50 / 0.52 | 14 / 8 sets |
+| HR mean coverage yassine / partner | 0.50 / 0.52 | 14 / 8 sets (includes 2 test — Fix 4 splits) |
 | Spark own rep rows | **269** (22 sets) | — |
-| Live analysis latency (cached pose) | 0.84 / 0.03 / 0.03 s | 3 sets |
+| Live latency **cached** pose (old claim) | 0.84 / 0.03 / 0.03 s | 3 sets |
+| Live latency **full MediaPipe** (honest) | mean **13.1 s** (pose ~13.1 / M1 ~0.01 / reps ~0.01 / M2 0) | 3 sets |
+| Live latency **live_fast** (stride 2 + 480px) | mean **7.8 s** (pose ~7.8); exercise match 3/3 vs cache; reps Δ −1 on 1 set | 3 sets |
 
-Honest RQ4: domain shift (portrait gym phone vs MM-Fit). Tricep extensions and situps/lateral/rows are weak; pushups/squats/shoulder press/jumping jacks/biceps mostly fine. M2 still fires false alarms on correct squats (same story as MM-Fit P(correct)≈0.08). HR gaps: watch silent 20–80 s on several sets.
+Honest RQ4: domain shift (portrait gym phone vs MM-Fit). Tricep extensions and situps/lateral/rows are weak; pushups/squats/shoulder press/jumping jacks/biceps mostly fine. M2 P(correct)≈0.06 on our correct squats — **live suggestion hides form** (message: not calibrated; opt-in `--show-form`). HR gaps: watch silent 20–80 s on several sets.
 
-Live demo: after `video_saved`, background worker writes `data/interim/own_live/…/analysis_setNN.json` and shows a suggestion on the control page (never into `sets.csv`). Commands: `docs/demo.md`.
+Live demo: after `video_saved`, background worker runs MediaPipe with live_fast, writes `data/interim/own_live/…/analysis_setNN.json`, shows suggestion on the control page (never into `sets.csv`). Metrics: `experiments/20261110_station_latency/`. **Docker Kafka daemon was not running** — station `--kafka` not re-measured. Commands: `docs/demo.md`.
 
 ## Data-source note (history)
 
@@ -39,7 +41,7 @@ Broker that worked: **Docker `apache/kafka`**. KRaft binaries blocked (`wmic` mi
 | `pose.keypoints` (w20 RGB) | 29.8 | 48 ms |
 | `watch.hr` (w20 `sw_l_hr`) | 0.79 | 19 ms |
 
-Sink → `data/interim/replay/` only. Metrics: `experiments/20261107_kafka_replay/metrics.json`. Station can optionally publish with `--kafka` (logs once and continues if the broker is down).
+Sink → `data/interim/replay/` only. Metrics: `experiments/20261107_kafka_replay/metrics.json`. Station can optionally publish with `--kafka` (logs once and continues if the broker is down). **Nov 10 check:** Docker Desktop installed but daemon not running — no new station Kafka metrics; do not claim a live station Kafka demo.
 
 ## RQ4 · MM-Fit raw video (step 2.4, w20)
 

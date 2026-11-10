@@ -22,6 +22,8 @@ def main(argv=None):
     p.add_argument("--http", action="store_true", help="Dev only: plain HTTP (iOS camera will refuse)")
     p.add_argument("--kafka", action="store_true",
                    help="Optional: publish watch.hr / coach.events if Docker Kafka is up")
+    p.add_argument("--show-form", action="store_true",
+                   help="Show Model 2 form scores (off by default: uncalibrated on our camera)")
     args = p.parse_args(argv)
 
     pin = station_pin(args.pin)
@@ -39,8 +41,11 @@ def main(argv=None):
     from awc.station.state import RUNTIME
 
     RUNTIME.kafka_enabled = bool(args.kafka)
+    RUNTIME.show_form = bool(args.show_form)
     if args.kafka:
         print("Kafka: enabled (will log once and continue if the broker is down)", flush=True)
+    if not args.show_form:
+        print("Form model: hidden (not calibrated for this camera). Pass --show-form to force.", flush=True)
     app = create_app(pin=pin, port=args.port)
     kwargs = {"host": "0.0.0.0", "port": args.port, "log_level": "warning", "ws_max_size": 32 * 1024 * 1024}
     if not args.http:
