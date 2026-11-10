@@ -35,7 +35,8 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.4b | RQ4 on four MM-Fit videos + auto sync | ✅ Done · Nov 7, 2026 |
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
 | 2.5b | Spark rep table for own recordings | ✅ Done · Nov 10, 2026 |
-| 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
+| 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 · refreshed Nov 10 |
+| 2.6b | Station post-set detection (live demo) | ✅ Done · Nov 10, 2026 |
 | 3.1 | Model 3 sequences and labels (MM-Fit) | ✅ Done · Nov 7, 2026 |
 | 3.1b | Speed-only breakdown; risk held to end of set | ✅ Done · Nov 7, 2026 |
 | 3.2 | Model 3 + RQ2/RQ3 comparisons | ✅ Done · Nov 7, 2026 · superseded by 3.2b |
@@ -48,6 +49,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-10 · Step 2.6b.** Station post-set analysis (background): pose → M1 → reps → M2 → HR → `data/interim/own_live/…/analysis_setNN.json`; shown on the control page (never into `sets.csv`). Latency on 3 cached sets: **0.84 / 0.03 / 0.03 s** (cold model load then warm). Optional `--kafka`. Demo: `docs/demo.md`.
 - **2026-11-10 · Step 2.5b.** Own Spark rep table: **269** rows, 22 sets, 2 people → `data/interim/own_rep_table.parquet` (speed vs first 2 reps, velocity loss). `python -m awc.bigdata.history --own`.
 - **2026-11-10 · Step 2.4c.** RQ4 on own videos (pose-only transformer): set accuracy **0.70** (14/20, Wilson 95% [0.48, 0.85]), macro-F1 **0.51**; yassine 0.75 / partner 0.625; rep MAE **3.17** (exact 22%, ±1 50%, n=18); M2 mean P(correct) on correct squats **0.06** (false-alarm check). Wrong-button: M1 agreed with note on 2/3. Report: `reports/rq4_own.md`.
 - **2026-11-10 · Step 2.4b-own.** MediaPipe pose for **22**/22 own sets → `data/interim/own/`; mean person-detect **95.7%** (Nov 9 lunges test set 22% — poor framing); HR join ±2 s; figure `reports/figures/own_pose_check.png`. `python scripts/process_recording.py --all --workers 4`.

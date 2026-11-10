@@ -5,6 +5,8 @@ import csv
 import time
 from pathlib import Path
 
+import pytest
+
 from awc.data import recordings as rec
 from awc.station.chunks import ChunkAssembler
 from awc.station.clock import ClockSync
@@ -140,8 +142,32 @@ def _reset_runtime():
     RUNTIME.recording = False
     RUNTIME.pending_labels = None
     RUNTIME.upload = {}
+    RUNTIME.analyses = {}
     RUNTIME.command_q.clear()
     return RUNTIME
+
+
+@pytest.mark.data
+def test_analysis_worker_on_cached_set():
+    """Analysis on a cached own set (no camera): JSON fields present, exercise in classes, reps ≥ 0."""
+    from awc.config import MMFIT_CLASSES, OWN_DIR, OWN_INTERIM
+    from awc.station.analyze import analyze_set, analysis_path
+
+    person, session, set_n = "yassine", "2026-11-10_SQUAT", 1
+    session_dir = OWN_DIR / person / session
+    cached = OWN_INTERIM / person / f"{session}_set{set_n:02d}.parquet"
+    if not session_dir.is_dir() or not cached.is_file():
+        pytest.skip("cached own squat set missing")
+    result = analyze_set(session_dir, set_n, person=person, session_folder=session)
+    assert result["exercise"] in MMFIT_CLASSES
+    assert int(result["reps"]) >= 0
+    assert "confidence" in result and "summary" in result
+    assert "elapsed_s" in result
+    path = analysis_path(person, session, set_n)
+    assert path.is_file()
+    # never writes into data/raw
+    assert "own_live" in str(path)
+    assert "own_recordings" not in str(path)
 
 
 def test_station_pin_guard():

@@ -20,6 +20,8 @@ def main(argv=None):
     p.add_argument("--pin", help="set a new 4+ digit phone PIN (kept in C:/awc_tmp/station.json)")
     p.add_argument("--renew-cert", action="store_true", help="force a new leaf certificate")
     p.add_argument("--http", action="store_true", help="Dev only: plain HTTP (iOS camera will refuse)")
+    p.add_argument("--kafka", action="store_true",
+                   help="Optional: publish watch.hr / coach.events if Docker Kafka is up")
     args = p.parse_args(argv)
 
     pin = station_pin(args.pin)
@@ -34,7 +36,11 @@ def main(argv=None):
     import uvicorn
 
     from awc.station.app import create_app
+    from awc.station.state import RUNTIME
 
+    RUNTIME.kafka_enabled = bool(args.kafka)
+    if args.kafka:
+        print("Kafka: enabled (will log once and continue if the broker is down)", flush=True)
     app = create_app(pin=pin, port=args.port)
     kwargs = {"host": "0.0.0.0", "port": args.port, "log_level": "warning", "ws_max_size": 32 * 1024 * 1024}
     if not args.http:

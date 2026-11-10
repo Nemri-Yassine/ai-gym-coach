@@ -33,6 +33,40 @@ def _is_local(host: str | None) -> bool:
     return (host or "") in LOCAL_HOSTS
 
 
+def _make_kafka_publisher():
+    """Optional Kafka publisher for watch.hr / coach.events. Logs once if broker is down."""
+    import logging
+
+    log = logging.getLogger("awc.station.kafka")
+    producer = {"obj": None}
+
+    def publish(result: dict):
+        if not RUNTIME.kafka_enabled:
+            return
+        try:
+            from awc.config import KAFKA_BOOTSTRAP
+            from kafka import KafkaProducer
+            if producer["obj"] is None:
+                producer["obj"] = KafkaProducer(
+                    bootstrap_servers=KAFKA_BOOTSTRAP,
+                    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                    request_timeout_ms=2000,
+                )
+            producer["obj"].send("coach.events", {
+                "session": f"{result.get('person')}/{result.get('session_folder')}",
+                "pc_ts_ms": int(time.time() * 1000),
+                "type": "set_analysis",
+                "payload": result,
+            })
+            producer["obj"].flush(timeout=2)
+        except Exception as exc:  # noqa: BLE001
+            if not RUNTIME.kafka_warned:
+                log.warning("Kafka unavailable (%s); continuing without broker", exc)
+                RUNTIME.kafka_warned = True
+
+    return publish
+
+
 def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
     from awc.station.netutil import station_pin
 
@@ -147,6 +181,7 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
         with RUNTIME.lock:
             RUNTIME.session = sess
             RUNTIME.pending_labels = None
+            RUNTIME.analyses = {}
             RUNTIME.recording = False
             RUNTIME.upload = {}
         rec.append_event(folder, int(time.time() * 1000), "session_start", session_id)
@@ -162,6 +197,7 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
             RUNTIME.session = None
             RUNTIME.recording = False
             RUNTIME.pending_labels = None
+            RUNTIME.analyses = {}
         return {"ok": True}
 
     # ------------------------------------------------------------ sets
@@ -314,7 +350,27 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
                 RUNTIME.pending_labels["n_chunks"] = n_chunks
             if body.get("fps_actual"):
                 sess.update_meta(fps_actual=body.get("fps_actual"))
+            RUNTIME.analyses[n] = {"set": n, "status": "running", "summary": "analysing…"}
+            folder = sess.folder
+        # Background: pose → M1 → reps → M2 → HR. Never blocks upload / live view.
+        # Control page picks the result up via /api/status polling.
+        from awc.station.analyze import schedule_analysis
+
+        def _on_done(result, set_n=n):
+            with RUNTIME.lock:
+                RUNTIME.analyses[set_n] = result
+
+        schedule_analysis(
+            folder, n, on_done=_on_done,
+            kafka_publish=_make_kafka_publisher() if RUNTIME.kafka_enabled else None,
+        )
         return {"ok": True, "frames": info["video"]["frames"], "fps": info["video"]["fps"]}
+
+
+    @app.get("/api/analysis/{set_index}")
+    def get_analysis(set_index: int):
+        with RUNTIME.lock:
+            return RUNTIME.analyses.get(int(set_index)) or {"status": "none"}
 
     # ------------------------------------------------------------ HR
     @app.post("/api/hr/source")

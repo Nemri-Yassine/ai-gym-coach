@@ -32,9 +32,12 @@ class Runtime:
     rec_confirmed: bool = False  # phone said its MediaRecorder started
     upload: dict = field(default_factory=dict)  # set → {received, acked, pending, done}
     pending_labels: dict | None = None  # after set_done, waiting for Save set
+    analyses: dict = field(default_factory=dict)  # set_index → analysis JSON (suggestion only)
     command_q: list = field(default_factory=list)  # commands for phone WS
     last_rtt_ms: float | None = None
     last_offset_ms: float | None = None
+    kafka_enabled: bool = False
+    kafka_warned: bool = False
 
     def push_cmd(self, msg: dict):
         """Append a phone command. Safe to call while already holding self.lock."""
@@ -80,6 +83,7 @@ class Runtime:
                 "clock_offset_ms": offset,
                 "clock_rtt_ms": rtt,
                 "pending_labels": self.pending_labels,
+                "analyses": {str(k): v for k, v in self.analyses.items()},
                 "session": None if self.session is None else str(self.session.folder),
                 "next_set": None if self.session is None else self.session.next_set(),
                 "preview_fresh_ms": (time.time() * 1000 - self.preview_ts) if self.preview_ts else None,
