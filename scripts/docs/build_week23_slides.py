@@ -13,9 +13,27 @@ OUT = ROOT / "reports" / "validation2" / "AI_Workout_Coach_Week2-3.html"
 SLIDES = [
     (
         "What changed",
-        "Injury → no own recordings. MM-Fit RGB (Zenodo 7672767) + watch IMU/HR replace them. "
-        "Baselines are within-session (earlier sets of the same exercise). RPE dropped. "
-        "Live Watch link remains untested.",
+        "Until Nov 10 we used MM-Fit RGB as a stand-in (injury). "
+        "Own gym-station sessions are now in: iPhone Safari → laptop HTTPS + Galaxy Watch 7 BLE. "
+        "MM-Fit baselines stay within-session. Own data is test-only (no fine-tune yet).",
+    ),
+    (
+        "Our own recordings",
+        "Gym station · 2 people · 1 day · 20 eval sets (+2 test) · 9 exercises. "
+        "Notes corrected 3 wrong buttons. RPE≈10 ignored. HR coverage ~0.5 (watch silent 20–80 s on some sets). "
+        "Session folders: yassine 9, partner 6. Manifest: data/own_manifest.csv.",
+    ),
+    (
+        "Models on our videos",
+        "Pose-only transformer: set accuracy 0.70 (14/20, Wilson [0.48, 0.85]), macro-F1 0.51. "
+        "Rep MAE 3.17 (n=18). M2 P(correct) on correct squats 0.06 — false alarms, same EC3D→phone gap. "
+        "Confusion: reports/figures/m1_confusion_own.png · tables: reports/rq4_own.md.",
+    ),
+    (
+        "Live detection demo",
+        "python -m awc.station → after each set, background pose→M1→reps→M2→HR. "
+        "Suggestion on the control page; never written into sets.csv. "
+        "Cached-pose analysis latency 0.84 / 0.03 / 0.03 s on 3 sets. Optional --kafka. docs/demo.md.",
     ),
     (
         "Kafka replay",
@@ -23,16 +41,15 @@ SLIDES = [
         "Sink writes under data/interim/replay/ only. Setup: docs/kafka_setup.md · demo: docs/demo.md.",
     ),
     (
-        "RQ4 · raw video",
+        "RQ4 · MM-Fit raw video",
         "MediaPipe from RGB vs dataset pose. Domain shift: EC3D Model 2 P(correct)≈0.08 on MM-Fit squats. "
         "Four sessions; mean keeps sync≥70% only. w20 auto sync within 1.4 frames of measured. "
         "Table: reports/rq4_first_look.md.",
     ),
     (
         "Spark rep table",
-        "5,918 MM-Fit reps · 616 sets. Within-session baselines via "
-        "Window.partitionBy(session, exercise).orderBy(set_idx).rowsBetween(unboundedPreceding, −1). "
-        "has_baseline rate 0.67. No RPE.",
+        "MM-Fit: 5,918 reps · 616 sets · has_baseline 0.67. "
+        "Own: 269 reps · 22 sets · 2 people (data/interim/own_rep_table.parquet).",
     ),
     (
         "Model 3 labels",
@@ -47,14 +64,15 @@ SLIDES = [
     ),
     (
         "Limits",
-        "No own data · no RPE · within-session baseline only · shared speed in labels · "
-        "Watch untested · MM-Fit reps assumed correct · Model 2 does not transfer EC3D→MM-Fit.",
+        "Own n=20 · one day · no lunges in eval · RPE unusable · HR gaps · "
+        "within-session MM-Fit baselines · Model 2 does not transfer EC3D→phone. "
+        "Own data not used for training in this package.",
     ),
     (
         "Demo",
-        "Kafka: pose_producer (--start-frame 2100) + hr_producer + live.py --kafka (docs/demo.md). "
-        "Median model 0.83 ms · e2e 75 ms on w20. Offline fallback is model-only. "
-        "Honest: “Slow down” still fires near rep 1 (risk ~0.40–0.45 > slow_thresh) — not the old form-polluted every-squat@rep2 pattern.",
+        "Live station: python -m awc.station. Offline: process_recording + eval_own_recordings. "
+        "Kafka MM-Fit: pose_producer (--start-frame 2100) + hr_producer + live.py --kafka. "
+        "docs/demo.md.",
     ),
 ]
 

@@ -19,7 +19,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 0 | Project proposal and validation presentation | ✅ Done · Oct 7, 2026 |
 | 1 | Project structure, git, dataset loaders | ✅ Done · Oct 7, 2026 |
 | 1.1 | Environment, Spark helper, run tracking | ✅ Done · Oct 22, 2026 |
-| 1.2 | Capture decision, recorder, recording protocol | ✅ Code done · Oct 22, 2026 · gym station Nov 9 |
+| 1.2 | Capture decision, recorder, recording protocol | ✅ Done · Nov 10, 2026 · own data + station |
 | — | Gym station (iPhone Wi-Fi → laptop + watch HR) | ✅ Done · Nov 9, 2026 |
 | 1.3 | Spark sync of MM-Fit to Parquet | ✅ Done · Oct 22, 2026 |
 | 1.4 | One skeleton for every source, Model 1 windows | ✅ Done · Oct 22, 2026 |
@@ -28,7 +28,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.1 | EC3D rep dataset for Model 2 | ✅ Done · Nov 4, 2026 |
 | 2.2 | Model 2 benchmark on EC3D | ✅ Done · Nov 4, 2026 |
 | 2.3 | Kafka streaming of pose and HR (replay) | ✅ Done · Nov 7, 2026 |
-| 2.4 | Models 1–2 on raw MM-Fit video (RQ4) | ✅ Done · Nov 7, 2026 · w20 only |
+| 2.4 | Models 1–2 on raw MM-Fit video + own (RQ4) | ✅ Done · Nov 7 / Nov 10, 2026 |
 | 2.4a | Own-recordings manifest (note-corrected labels) | ✅ Done · Nov 10, 2026 |
 | 2.4b-own | MediaPipe pose for own recordings | ✅ Done · Nov 10, 2026 |
 | 2.4c | Models 1–2 on own recordings (RQ4 own) | ✅ Done · Nov 10, 2026 |
@@ -49,6 +49,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-10 · Weeks 1–2 complete (own data).** Gym station capture decision locked; week1/week2 reports refreshed; slides updated; tag `v1.2`. Key RQ4 own: M1 set acc **0.70** [0.48, 0.85], macro-F1 **0.51**, rep MAE **3.17**, M2 P(correct) **0.06**, Spark own **269** reps, live analysis **0.84/0.03/0.03 s**.
 - **2026-11-10 · Step 2.6b.** Station post-set analysis (background): pose → M1 → reps → M2 → HR → `data/interim/own_live/…/analysis_setNN.json`; shown on the control page (never into `sets.csv`). Latency on 3 cached sets: **0.84 / 0.03 / 0.03 s** (cold model load then warm). Optional `--kafka`. Demo: `docs/demo.md`.
 - **2026-11-10 · Step 2.5b.** Own Spark rep table: **269** rows, 22 sets, 2 people → `data/interim/own_rep_table.parquet` (speed vs first 2 reps, velocity loss). `python -m awc.bigdata.history --own`.
 - **2026-11-10 · Step 2.4c.** RQ4 on own videos (pose-only transformer): set accuracy **0.70** (14/20, Wilson 95% [0.48, 0.85]), macro-F1 **0.51**; yassine 0.75 / partner 0.625; rep MAE **3.17** (exact 22%, ±1 50%, n=18); M2 mean P(correct) on correct squats **0.06** (false-alarm check). Wrong-button: M1 agreed with note on 2/3. Report: `reports/rq4_own.md`.
@@ -116,7 +117,7 @@ Galaxy Watch 7 ─► heart rate + wrist motion  ───────┤  Kafka
 |---|---|---|
 | [MM-Fit](https://mmfit.github.io) | Exercise, reps, heart rate | 21 sessions, 6,160 reps, 70.8 M sensor rows |
 | [EC3D](https://github.com/Jacoo-Zhao/3D-Pose-Based-Feedback-For-Physical-Exercises) | Good vs bad reps | 371 reps, 29,789 3D frames, 8 mistakes |
-| Our recordings | Fatigue over weeks | 2 people, 3–6 weeks (to record) |
+| Our recordings | RQ4 / fatigue (later) | 2 people, 20 eval sets recorded Nov 10 (more weeks still to collect) |
 
 Download instructions: [data/README.md](data/README.md).
 

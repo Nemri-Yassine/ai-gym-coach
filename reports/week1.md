@@ -1,6 +1,6 @@
 # Week 1 validation
 
-What was built: a Spark job that joins MM-Fit pose, watch IMU and heart rate into one 30 Hz Parquet table; one 18-joint skeleton shared by MM-Fit, EC3D and (later) MediaPipe; 3-second windows; a 9-run exercise-recognition benchmark; and a rep counter. The phone/watch recorder and the recording protocol are ready. No own session has been filmed yet.
+What was built: a Spark job that joins MM-Fit pose, watch IMU and heart rate into one 30 Hz Parquet table; one 18-joint skeleton shared by MM-Fit, EC3D and MediaPipe; 3-second windows; a 9-run exercise-recognition benchmark; and a rep counter. Capture is the **gym station** (iPhone Safari → laptop HTTPS + Galaxy Watch 7 BLE). Own sessions were recorded on **2026-11-10** (see below; full RQ4 in `reports/rq4_own.md`).
 
 ## Spark
 
@@ -48,9 +48,16 @@ We had no time to record this week, so the camera half of the pipeline was teste
 
 This does not replace our own sessions for Model 3: no heart rate, no RPE, and not the same person over several weeks.
 
-## Our sessions
+## Our sessions (updated 2026-11-10)
 
-**0 recorded.** The recorder (`scripts/record_session.py`) and `docs/recording_protocol.md` are in place. Pulsoid, HypeRate and Sensor Logger are implemented. None was tried on the Poco X3 Pro or the Galaxy Watch 7, so there is no latency number and the heart-rate choice is still open (`docs/decisions.md`). Week 3 still needs at least 6 normal sessions and 2 form sessions per person. Recording has to start before Model 3.
+**2 people · 1 recording day · gym station.** Manifest: `data/own_manifest.csv` (22 rows = 20 eval + 2 test).
+
+| Person | Session folders | Eval sets | Test sets |
+|---|---:|---:|---:|
+| yassine | **9** | 12 | 2 (lunges `tt`, squats `tt`) |
+| partner | **6** | 8 | 0 |
+
+Plan acceptance “≥ 2 real sessions per person”: we count **recording folders** (yassine 9, partner 6). Honestly: they are **one day**, many short sessions (often one set per folder), not multi-week fatigue sessions. RPE was pressed ~10 on almost every set — **not usable**. Weight fields are body weight typed by mistake — ignored. Heart-rate coverage is uneven (watch silent on several sets). Notes corrected 3 wrong exercise buttons. Pose + RQ4 numbers: `reports/rq4_own.md`. Decision: `docs/decisions.md`.
 
 ## Problems
 
