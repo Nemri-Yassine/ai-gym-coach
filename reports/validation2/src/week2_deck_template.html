@@ -85,11 +85,144 @@ img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-r
 .v169{aspect-ratio:16/9;height:100%;max-width:100%;margin:0 auto}
 .vrow{display:flex;gap:20px;justify-content:center;min-height:0}
 .vrow .vid{aspect-ratio:16/9;flex:0 1 auto;height:100%}
+/* ---- project overview slide ---- */
+.ov-pipe{display:flex;align-items:stretch;gap:0;height:300px}
+.ov-step{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
+.ov-step svg{flex:1;min-height:0;width:100%}
+.ov-step .t{font-size:21px;font-weight:750;line-height:1.1}
+.ov-step .d{font-size:15px;color:var(--muted);line-height:1.25}
+.ov-step.m{border-color:#33467a;background:#131b2d}
+.ov-step.stop{border-color:#5b2a2d;background:#1f1216}
+.ov-ar{width:30px;display:grid;place-items:center;color:var(--accent);font-size:28px;flex:0 0 30px}
+.ov-low{display:grid;grid-template-columns:1.05fr 1fr 1.05fr;gap:18px;flex:1;min-height:0}
+.ov-low .card{padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex:1}
+.tile{background:var(--panel2);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;text-align:center}
+.tile svg{width:58px;height:58px}
+.tile b{font-size:17px}
+.tile span{font-size:13.5px;color:var(--muted);line-height:1.2}
+.tl{display:flex;flex-direction:column;gap:12px;flex:1;justify-content:center}
+.tl .w{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:12px}
+.tl .wk{font:700 15px var(--mono);border-radius:10px;padding:8px 0;text-align:center}
+.tl .wk.done{background:#14301f;color:var(--ok)} .tl .wk.now{background:#1d2740;color:var(--accent)} .tl .wk.next{background:var(--panel2);color:var(--muted)}
+.tl .x{font-size:16px;line-height:1.3}
+
 .title-fg{position:relative;z-index:1;margin-top:auto;margin-bottom:auto;display:flex;flex-direction:column;gap:22px}
 </style>
 </head>
 <body>
 <div id="viewport"><div id="deck">
+
+<!-- 0 · PROJECT OVERVIEW (first page) -->
+<section class="slide" data-title="Our project">
+  <div class="eyebrow">AI Workout Coach · Deep Learning &amp; Big Data · Yassine Nemri · Iheb Lamouchi</div>
+  <h2>A coach that <em>watches you train</em> and says <span class="bad">STOP</span> before you get hurt</h2>
+  <div class="ov-pipe">
+    <div class="ov-step">
+      <svg viewBox="0 0 160 110">
+        <rect x="18" y="12" width="44" height="80" rx="8" fill="none" stroke="#7393FF" stroke-width="4"/>
+        <circle cx="40" cy="26" r="6" fill="#7393FF"/>
+        <rect x="98" y="30" width="40" height="46" rx="12" fill="none" stroke="#FF6B7A" stroke-width="4"/>
+        <rect x="108" y="12" width="20" height="18" rx="4" fill="#FF6B7A" opacity=".5"/><rect x="108" y="76" width="20" height="18" rx="4" fill="#FF6B7A" opacity=".5"/>
+        <path d="M104 54h8l4-9 6 18 4-9h8" fill="none" stroke="#FF6B7A" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+      <div class="t">Phone + watch</div><div class="d">video · heart rate · wrist motion</div>
+    </div>
+    <div class="ov-ar">&#8594;</div>
+    <div class="ov-step">
+      <svg viewBox="0 0 160 110">
+        <g stroke="#EEF2F6" stroke-width="5" stroke-linecap="round" fill="none">
+          <line x1="80" y1="22" x2="80" y2="56"/><line x1="80" y1="30" x2="60" y2="46"/><line x1="80" y1="30" x2="100" y2="46"/>
+          <line x1="60" y1="46" x2="70" y2="28"/><line x1="100" y1="46" x2="90" y2="28"/>
+          <line x1="80" y1="56" x2="64" y2="74"/><line x1="64" y1="74" x2="68" y2="100"/>
+          <line x1="80" y1="56" x2="96" y2="74"/><line x1="96" y1="74" x2="92" y2="100"/>
+        </g>
+        <circle cx="80" cy="13" r="8" fill="#EEF2F6"/>
+        <g fill="#7393FF"><circle cx="64" cy="74" r="5"/><circle cx="96" cy="74" r="5"/><circle cx="60" cy="46" r="5"/><circle cx="100" cy="46" r="5"/><circle cx="80" cy="56" r="5"/></g>
+      </svg>
+      <div class="t">Skeleton</div><div class="d">18 joints per frame (MediaPipe)</div>
+    </div>
+    <div class="ov-ar">&#8594;</div>
+    <div class="ov-step m">
+      <svg viewBox="0 0 160 110">
+        <rect x="10" y="14" width="140" height="30" rx="8" fill="#1d2740"/>
+        <rect x="10" y="14" width="118" height="30" rx="8" fill="#7393FF"/>
+        <text x="20" y="35" font-size="16" font-weight="700" fill="#0A0E13" font-family="Segoe UI">Squats 95%</text>
+        <rect x="10" y="52" width="140" height="18" rx="6" fill="#1d2740"/><rect x="10" y="52" width="14" height="18" rx="6" fill="#5D6B7A"/>
+        <text x="80" y="102" text-anchor="middle" font-size="26" font-weight="800" fill="#4CC487" font-family="Segoe UI">10 reps</text>
+      </svg>
+      <div class="t">Model 1</div><div class="d">which exercise? how many reps?</div>
+    </div>
+    <div class="ov-ar">&#8594;</div>
+    <div class="ov-step m">
+      <svg viewBox="0 0 160 110">
+        <g stroke-width="5" stroke-linecap="round" fill="none">
+          <g stroke="#4CC487"><line x1="44" y1="20" x2="44" y2="50"/><line x1="44" y1="50" x2="32" y2="68"/><line x1="32" y1="68" x2="34" y2="92"/><line x1="44" y1="50" x2="56" y2="68"/><line x1="56" y1="68" x2="54" y2="92"/></g>
+          <g stroke="#FF5A5F"><line x1="116" y1="20" x2="116" y2="50"/><line x1="116" y1="50" x2="108" y2="70"/><line x1="108" y1="70" x2="100" y2="92"/><line x1="116" y1="50" x2="114" y2="70"/><line x1="114" y1="70" x2="126" y2="92"/></g>
+        </g>
+        <circle cx="44" cy="12" r="7" fill="#4CC487"/><circle cx="116" cy="12" r="7" fill="#FF5A5F"/>
+        <text x="44" y="108" text-anchor="middle" font-size="15" font-weight="700" fill="#4CC487" font-family="Segoe UI">&#10003; good</text>
+        <text x="116" y="108" text-anchor="middle" font-size="15" font-weight="700" fill="#FF5A5F" font-family="Segoe UI">&#10007; knees in</text>
+      </svg>
+      <div class="t">Model 2</div><div class="d">is the form correct?</div>
+    </div>
+    <div class="ov-ar">&#8594;</div>
+    <div class="ov-step m">
+      <svg viewBox="0 0 160 110">
+        <line x1="14" y1="96" x2="150" y2="96" stroke="#243040" stroke-width="2"/>
+        <line x1="14" y1="40" x2="150" y2="40" stroke="#FF5A5F" stroke-width="2" stroke-dasharray="5 5"/>
+        <polyline points="14,88 34,84 54,80 74,72 94,62 114,46 134,30" fill="none" stroke="#EFB043" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="134" cy="30" r="6" fill="#FF5A5F"/>
+        <text x="14" y="30" font-size="13" fill="#FF5A5F" font-family="Segoe UI">risk limit</text>
+        <text x="14" y="110" font-size="12" fill="#8B98A6" font-family="Segoe UI">rep 1 &#8594; rep 10</text>
+      </svg>
+      <div class="t">Model 3</div><div class="d">fatigue risk, rep after rep</div>
+    </div>
+    <div class="ov-ar">&#8594;</div>
+    <div class="ov-step stop" style="flex:.8">
+      <svg viewBox="0 0 110 110"><polygon points="33,6 77,6 104,33 104,77 77,104 33,104 6,77 6,33" fill="#FF5A5F"/><text x="55" y="66" text-anchor="middle" font-size="27" font-weight="800" fill="#fff" font-family="Segoe UI">STOP</text></svg>
+      <div class="t">Coach</div><div class="d">voice: "slow down" / "stop"</div>
+    </div>
+  </div>
+  <div class="ov-low">
+    <div class="card"><h3>Data</h3>
+      <div class="tiles">
+        <div class="tile">
+          <svg viewBox="0 0 60 60"><rect x="4" y="12" width="40" height="32" rx="6" fill="none" stroke="#7393FF" stroke-width="3.5"/><polygon points="44,22 56,15 56,41 44,34" fill="#7393FF"/><path d="M14 52h22" stroke="#FF6B7A" stroke-width="3.5" stroke-linecap="round"/></svg>
+          <b>MM-Fit</b><span>21 sessions<br>video + watch</span></div>
+        <div class="tile">
+          <svg viewBox="0 0 60 60"><g stroke="#EEF2F6" stroke-width="3.5" stroke-linecap="round"><line x1="30" y1="14" x2="30" y2="34"/><line x1="30" y1="34" x2="20" y2="52"/><line x1="30" y1="34" x2="40" y2="52"/><line x1="30" y1="20" x2="18" y2="30"/><line x1="30" y1="20" x2="42" y2="30"/></g><circle cx="30" cy="8" r="5" fill="#EEF2F6"/><circle cx="20" cy="52" r="4" fill="#FF5A5F"/><circle cx="40" cy="52" r="4" fill="#4CC487"/></svg>
+          <b>EC3D</b><span>371 reps<br>good vs 8 mistakes</span></div>
+        <div class="tile">
+          <svg viewBox="0 0 60 60"><rect x="16" y="4" width="28" height="52" rx="6" fill="none" stroke="#7393FF" stroke-width="3.5"/><circle cx="30" cy="14" r="4" fill="#7393FF"/><rect x="24" y="47" width="12" height="3" rx="1.5" fill="#7393FF"/></svg>
+          <b>Ours</b><span>2 people, 20 sets<br>iPhone + Galaxy Watch</span></div>
+      </div>
+    </div>
+    <div class="card"><h3>Week 1 results</h3>
+      <svg viewBox="0 0 460 200" style="width:100%;flex:1">
+        <text x="0" y="18" font-size="15" fill="#8B98A6" font-family="Segoe UI">Model 1 accuracy, people never seen</text>
+        <rect x="0" y="28" width="440" height="34" rx="8" fill="#18212C"/>
+        <rect x="0" y="28" width="418" height="34" rx="8" fill="#4CC487"/>
+        <text x="12" y="51" font-size="19" font-weight="800" fill="#0A0E13" font-family="Segoe UI">95%</text>
+        <text x="0" y="100" font-size="15" fill="#8B98A6" font-family="Segoe UI">Rep counting error (reps per set)</text>
+        <rect x="0" y="110" width="440" height="30" rx="8" fill="#5D6B7A"/>
+        <text x="12" y="131" font-size="16" font-weight="700" fill="#EEF2F6" font-family="Segoe UI">first version 1.35</text>
+        <rect x="0" y="148" width="440" height="30" rx="8" fill="#18212C"/>
+        <rect x="0" y="148" width="160" height="30" rx="8" fill="#4CC487"/>
+        <text x="12" y="169" font-size="16" font-weight="800" fill="#0A0E13" font-family="Segoe UI">0.49</text>
+        <text x="172" y="169" font-size="15" fill="#8B98A6" font-family="Segoe UI">after week 1</text>
+        <text x="0" y="198" font-size="14" fill="#5D6B7A" font-family="Segoe UI">+ Spark pipeline joins video, motion and heart rate</text>
+      </svg>
+    </div>
+    <div class="card"><h3>Plan</h3>
+      <div class="tl">
+        <div class="w"><div class="wk done">W1 &#10003;</div><div class="x">Data pipeline (Spark) + <b>Model 1</b></div></div>
+        <div class="w"><div class="wk now">W2 &#9654;</div><div class="x"><b>Model 2</b>, Kafka streaming, <b>our own gym videos</b></div></div>
+        <div class="w"><div class="wk next">W3</div><div class="x"><b>Model 3</b> fatigue + live voice coach</div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- 1 · TITLE -->
 <section class="slide" data-title="Title">
@@ -101,42 +234,6 @@ img.fig{display:block;max-width:100%;max-height:100%;object-fit:contain;border-r
       <p class="note">Yassine Nemri · Iheb Lamouchi · 10 Nov 2026</p>
     </div>
     <div class="vid" style="flex:1.25;aspect-ratio:16/9"><video data-start="6" data-src="demo/week2/squats_yassine.mp4" muted loop playsinline preload="metadata"></video><span class="cap">live result on our own video</span></div>
-  </div>
-</section>
-
-<!-- 1b · PROJECT REMINDER -->
-<section class="slide" data-title="Reminder">
-  <div class="eyebrow">Reminder · our project</div>
-  <h2>"Most apps tell you what you did. <em>Ours tells you when to stop.</em>"</h2>
-  <p class="lede">An AI coach that watches you train with a <b>phone camera</b> and a <b>smartwatch</b>: it recognises the exercise, counts reps, checks the form, and says <b>stop</b> before fatigue turns into injury.</p>
-  <div class="row" style="margin-top:10px;align-items:flex-start">
-    <div class="card col" style="flex:1.05">
-      <h3>Three models</h3>
-      <ul class="clean">
-        <li><b>Model 1</b> · which exercise + rep count · camera skeleton + watch motion</li>
-        <li><b>Model 2</b> · is the form correct? · squat, lunge, plank</li>
-        <li><b>Model 3</b> · fatigue / injury risk → the "stop" alert (week 3)</li>
-      </ul>
-      <h3 style="margin-top:18px">Data</h3>
-      <ul class="clean">
-        <li><b>MM-Fit</b> · 21 sessions, video + smartwatch, 10 exercises</li>
-        <li><b>EC3D</b> · 371 reps, correct vs 8 kinds of mistake</li>
-        <li><b>Our recordings</b> · iPhone + Galaxy Watch 7 (new this week)</li>
-      </ul>
-    </div>
-    <div class="card col" style="flex:1">
-      <h3>Week 1 · done</h3>
-      <ul class="clean">
-        <li class="k">Spark pipeline: MM-Fit video, watch motion and heart rate in one table</li>
-        <li class="k">Model 1 on unseen people: <b>95%</b> accuracy (macro-F1 0.88)</li>
-        <li class="k">Rep counting: off by <b>0.49</b> reps on average</li>
-      </ul>
-      <h3 style="margin-top:18px">Week 2 · today</h3>
-      <ul class="clean">
-        <li>Model 2 (form) · Kafka streaming · Spark rep table</li>
-        <li><b>Our own gym recordings</b>, and does it all work on them?</li>
-      </ul>
-    </div>
   </div>
 </section>
 

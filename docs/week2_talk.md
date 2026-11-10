@@ -5,8 +5,8 @@ Open `reports/validation2/AI_Workout_Coach_Week2.html` in Chrome; keep the `demo
 
 | # | Slide | Say (short, simple) |
 |---|---|---|
-| 1 | Title | "This week we asked one question: do our models still work on real gym videos, with our phone, on our bodies?" |
-| 2 | Reminder | "Quick reminder: most apps tell you what you did; ours tells you when to stop. Three models: exercise and reps, form, fatigue. Week 1 gave us the Spark pipeline and Model 1 at 95% on unseen people. This week: form, streaming, and above all our own gym recordings." |
+| 1 | **Our project** | Point left to right. "Our project: a coach that watches you train. The phone films, the watch sends heart rate. We turn the video into a skeleton. Model 1 finds the exercise and counts reps, Model 2 checks the form, Model 3 watches fatigue and says stop. Data: MM-Fit, EC3D, and now our own recordings. Week 1 gave 95% on unseen people and reps off by 0.49." |
+| 2 | Title | "This week we asked one question: do our models still work on real gym videos, with our phone, on our bodies?" |
 | 3 | The question | "Model 1 and Model 2 were trained on public datasets. RQ4 measures how much we lose on a real phone camera. Every week-2 step is done." |
 | 4 | Pipeline | "Every set goes through this chain: iPhone → skeleton → which exercise → reps → form. The watch sends heart rate on the same clock. Kafka and Spark handle the streams and the rep table. All on a laptop CPU." |
 | 5 | Station | "We built this ourselves: the iPhone streams each set live to the laptop, the watch sends heart rate over Bluetooth. 30 fps on every set, nothing lost. Heart rate is our weak point: about half the time covered." |
