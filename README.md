@@ -49,6 +49,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-10 · Fix 4 (report hygiene).** Rounded RQ4 numbers (macro-F1 **0.511**); HR/Spark tables eval-only; `no_exercise_detected` when all windows are non_activity (n=2 eval); per-set table in `rq4_own.md`; clock RTT medians **3.5 ms** (not “tens of ms”); Spark `segmentation_failed` (4 sets) excluded from velocity medians.
 - **2026-11-10 · Fix 3 (honest live latency).** Cached “0.84 s” skipped MediaPipe. Full pose mean **13.1 s**; live_fast (every 2nd frame + 480px) mean **7.8 s**, exercise match 3/3. Form hidden until calibrated (`--show-form`). Docker Kafka daemon down — not claimed. `experiments/20261110_station_latency/`.
 - **2026-11-10 · Fix 2 (test isolation).** Quick-trains honour `AWC_MODELS_DIR` / `AWC_EXPERIMENTS_DIR` and write `*_quick` checkpoints under tmp in pytest. Stray quick folders removed; B5 retrain: risk AUC **0.599 → 0.760 ± 0.009** (matches `reports/m3_results.md`).
 - **2026-11-10 · Fix 1 (verified reps).** Station no longer defaults reps/RPE to 10; Save set requires a typed count. Review UI: `python scripts/review_reps.py` → `data/own_reps_verified.csv`. Manifest keeps `reps_typed` / `reps_source`; eval MAE uses **verified only**. Typed-default MAE **3.17** is provisional (not a count) until review finishes.

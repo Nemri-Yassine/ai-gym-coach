@@ -45,6 +45,7 @@ REP_COLUMNS = [
 
 OWN_REP_COLUMNS = REP_COLUMNS + [
     "person", "set", "speed_rel_first2", "velocity_loss",
+    "reps_truth", "segmentation_failed", "use",
 ]
 
 
@@ -189,6 +190,16 @@ def build_own_rep_rows(manifest_rows=None, rf_pack=None) -> pd.DataFrame:
         count, bounds = count_reps(pose_norm, fps=VIDEO_FPS, exercise=exercise)
         if count == 0 or not bounds:
             continue
+        truth = row.get("reps")
+        try:
+            truth_n = int(truth) if truth not in (None, "") else None
+        except (TypeError, ValueError):
+            truth_n = None
+        # Implausible counts vs ground truth → segmentation_failed (exclude from velocity medians)
+        seg_failed = False
+        if truth_n is not None and truth_n > 0:
+            if count < 0.5 * truth_n or count > 1.5 * truth_n:
+                seg_failed = True
         key = (person, exercise)
         counters[key] = counters.get(key, 0) + 1
         set_idx = counters[key]
@@ -230,17 +241,24 @@ def build_own_rep_rows(manifest_rows=None, rf_pack=None) -> pd.DataFrame:
                 "set": set_n,
                 "speed_rel_first2": np.nan,
                 "velocity_loss": np.nan,
+                "reps_truth": truth_n if truth_n is not None else np.nan,
+                "segmentation_failed": bool(seg_failed),
+                "use": row.get("use") or "eval",
             })
         # within-set: speed relative to mean of first 2 reps; velocity loss = 1 - rel
         speeds = [r["mean_speed"] for r in set_reps]
         base = float(np.nanmean(speeds[:2])) if speeds else np.nan
         for r in set_reps:
-            if np.isfinite(base) and base > 1e-8 and np.isfinite(r["mean_speed"]):
+            if seg_failed:
+                r["speed_rel_first2"] = np.nan
+                r["velocity_loss"] = np.nan
+            elif np.isfinite(base) and base > 1e-8 and np.isfinite(r["mean_speed"]):
                 rel = float(r["mean_speed"] / base)
                 r["speed_rel_first2"] = rel
                 r["velocity_loss"] = float(1.0 - rel)
         out.extend(set_reps)
-        print(f"own {person}/{session}/set{set_n:02d}: {count} reps", flush=True)
+        flag = " segmentation_failed" if seg_failed else ""
+        print(f"own {person}/{session}/set{set_n:02d}: {count} reps{flag}", flush=True)
     return pd.DataFrame(out, columns=OWN_REP_COLUMNS)
 
 
@@ -289,15 +307,39 @@ def run_own(use_spark=True, cores="local[2]") -> dict:
             print(f"Spark own within-set failed ({exc}); keeping pandas values", flush=True)
     OWN_REP_TABLE.parent.mkdir(parents=True, exist_ok=True)
     rep_df.to_parquet(OWN_REP_TABLE, index=False)
-    # median velocity loss at the last rep per exercise
+    # median velocity loss at the last rep per exercise (eval only; skip segmentation_failed)
     last_loss = {}
+    n_seg_failed = 0
+    n_eval_sets = 0
+    n_test_sets = 0
     if not rep_df.empty:
-        last = rep_df.sort_values("rep_idx").groupby(["person", "session", "set", "exercise"], as_index=False).tail(1)
-        for ex, g in last.groupby("exercise"):
-            last_loss[ex] = float(np.nanmedian(g["velocity_loss"].to_numpy(dtype=np.float64)))
+        if "segmentation_failed" in rep_df.columns:
+            n_seg_failed = int(
+                rep_df.groupby(["person", "session", "set"])["segmentation_failed"].any().sum()
+            )
+        if "use" in rep_df.columns:
+            n_eval_sets = int(rep_df[rep_df["use"] == "eval"].groupby(["person", "session", "set"]).ngroups)
+            n_test_sets = int(rep_df[rep_df["use"] == "test"].groupby(["person", "session", "set"]).ngroups)
+        usable = rep_df
+        if "use" in usable.columns:
+            usable = usable[usable["use"] == "eval"]
+        if "segmentation_failed" in usable.columns:
+            usable = usable[~usable["segmentation_failed"].astype(bool)]
+        if not usable.empty:
+            last = usable.sort_values("rep_idx").groupby(
+                ["person", "session", "set", "exercise"], as_index=False
+            ).tail(1)
+            for ex, g in last.groupby("exercise"):
+                vals = g["velocity_loss"].to_numpy(dtype=np.float64)
+                vals = vals[np.isfinite(vals)]
+                if len(vals):
+                    last_loss[ex] = round(float(np.nanmedian(vals)), 3)
     summary = {
         "rep_rows": int(len(rep_df)),
         "sets": int(rep_df.groupby(["person", "session", "set"]).ngroups) if len(rep_df) else 0,
+        "eval_sets": n_eval_sets,
+        "test_sets": n_test_sets,
+        "segmentation_failed_sets": n_seg_failed,
         "people": sorted(rep_df["person"].unique().tolist()) if len(rep_df) else [],
         "median_velocity_loss_last_rep": last_loss,
         "path": str(OWN_REP_TABLE),

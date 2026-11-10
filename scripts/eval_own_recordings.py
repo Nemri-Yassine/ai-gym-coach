@@ -138,10 +138,13 @@ def predict(model, x):
 
 
 def video_vote(preds):
+    """Majority vote excluding non_activity. Returns None when every window is non_activity
+    (vote excluding non_activity is undefined → report as no exercise detected)."""
     na = MMFIT_CLASSES.index("non_activity")
     active = [int(p) for p in preds if p != na]
-    pool = active or [int(p) for p in preds]
-    return Counter(pool).most_common(1)[0][0] if pool else na
+    if not active:
+        return None
+    return Counter(active).most_common(1)[0][0]
 
 
 def load_m2_rf():
@@ -199,7 +202,7 @@ def evaluate(rows: list[dict]) -> dict:
         win_preds = {}
         for name, model in models.items():
             if len(x) == 0:
-                votes[name] = MMFIT_CLASSES.index("non_activity")
+                votes[name] = None
                 win_preds[name] = []
                 continue
             p = predict(model, x)
@@ -208,27 +211,30 @@ def evaluate(rows: list[dict]) -> dict:
             window_p[name] += p.tolist()
             votes[name] = video_vote(p)
 
-        pred_name = MMFIT_CLASSES[votes[primary]] if primary else None
-        # Rep counting: oracle exercise + M1 predicted
+        vote_idx = votes.get(primary) if primary else None
+        no_detection = vote_idx is None
+        pred_name = "no_exercise_detected" if no_detection else MMFIT_CLASSES[vote_idx]
+        # Rep counting: oracle exercise + M1 predicted (skip M1-ex count when no detection)
         finite = segment[np.isfinite(segment).all(axis=(1, 2))]
         n_true = row["reps"]
         reps_source = row.get("reps_source") or "unknown"
         n_oracle = n_m1 = None
         if len(finite) >= 16:
             n_oracle, _ = count_reps(normalize(finite), exercise=row["exercise"])
-            n_m1, _ = count_reps(normalize(finite), exercise=pred_name)
-            if n_true is not None:
-                entry = {
+            if not no_detection:
+                n_m1, _ = count_reps(normalize(finite), exercise=pred_name)
+            if n_true is not None and n_oracle is not None:
+                rep_true_ex.append({
                     "key": key, "person": row["person"], "exercise": row["exercise"],
                     "true": int(n_true), "pred": int(n_oracle), "mode": "true_ex",
                     "reps_source": reps_source,
-                }
-                rep_true_ex.append(entry)
-                rep_pred_ex.append({
-                    "key": key, "person": row["person"], "exercise": row["exercise"],
-                    "true": int(n_true), "pred": int(n_m1), "mode": "m1_ex",
-                    "pred_exercise": pred_name, "reps_source": reps_source,
                 })
+                if n_m1 is not None:
+                    rep_pred_ex.append({
+                        "key": key, "person": row["person"], "exercise": row["exercise"],
+                        "true": int(n_true), "pred": int(n_m1), "mode": "m1_ex",
+                        "pred_exercise": pred_name, "reps_source": reps_source,
+                    })
 
         # Model 2 on squat/lunge/plank reps
         m2_set = []
@@ -245,6 +251,10 @@ def evaluate(rows: list[dict]) -> dict:
                         "pred_correct": int(p_corr >= 0.5),
                     })
 
+        vote_labels = {
+            n: ("no_exercise_detected" if v is None else MMFIT_CLASSES[v])
+            for n, v in votes.items()
+        }
         set_rows.append({
             "key": key,
             "person": row["person"],
@@ -256,13 +266,16 @@ def evaluate(rows: list[dict]) -> dict:
             "label_source": row.get("label_source"),
             "use": row["use"],
             "reps_true": n_true,
+            "reps_typed": row.get("reps_typed"),
+            "reps_source": reps_source,
             "reps_oracle": n_oracle,
             "reps_m1": n_m1,
             "detected": detected,
             "n_windows": len(x),
-            "votes": {n: MMFIT_CLASSES[v] for n, v in votes.items()},
+            "votes": vote_labels,
             "vote_primary": pred_name,
-            "correct_primary": bool(pred_name == row["exercise"]) if pred_name else False,
+            "no_detection": bool(no_detection),
+            "correct_primary": bool(pred_name == row["exercise"]),
             "m2_p_correct_mean": float(np.mean(m2_set)) if m2_set else None,
             "hr_coverage": row.get("hr_coverage"),
             "hr_ok": row.get("hr_ok"),
@@ -272,17 +285,26 @@ def evaluate(rows: list[dict]) -> dict:
         })
 
     eval_sets = [r for r in set_rows if r["use"] == "eval"]
+    test_sets = [r for r in set_rows if r["use"] == "test"]
+    na_idx = MMFIT_CLASSES.index("non_activity")
+
+    def _vote_to_idx(label: str) -> int:
+        if label == "no_exercise_detected" or label not in MMFIT_CLASSES:
+            return na_idx  # count as wrong vs any exercise truth
+        return MMFIT_CLASSES.index(label)
+
     # M1 metrics on primary
     m1_out = {}
     for name in models:
         vy = np.array([MMFIT_CLASSES.index(r["exercise"]) for r in eval_sets])
-        vp = np.array([MMFIT_CLASSES.index(r["votes"][name]) for r in eval_sets])
-        k = int((vy == vp).sum())
-        n = len(vy)
+        vp = np.array([_vote_to_idx(r["votes"][name]) for r in eval_sets])
+        # string-equality correctness (no_exercise_detected never equals a real exercise)
+        correct_flags = [r["votes"][name] == r["exercise"] for r in eval_sets]
+        k = int(sum(correct_flags))
+        n = len(eval_sets)
         lo, hi = wilson_ci(k, n)
         present = sorted({r["exercise"] for r in eval_sets})
         present_idx = [MMFIT_CLASSES.index(e) for e in present]
-        # macro-F1 over the exercises present (exclude absent classes / non_activity)
         if n:
             from sklearn.metrics import f1_score
             f1 = float(f1_score(vy, vp, labels=present_idx, average="macro", zero_division=0))
@@ -290,30 +312,34 @@ def evaluate(rows: list[dict]) -> dict:
             f1 = float("nan")
         per_person = {}
         for person in ("yassine", "partner"):
-            m = np.array([r["person"] == person for r in eval_sets])
-            if m.any():
-                kk = int((vy[m] == vp[m]).sum())
-                nn = int(m.sum())
+            subset = [r for r in eval_sets if r["person"] == person]
+            if subset:
+                kk = sum(1 for r in subset if r["votes"][name] == r["exercise"])
+                nn = len(subset)
                 plo, phi = wilson_ci(kk, nn)
-                per_person[person] = {"n": nn, "accuracy": kk / nn, "ci95": [plo, phi]}
+                per_person[person] = {
+                    "n": nn, "accuracy": round(kk / nn, 3), "ci95": [round(plo, 3), round(phi, 3)],
+                    "n_no_detection": sum(1 for r in subset if r["votes"][name] == "no_exercise_detected"),
+                }
         per_ex = {}
         for ex in present:
-            m = vy == MMFIT_CLASSES.index(ex)
-            nn = int(m.sum())
-            kk = int((vy[m] == vp[m]).sum()) if nn else 0
-            per_ex[ex] = {"n": nn, "accuracy": (kk / nn) if nn else None}
+            subset = [r for r in eval_sets if r["exercise"] == ex]
+            nn = len(subset)
+            kk = sum(1 for r in subset if r["votes"][name] == r["exercise"])
+            per_ex[ex] = {"n": nn, "accuracy": round(kk / nn, 3) if nn else None}
         wy = np.array(window_y[name])
         wp = np.array(window_p[name])
-        # only windows from eval sets — approximate by filtering set_rows
+        n_no_det = sum(1 for r in eval_sets if r["votes"][name] == "no_exercise_detected")
         m1_out[name] = {
             "n_sets": n,
-            "set_accuracy": (k / n) if n else None,
+            "set_accuracy": round(k / n, 3) if n else None,
             "set_correct": k,
-            "wilson95": [lo, hi],
-            "macro_f1": float(f1) if n else None,
+            "wilson95": [round(lo, 3), round(hi, 3)],
+            "macro_f1": round(float(f1), 3) if n else None,
+            "n_no_detection": n_no_det,
             "per_person": per_person,
             "per_exercise": per_ex,
-            "window_accuracy": float((wy == wp).mean()) if len(wy) else None,
+            "window_accuracy": round(float((wy == wp).mean()), 3) if len(wy) else None,
             "n_windows": int(len(wy)),
             "confusion": np.array(
                 [[int(((vy == a) & (vp == b)).sum()) for b in range(len(MMFIT_CLASSES))]
@@ -387,25 +413,39 @@ def evaluate(rows: list[dict]) -> dict:
                 ),
             })
 
-    # HR summary per person
-    hr_summary = {}
-    for person in ("yassine", "partner"):
-        own = [r for r in rows if r["person"] == person]
-        cov = [float(r["hr_coverage"]) for r in own if r.get("hr_coverage") is not None]
-        ok = sum(1 for r in own if r.get("hr_ok"))
+    # HR summary per person — eval sets only; test listed separately
+    def _hr_block(subset):
+        cov = [float(r["hr_coverage"]) for r in subset if r.get("hr_coverage") is not None]
+        ok = sum(1 for r in subset if r.get("hr_ok"))
         rises = []
-        for r in own:
+        for r in subset:
             if r.get("hr_start") is not None and r.get("hr_end") is not None:
                 if np.isfinite(r["hr_start"]) and np.isfinite(r["hr_end"]):
                     rises.append(float(r["hr_end"] - r["hr_start"]))
-        hr_summary[person] = {
-            "n_sets": len(own),
+        return {
+            "n_sets": len(subset),
             "hr_ok_sets": ok,
-            "mean_coverage": float(np.mean(cov)) if cov else 0.0,
-            "median_coverage": float(np.median(cov)) if cov else 0.0,
-            "mean_hr_rise": float(np.mean(rises)) if rises else None,
+            "mean_coverage": round(float(np.mean(cov)), 2) if cov else 0.0,
+            "median_coverage": round(float(np.median(cov)), 2) if cov else 0.0,
+            "mean_hr_rise": round(float(np.mean(rises)), 1) if rises else None,
             "n_rise": len(rises),
         }
+
+    hr_summary = {}
+    for person in ("yassine", "partner"):
+        hr_summary[person] = _hr_block([r for r in eval_sets if r["person"] == person])
+    hr_summary["test_sets"] = _hr_block(test_sets)
+
+    # Round M2 floats
+    def _round_m2(block):
+        if not block:
+            return block
+        out = dict(block)
+        if out.get("mean_p_correct") is not None:
+            out["mean_p_correct"] = round(float(out["mean_p_correct"]), 3)
+        if out.get("pct_classified_correct") is not None:
+            out["pct_classified_correct"] = round(float(out["pct_classified_correct"]), 3)
+        return out
 
     return {
         "primary_model": primary,
@@ -424,17 +464,17 @@ def evaluate(rows: list[dict]) -> dict:
             "n_typed_eval": len(rep_oracle_typed),
         },
         "m2": {
-            "eval_squats": {
+            "eval_squats": _round_m2({
                 "n_reps": len(m2_eval),
                 "mean_p_correct": float(np.mean([r["p_correct"] for r in m2_eval])) if m2_eval else None,
                 "pct_classified_correct": (
                     float(np.mean([r["pred_correct"] for r in m2_eval])) if m2_eval else None
                 ),
-            },
-            "all_squats_incl_test": {
+            }),
+            "all_squats_incl_test": _round_m2({
                 "n_reps": len(m2_all_squats),
                 "mean_p_correct": float(np.mean([r["p_correct"] for r in m2_all_squats])) if m2_all_squats else None,
-            },
+            }),
             "rows": m2_probs,
         },
         "wrong_button": wrong_button,
@@ -543,6 +583,8 @@ def write_report(result: dict, run_dir: Path):
         "## Model 1 (pose only)",
         "",
         f"Primary checkpoint: `{primary}`. Windows 90 / hop 45, majority vote excluding `non_activity`.",
+        f"When every window is `non_activity`, the vote is **undefined** → labelled "
+        f"`no_exercise_detected` and counted **wrong** (n={m1.get('n_no_detection', 0)} eval sets).",
         f"Set accuracy: **{m1.get('set_accuracy')}** ({m1.get('set_correct')}/{m1.get('n_sets')}), "
         f"Wilson 95% CI [{lo:.2f}, {hi:.2f}]. Macro-F1 (9 exercises present): **{m1.get('macro_f1')}**.",
         f"Window accuracy: **{m1.get('window_accuracy')}** (n={m1.get('n_windows')}).",
@@ -585,7 +627,28 @@ def write_report(result: dict, run_dir: Path):
         "",
         "Confusion: `reports/figures/m1_confusion_own.png`.",
         "",
+        "### Per-set predictions",
+        "",
+        "| Set | use | Truth | transformer | CNN | LSTM | reps typed | reps verified | reps counted |",
+        "|---|---|---|---|---|---|---:|---:|---:|",
     ]
+    for r in result["sets"]:
+        votes = r.get("votes") or {}
+        typed = r.get("reps_typed")
+        verified = r.get("reps_true") if r.get("reps_source") == "verified" else ""
+        if r.get("reps_source") != "verified":
+            verified = "—"
+        counted = r.get("reps_oracle")
+        lines.append(
+            f"| `{r['key']}` | {r['use']} | {r['exercise']} | "
+            f"{votes.get('m1_transformer_pose', '—')} | "
+            f"{votes.get('m1_cnn_pose', '—')} | "
+            f"{votes.get('m1_lstm_pose', '—')} | "
+            f"{typed if typed is not None else '—'} | "
+            f"{verified if verified != '' else '—'} | "
+            f"{counted if counted is not None else '—'} |"
+        )
+    lines += [""]
 
     lines += [
         "## Rep counting",
@@ -644,15 +707,27 @@ def write_report(result: dict, run_dir: Path):
         "",
         "## Heart rate",
         "",
+        "Eval sets only:",
+        "",
         "| Person | sets | hr_ok | mean coverage | median coverage | mean HR rise (end−start) |",
         "|---|---:|---:|---:|---:|---:|",
     ]
-    for person, h in result["hr_summary"].items():
-        rise = "–" if h["mean_hr_rise"] is None else f"{h['mean_hr_rise']:.1f}"
+    for person in ("yassine", "partner"):
+        h = result["hr_summary"].get(person) or {}
+        rise = "–" if h.get("mean_hr_rise") is None else f"{h['mean_hr_rise']:.1f}"
         lines.append(
-            f"| {person} | {h['n_sets']} | {h['hr_ok_sets']} | {h['mean_coverage']:.2f} | "
-            f"{h['median_coverage']:.2f} | {rise} |"
+            f"| {person} | {h.get('n_sets', 0)} | {h.get('hr_ok_sets', 0)} | "
+            f"{h.get('mean_coverage', 0):.2f} | {h.get('median_coverage', 0):.2f} | {rise} |"
         )
+    ht = result["hr_summary"].get("test_sets") or {}
+    if ht.get("n_sets"):
+        rise = "–" if ht.get("mean_hr_rise") is None else f"{ht['mean_hr_rise']:.1f}"
+        lines += [
+            "",
+            f"Test sets (excluded above): n={ht['n_sets']}, hr_ok={ht['hr_ok_sets']}, "
+            f"mean coverage {ht['mean_coverage']:.2f}, median {ht['median_coverage']:.2f}, "
+            f"mean HR rise {rise}.",
+        ]
     lines += [
         "",
         "Limitation: the watch went silent for 20–80 s on several sets (hr_coverage 0 on many early sets).",
@@ -664,6 +739,7 @@ def write_report(result: dict, run_dir: Path):
         "- Portrait phone framing and gym background differ from MM-Fit / RepCount.",
         "- RPE not usable; HR gaps; two sets missing typed reps.",
         "- Own data never used for training or threshold tuning in this report.",
+        "- Rep MAE typed-default is provisional until `data/own_reps_verified.csv` is filled.",
         "",
         f"Metrics: `{run_dir.as_posix()}/metrics.json`.",
         "",

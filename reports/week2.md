@@ -9,13 +9,13 @@ RPE ignored (≈10 everywhere). Weight typed as body weight — ignored. Notes c
 | Metric | Value | n |
 |---|---:|---:|
 | M1 set accuracy (pose-only transformer) | **0.70** (Wilson 95% [0.48, 0.85]) | 20 |
-| M1 macro-F1 (9 exercises) | **0.51** | 20 |
-| M1 accuracy yassine / partner | 0.75 / 0.625 | 12 / 8 |
+| M1 macro-F1 (9 exercises) | **0.511** | 20 |
+| M1 accuracy yassine / partner | 0.750 / 0.625 | 12 / 8 |
 | Rep MAE (true exercise) | **3.17** (exact 22%, ±1 50%) — **typed default, not a count** until verified | 18 |
 | Rep MAE (M1 exercise) | 3.67 (typed default) | 18 |
 | M2 mean P(correct) on correct squats | **0.06** (% classified correct 0%) | 20 reps |
-| HR mean coverage yassine / partner | 0.50 / 0.52 | 14 / 8 sets (includes 2 test — Fix 4 splits) |
-| Spark own rep rows | **269** (22 sets) | — |
+| HR mean coverage yassine / partner (eval) | 0.54 / 0.52 (hr_ok 7/12 · 4/8) | 12 / 8 eval sets |
+| Spark own rep rows | **269** (20 eval + 2 test; 4 sets `segmentation_failed`) | — |
 | Live latency **cached** pose (old claim) | 0.84 / 0.03 / 0.03 s | 3 sets |
 | Live latency **full MediaPipe** (honest) | mean **13.1 s** (pose ~13.1 / M1 ~0.01 / reps ~0.01 / M2 0) | 3 sets |
 | Live latency **live_fast** (stride 2 + 480px) | mean **7.8 s** (pose ~7.8); exercise match 3/3 vs cache; reps Δ −1 on 1 set | 3 sets |
@@ -56,4 +56,4 @@ No form labels on MM-Fit. See also four-session table in `reports/rq4_first_look
 
 **MM-Fit:** 5,918 rep rows, 616 sets, 21 sessions; within-session baselines; `has_baseline` rate 0.67; HR mask forced 0 on w05/w10/w18.
 
-**Own:** 269 rep rows, 22 sets, 2 people → `data/interim/own_rep_table.parquet`. Median velocity loss at last rep (negative = last rep faster than first 2): squats 0.21, pushups 0.07, tricep_extensions −1.58 (noisy counts), etc. Summary: `data/interim/own_rep_table_summary.json`.
+**Own:** 269 rep rows, **20 eval + 2 test** sets, 2 people → `data/interim/own_rep_table.parquet`. Sets with counted reps <0.5× or >1.5× truth are `segmentation_failed` (4 sets) and excluded from velocity-loss medians. Median velocity loss at last rep (eval, non-failed): squats 0.222, pushups 0.065, tricep_extensions −1.146 (remaining sets still noisy vs typed-10 truth). Summary: `data/interim/own_rep_table_summary.json`.

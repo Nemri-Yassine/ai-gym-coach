@@ -22,8 +22,9 @@ Wrong button pressed on 3 eval sets; the note (and folder name for 2 unsaved set
 ## Model 1 (pose only)
 
 Primary checkpoint: `m1_transformer_pose`. Windows 90 / hop 45, majority vote excluding `non_activity`.
-Set accuracy: **0.7** (14/20), Wilson 95% CI [0.48, 0.85]. Macro-F1 (9 exercises present): **0.5111111111111111**.
-Window accuracy: **0.6287625418060201** (n=299).
+When every window is `non_activity`, the vote is **undefined** → labelled `no_exercise_detected` and counted **wrong** (n=2 eval sets).
+Set accuracy: **0.7** (14/20), Wilson 95% CI [0.48, 0.85]. Macro-F1 (9 exercises present): **0.511**.
+Window accuracy: **0.629** (n=299).
 
 Differences of a few sets are noise at this n.
 
@@ -51,7 +52,7 @@ Did Model 1 agree with the note (truth) or the wrong button?
 | Set | Button | Truth | M1 | Agrees with |
 |---|---|---|---|---|
 | `yassine/2026-11-10_s007/set01` | squats | pushups | pushups | **note/truth** |
-| `yassine/2026-11-10_TRICEPS/set01` | squats | tricep_extensions | non_activity | **neither** |
+| `yassine/2026-11-10_TRICEPS/set01` | squats | tricep_extensions | no_exercise_detected | **neither** |
 | `yassine/2026-11-10_TRICEPS/set04` | lateral_shoulder_raises | bicep_curls | bicep_curls | **note/truth** |
 
 ### Comparison (same pose-only transformer, set/video accuracy)
@@ -62,48 +63,64 @@ Did Model 1 agree with the note (truth) or the wrong button?
 | MM-Fit w20 MediaPipe | macro-F1 | 0.80 | — |
 | RepCount public videos | video accuracy (4 ex.) | 0.808 | — |
 | **Our videos** | set accuracy | 0.7 | 20 |
-| **Our videos** | macro-F1 (9 ex.) | 0.5111111111111111 | 20 |
+| **Our videos** | macro-F1 (9 ex.) | 0.511 | 20 |
 
 Confusion: `reports/figures/m1_confusion_own.png`.
 
+### Per-set predictions
+
+| Set | use | Truth | transformer | CNN | LSTM | reps typed | reps verified | reps counted |
+|---|---|---|---|---|---|---:|---:|---:|
+| `partner/2026-11-10_s007/set01` | eval | pushups | pushups | pushups | pushups | 10 | — | 11 |
+| `partner/2026-11-10_PUSHUP/set01` | eval | pushups | pushups | pushups | pushups | 10 | — | 14 |
+| `partner/2026-11-10_EX3IHEB/set01` | eval | jumping_jacks | jumping_jacks | jumping_jacks | jumping_jacks | 10 | — | 11 |
+| `partner/2026-11-10_SHOULDERPRESS/set01` | eval | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | 10 | — | 12 |
+| `partner/2026-11-10_SHOULDERDUMB2/set01` | eval | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | 10 | — | 17 |
+| `partner/2026-11-10_s01/set01` | eval | lateral_shoulder_raises | jumping_jacks | jumping_jacks | jumping_jacks | 10 | — | 11 |
+| `partner/2026-11-10_s01/set02` | eval | tricep_extensions | dumbbell_rows | dumbbell_rows | dumbbell_rows | 10 | — | 15 |
+| `partner/2026-11-10_s01/set03` | eval | situps | pushups | pushups | no_exercise_detected | 10 | — | 12 |
+| `yassine/2026-11-10_s007/set01` | eval | pushups | pushups | pushups | pushups | 10 | — | 11 |
+| `yassine/2026-11-10_PUHSUP2/set01` | eval | pushups | pushups | pushups | pushups | — | — | 11 |
+| `yassine/2026-11-10_JUMPJACK/set01` | eval | jumping_jacks | jumping_jacks | jumping_jacks | jumping_jacks | — | — | 16 |
+| `yassine/2026-11-10_DUMBSHOULD/set01` | eval | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | 10 | — | 6 |
+| `yassine/2026-11-10_DUMBSHOULD/set02` | eval | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | dumbbell_shoulder_press | 10 | — | 9 |
+| `yassine/2026-11-10_SQUAT/set01` | eval | squats | squats | squats | squats | 10 | — | 10 |
+| `yassine/2026-11-10_SQUAT/set02` | eval | squats | squats | squats | squats | 10 | — | 10 |
+| `yassine/2026-11-10_TRICEPS/set01` | eval | tricep_extensions | no_exercise_detected | no_exercise_detected | no_exercise_detected | 10 | — | 7 |
+| `yassine/2026-11-10_TRICEPS/set02` | eval | tricep_extensions | no_exercise_detected | bicep_curls | no_exercise_detected | 10 | — | 8 |
+| `yassine/2026-11-10_TRICEPS/set03` | eval | bicep_curls | bicep_curls | bicep_curls | bicep_curls | 10 | — | 10 |
+| `yassine/2026-11-10_TRICEPS/set04` | eval | bicep_curls | bicep_curls | bicep_curls | bicep_curls | 10 | — | 33 |
+| `yassine/2026-11-10_DUMBLLROWS/set01` | eval | dumbbell_rows | pushups | pushups | pushups | 10 | — | 10 |
+| `yassine/2026-11-09_s01/set01` | test | lunges | no_exercise_detected | no_exercise_detected | no_exercise_detected | 8 | — | 2 |
+| `yassine/2026-11-10_s01/set01` | test | squats | squats | squats | situps | 10 | — | 14 |
+
 ## Rep counting
 
-No peak-parameter tuning on these sets.
+No peak-parameter tuning on these sets. **Main numbers use hand-verified reps only** (`reps_source=verified`).
 
-True exercise: MAE **3.17**, exact **22.2%**, within ±1 **50.0%** (n=18).
-M1-predicted exercise: MAE **3.67**, exact **16.7%**, within ±1 **50.0%** (n=18).
+> **PROVISIONAL:** `data/own_reps_verified.csv` is missing. Run `python scripts/review_reps.py` and count the 22 sets. Do not cite typed-default MAE as a result.
 
-| Exercise | n | MAE (true ex) |
-|---|---:|---:|
-| bicep_curls | 2 | 11.50 |
-| dumbbell_rows | 1 | 0.00 |
-| dumbbell_shoulder_press | 4 | 3.50 |
-| jumping_jacks | 1 | 1.00 |
-| lateral_shoulder_raises | 1 | 1.00 |
-| pushups | 3 | 2.00 |
-| situps | 1 | 2.00 |
-| squats | 2 | 0.00 |
-| tricep_extensions | 3 | 3.33 |
 
-| Person | n | MAE (true ex) |
-|---|---:|---:|
-| partner | 8 | 2.88 |
-| yassine | 10 | 3.40 |
+**Typed default (not a count):** MAE 3.17, exact 22.2%, ±1 50.0% (n=18). Station UI used to default reps=10 — these numbers are **not** ground truth.
 
 Figure: `reports/figures/rep_counting_own.png`.
 
 ## Model 2 (form)
 
 Only **correct** squats recorded (2 eval + 1 test). No lunges/plank mistakes. This measures **false alarms**, not mistake detection.
-Eval squats: mean P(correct) **0.06000000000000001**, % reps classified correct **0.0** (n=20).
+Eval squats: mean P(correct) **0.06**, % reps classified correct **0.0** (n=20).
 Compare MM-Fit RQ4 MediaPipe P(correct) on squat/lunge: **0.08 / 0.14**.
 
 ## Heart rate
 
+Eval sets only:
+
 | Person | sets | hr_ok | mean coverage | median coverage | mean HR rise (end−start) |
 |---|---:|---:|---:|---:|---:|
-| yassine | 14 | 7 | 0.50 | 0.43 | 2.3 |
+| yassine | 12 | 7 | 0.54 | 0.58 | 2.3 |
 | partner | 8 | 4 | 0.52 | 0.59 | -1.5 |
+
+Test sets (excluded above): n=2, hr_ok=0, mean coverage 0.25, median 0.25, mean HR rise –.
 
 Limitation: the watch went silent for 20–80 s on several sets (hr_coverage 0 on many early sets).
 Figure: `reports/figures/own_hr_session.png`.
@@ -114,5 +131,6 @@ Figure: `reports/figures/own_hr_session.png`.
 - Portrait phone framing and gym background differ from MM-Fit / RepCount.
 - RPE not usable; HR gaps; two sets missing typed reps.
 - Own data never used for training or threshold tuning in this report.
+- Rep MAE typed-default is provisional until `data/own_reps_verified.csv` is filled.
 
 Metrics: `C:/Users/yassi/OneDrive/Bureau/projet DL BIG DATA/experiments/20261110_own_rq4/metrics.json`.
