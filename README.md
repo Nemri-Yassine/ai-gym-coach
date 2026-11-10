@@ -30,6 +30,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 | 2.3 | Kafka streaming of pose and HR (replay) | ✅ Done · Nov 7, 2026 |
 | 2.4 | Models 1–2 on raw MM-Fit video (RQ4) | ✅ Done · Nov 7, 2026 · w20 only |
 | 2.4a | Own-recordings manifest (note-corrected labels) | ✅ Done · Nov 10, 2026 |
+| 2.4b-own | MediaPipe pose for own recordings | ✅ Done · Nov 10, 2026 |
 | 2.4b | RQ4 on four MM-Fit videos + auto sync | ✅ Done · Nov 7, 2026 |
 | 2.5 | Spark rep history + within-session baselines | ✅ Done · Nov 7, 2026 |
 | 2.6 | Week 2 validation package | ✅ Done · Nov 7, 2026 |
@@ -45,6 +46,7 @@ The step-by-step work plan (3 weeks, one validation per week) is in [docs/PLAN.m
 
 ### Log
 
+- **2026-11-10 · Step 2.4b-own.** MediaPipe pose for **22**/22 own sets → `data/interim/own/`; mean person-detect **95.7%** (Nov 9 lunges test set 22% — poor framing); HR join ±2 s; figure `reports/figures/own_pose_check.png`. `python scripts/process_recording.py --all --workers 4`.
 - **2026-11-10 · Step 2.4a.** Own-recordings manifest `data/own_manifest.csv`: **22** sets (20 eval + 2 test), 2 people, 9 exercises; note wins over button (3 wrong-button corrections); HR coverage + `hr_ok` per set. RPE/weight ignored (RPE≈10, body weight typed). Rebuild: `python scripts/own_manifest.py --print`.
 - **2026-11-09 · Gym station.** iPhone Safari → laptop over HTTPS/WebSocket (`python -m awc.station`); live chunk upload to `data/raw/own_recordings/`; BLE or Pulsoid HR; clock sync; control UI + QR. Docs: `docs/gym_station.md`. Check: `scripts/station_check.py`.
 - **2026-11-10 · Gym station v2.** Certificate re-issued automatically at start for the current IPs + iPhone hotspot range (same root CA, nothing new on the phone); 4-digit PIN for the phone page, control page laptop-only. Video uploaded live again (ordered retry queue, `set_done` after the last piece), remuxed to a normal MP4, frame times from the video's own timestamps + recorder start (yesterday's real iPhone clip: 332 frames, 30.0 fps; the old 360-vs-332 mismatch is gone). Smooth live view via WebRTC with JPEG fallback. Faster BLE reconnect + drop counter (Nov 9 link dropped about every 30 s). Firewall rule must allow Public networks.

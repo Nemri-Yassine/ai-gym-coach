@@ -168,10 +168,31 @@ def next_set_index(folder) -> int:
     return max(int(r["set"]) for r in rows) + 1
 
 
+def _events_bounds(events, set_n):
+    start = end = None
+    needle = f"set={set_n}"
+    for e in events:
+        detail = e.get("detail") or ""
+        if needle not in detail:
+            continue
+        try:
+            ts = int(float(e["pc_ts_ms"]))
+        except (KeyError, TypeError, ValueError):
+            continue
+        if e.get("event") == "set_start":
+            start = ts
+        elif e.get("event") == "set_end":
+            end = ts
+    return start, end
+
+
 def load(session_folder):
     """Load a per-set own recording (phone-app or gym-station).
 
     Returns a dict with sets, extras, frames (per set), hr, events, meta.
+    Sets that have a video + set_start/set_end in events.csv but no sets.csv row
+    are included with empty labels (exercise/reps unknown) so callers can still
+    find the video paths.
     """
     folder = Path(session_folder)
     if not folder.is_dir():
@@ -183,7 +204,33 @@ def load(session_folder):
         for key in ("set", "start_ms", "end_ms", "reps", "rpe"):
             if row.get(key) not in (None, ""):
                 row[key] = int(float(row[key]))
-    extras = {int(r["set"]): r for r in _read_csv(folder / "sets_extra.csv")}
+    extras = {int(r["set"]): r for r in _read_csv(folder / "sets_extra.csv") if r.get("set")}
+    events = _read_csv(folder / "events.csv")
+    labelled = {int(r["set"]) for r in sets}
+    sets_dir = folder / "sets"
+    if sets_dir.is_dir():
+        for path in sorted(sets_dir.glob("set*.mp4")):
+            if ".raw." in path.name or path.stat().st_size <= 0:
+                continue
+            try:
+                n = int(path.stem.replace("set", ""))
+            except ValueError:
+                continue
+            if n in labelled:
+                continue
+            start, end = _events_bounds(events, n)
+            if start is None or end is None:
+                continue
+            sets.append({
+                "set": n,
+                "exercise": "",
+                "start_ms": start,
+                "end_ms": end,
+                "reps": None,
+                "rpe": None,
+                "form_label": "correct",
+            })
+            labelled.add(n)
     frames = {}
     for row in sets:
         n = int(row["set"])
@@ -192,10 +239,11 @@ def load(session_folder):
         frames[n] = [(int(r["frame"]), int(float(r["pc_ts_ms"]))) for r in rows]
         video_mp4 = folder / "sets" / f"set{n:02d}.mp4"
         video_webm = folder / "sets" / f"set{n:02d}.webm"
-        row["video"] = str(video_mp4 if video_mp4.is_file() else video_webm if video_webm.is_file() else "")
+        row["video"] = str(video_mp4 if video_mp4.is_file() and video_mp4.stat().st_size > 0
+                           else video_webm if video_webm.is_file() and video_webm.stat().st_size > 0
+                           else "")
         row["extra"] = extras.get(n, {})
     hr = [(int(float(r["pc_ts_ms"])), float(r["bpm"])) for r in _read_csv(folder / "hr.csv")]
-    events = _read_csv(folder / "events.csv")
     clock = _read_csv(folder / "clock_sync.csv")
     return {
         "folder": folder,

@@ -19,18 +19,19 @@ def landmarks_to_pixels(landmarks, width, height) -> np.ndarray:
     return mediapipe_to_coco18(lm, y_down=True)
 
 
-def fill_gaps(seq, max_gap) -> np.ndarray:
+def fill_gaps(seq, max_gap, return_n_filled=False):
     """Linearly interpolate NaN runs no longer than max_gap frames. Longer runs stay NaN."""
     seq = np.asarray(seq, dtype=np.float64).copy()
     missing = ~np.isfinite(seq).all(axis=(1, 2))
     if not missing.any() or missing.all():
-        return seq
+        return (seq, 0) if return_n_filled else seq
     t = np.arange(len(seq))
     good = ~missing
     flat = seq.reshape(len(seq), -1)
     for c in range(flat.shape[1]):
         flat[missing, c] = np.interp(t[missing], t[good], flat[good, c])
     # Undo the fill for long runs and for the edges outside the first/last detection.
+    n_filled = 0
     run_start = None
     for i in range(len(seq) + 1):
         is_missing = i < len(seq) and missing[i]
@@ -40,8 +41,11 @@ def fill_gaps(seq, max_gap) -> np.ndarray:
             at_edge = run_start == 0 or i == len(seq)
             if at_edge or i - run_start > max_gap:
                 flat[run_start:i] = np.nan
+            else:
+                n_filled += i - run_start
             run_start = None
-    return flat.reshape(seq.shape)
+    out = flat.reshape(seq.shape)
+    return (out, int(n_filled)) if return_n_filled else out
 
 
 def resample(seq, fps_in, fps_out=VIDEO_FPS) -> np.ndarray:
@@ -107,7 +111,7 @@ def _open_landmarker(model_path=POSE_MODEL):
     return vision.PoseLandmarker.create_from_options(options)
 
 
-def _detect_bgr(landmarker, bgr, ts_ms):
+def _detect_bgr(landmarker, bgr, ts_ms, return_visibility=False):
     import cv2
     import mediapipe as mp
 
@@ -116,8 +120,15 @@ def _detect_bgr(landmarker, bgr, ts_ms):
     image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
     result = landmarker.detect_for_video(image, int(ts_ms))
     if result.pose_landmarks:
-        lm = [(p.x, p.y) for p in result.pose_landmarks[0]]
-        return landmarks_to_pixels(lm, width, height)
+        pts = result.pose_landmarks[0]
+        lm = [(p.x, p.y) for p in pts]
+        pose = landmarks_to_pixels(lm, width, height)
+        if return_visibility:
+            vis = float(np.mean([getattr(p, "visibility", 1.0) for p in pts]))
+            return pose, vis
+        return pose
+    if return_visibility:
+        return np.full((18, 2), np.nan, dtype=np.float32), float("nan")
     return np.full((18, 2), np.nan, dtype=np.float32)
 
 
@@ -158,11 +169,12 @@ def extract_pose_ranges(video_path, ranges, model_path=POSE_MODEL):
     return out
 
 
-def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
+def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None, return_qa=False):
     """Run Pose Landmarker on every frame. Returns (pose (T, 18, 2) at 30 fps, source fps, source frames).
 
     frame_times_ms: real capture time of every frame (frames.csv of our recordings). When given,
     it is the clock: the video's fps is ignored. Without it (public videos), the video fps is used.
+    return_qa: also return a dict with pct_detected, mean_visibility, n_gaps_filled.
     """
     import cv2
 
@@ -173,6 +185,7 @@ def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
     if not np.isfinite(fps) or fps <= 1:
         fps = VIDEO_FPS
     frames = []
+    visibilities = []
     with _open_landmarker(model_path) as landmarker:
         index = 0
         while True:
@@ -181,16 +194,35 @@ def extract_pose(video_path, model_path=POSE_MODEL, frame_times_ms=None):
                 break
             ts = (int(frame_times_ms[index] - frame_times_ms[0]) if frame_times_ms is not None
                   and index < len(frame_times_ms) else int(round(index * 1000 / fps)))
-            frames.append(_detect_bgr(landmarker, bgr, ts))
+            pose, vis = _detect_bgr(landmarker, bgr, ts, return_visibility=True)
+            frames.append(pose)
+            visibilities.append(vis)
             index += 1
     cap.release()
     raw = np.asarray(frames, dtype=np.float64).reshape(-1, 18, 2)
+    detected = np.isfinite(raw).all(axis=(1, 2))
+    pct_detected = float(detected.mean()) if len(raw) else 0.0
+    vis_arr = np.asarray(visibilities, dtype=np.float64)
+    mean_visibility = float(np.nanmean(vis_arr[detected])) if detected.any() else 0.0
     if frame_times_ms is not None:
         times = np.asarray(frame_times_ms[:len(raw)], dtype=np.float64)
         if len(times) != len(raw):
             raise ValueError(f"video has {len(raw)} frames but {len(times)} timestamps")
         real_fps = (len(times) - 1) / max((times[-1] - times[0]) / 1000.0, 1e-6)
-        filled = fill_gaps(raw, max_gap=int(round(MAX_GAP_SECONDS * real_fps)))
-        return resample_times(filled, times).astype(np.float32), float(real_fps), len(raw)
-    filled = fill_gaps(raw, max_gap=int(round(MAX_GAP_SECONDS * fps)))
-    return resample(filled, fps).astype(np.float32), float(fps), len(raw)
+        filled, n_gaps = fill_gaps(raw, max_gap=int(round(MAX_GAP_SECONDS * real_fps)), return_n_filled=True)
+        pose = resample_times(filled, times).astype(np.float32)
+        src_fps = float(real_fps)
+    else:
+        filled, n_gaps = fill_gaps(raw, max_gap=int(round(MAX_GAP_SECONDS * fps)), return_n_filled=True)
+        pose = resample(filled, fps).astype(np.float32)
+        src_fps = float(fps)
+    if return_qa:
+        qa = {
+            "pct_detected": pct_detected,
+            "mean_visibility": mean_visibility,
+            "n_gaps_filled": int(n_gaps),
+            "n_src": len(raw),
+            "n_out": len(pose),
+        }
+        return pose, src_fps, len(raw), qa
+    return pose, src_fps, len(raw)
