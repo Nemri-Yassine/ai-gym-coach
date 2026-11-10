@@ -134,3 +134,25 @@ Figure: `reports/figures/own_hr_session.png`.
 - Rep MAE typed-default is provisional until `data/own_reps_verified.csv` is filled.
 
 Metrics: `C:/Users/yassi/OneDrive/Bureau/projet DL BIG DATA/experiments/20261110_own_rq4/metrics.json`.
+
+## Why Model 1 fails on 4 exercises (diagnosis)
+
+Figure: `reports/figures/own_m1_diagnosis.png` (mean key-joint Y vs rep fraction; our videos vs MM-Fit train true vs predicted).
+
+- **Tricep extensions → `no_exercise_detected`:** MM-Fit triceps are overhead standing curls with wrists ~1.5–2 torso lengths above mid-hip; ours stay near 0–0.5 with little amplitude — likely a seated / kickback variant the pose model barely “sees” as exercise.
+- **Lateral shoulder raises → jumping jacks:** Arm arcs look almost identical; MM-Fit jumping jacks add small ankle bounce. Ours keep ankles flat, but the model still keys on the arms.
+- **Sit-ups → push-ups:** Our sit-ups keep ankles ~−1.2 below mid-hip (legs extended on the floor); MM-Fit sit-ups put ankles near the hip line. That floor framing plus noisy end-of-set motion overlaps the push-up wrist band.
+- **Dumbbell rows → push-ups:** Ours are strongly one-sided (one wrist oscillating below the hip, the other flat) — body-horizontal row from the side. MM-Fit rows are more bilateral; the low active wrist looks like a push-up support arm.
+
+Systematic, not random noise: camera view and exercise variant differ from MM-Fit.
+
+## LOPO own adaptation (separate experiment)
+
+Fine-tune pose-only transformer on MM-Fit train + one person's own eval sets; test on the other person. No threshold tuning on the test person. **Zero-shot remains the main RQ4 number.**
+
+| Adapt on | Test on | n test sets | Zero-shot set acc | LOPO set acc | Checkpoint |
+|---|---|---:|---:|---:|---|
+| yassine | partner | 8 | 0.625 | **0.625** | `m1_transformer_pose_lopo_partner.pt` |
+| partner | yassine | 12 | 0.75 | **0.917** | `m1_transformer_pose_lopo_yassine.pt` |
+
+n = 8 (partner) / 12 (yassine) eval sets. Metrics: `C:/Users/yassi/OneDrive/Bureau/projet DL BIG DATA/experiments/20261110_m1_lopo_own_summary/metrics.json`.

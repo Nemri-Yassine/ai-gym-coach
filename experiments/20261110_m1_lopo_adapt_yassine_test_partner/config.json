@@ -1,0 +1,24 @@
+{
+  "adapt_person": "yassine",
+  "test_person": "partner",
+  "epochs": 8,
+  "lr": 0.0001,
+  "n_mmfit": 8000,
+  "n_own": 163,
+  "own_sets": [
+    "yassine/2026-11-10_s007/set01",
+    "yassine/2026-11-10_PUHSUP2/set01",
+    "yassine/2026-11-10_JUMPJACK/set01",
+    "yassine/2026-11-10_DUMBSHOULD/set01",
+    "yassine/2026-11-10_DUMBSHOULD/set02",
+    "yassine/2026-11-10_SQUAT/set01",
+    "yassine/2026-11-10_SQUAT/set02",
+    "yassine/2026-11-10_TRICEPS/set01",
+    "yassine/2026-11-10_TRICEPS/set02",
+    "yassine/2026-11-10_TRICEPS/set03",
+    "yassine/2026-11-10_TRICEPS/set04",
+    "yassine/2026-11-10_DUMBLLROWS/set01"
+  ],
+  "seed": 42,
+  "git_commit": "4704c8a4fcd6379dbc4eb6aed22a407429bf9985"
+}

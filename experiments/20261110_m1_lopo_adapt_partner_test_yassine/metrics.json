@@ -1,0 +1,165 @@
+{
+  "adapt_person": "partner",
+  "test_person": "yassine",
+  "n_own_adapt_windows": 126,
+  "n_own_adapt_sets": 8,
+  "zero_shot": {
+    "n_sets": 12,
+    "set_accuracy": 0.75,
+    "set_correct": 9,
+    "preds": [
+      {
+        "key": "yassine/2026-11-10_s007/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_PUHSUP2/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_JUMPJACK/set01",
+        "truth": "jumping_jacks",
+        "pred": "jumping_jacks",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_DUMBSHOULD/set01",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_DUMBSHOULD/set02",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_SQUAT/set01",
+        "truth": "squats",
+        "pred": "squats",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_SQUAT/set02",
+        "truth": "squats",
+        "pred": "squats",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set01",
+        "truth": "tricep_extensions",
+        "pred": "no_exercise_detected",
+        "ok": false
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set02",
+        "truth": "tricep_extensions",
+        "pred": "no_exercise_detected",
+        "ok": false
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set03",
+        "truth": "bicep_curls",
+        "pred": "bicep_curls",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set04",
+        "truth": "bicep_curls",
+        "pred": "bicep_curls",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_DUMBLLROWS/set01",
+        "truth": "dumbbell_rows",
+        "pred": "pushups",
+        "ok": false
+      }
+    ]
+  },
+  "adapted": {
+    "n_sets": 12,
+    "set_accuracy": 0.917,
+    "set_correct": 11,
+    "preds": [
+      {
+        "key": "yassine/2026-11-10_s007/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_PUHSUP2/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_JUMPJACK/set01",
+        "truth": "jumping_jacks",
+        "pred": "jumping_jacks",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_DUMBSHOULD/set01",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_DUMBSHOULD/set02",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_SQUAT/set01",
+        "truth": "squats",
+        "pred": "squats",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_SQUAT/set02",
+        "truth": "squats",
+        "pred": "squats",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set01",
+        "truth": "tricep_extensions",
+        "pred": "tricep_extensions",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set02",
+        "truth": "tricep_extensions",
+        "pred": "tricep_extensions",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set03",
+        "truth": "bicep_curls",
+        "pred": "bicep_curls",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_TRICEPS/set04",
+        "truth": "bicep_curls",
+        "pred": "bicep_curls",
+        "ok": true
+      },
+      {
+        "key": "yassine/2026-11-10_DUMBLLROWS/set01",
+        "truth": "dumbbell_rows",
+        "pred": "pushups",
+        "ok": false
+      }
+    ]
+  },
+  "checkpoint": "m1_transformer_pose_lopo_yassine.pt"
+}

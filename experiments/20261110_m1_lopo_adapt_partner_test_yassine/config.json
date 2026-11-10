@@ -1,0 +1,20 @@
+{
+  "adapt_person": "partner",
+  "test_person": "yassine",
+  "epochs": 8,
+  "lr": 0.0001,
+  "n_mmfit": 8000,
+  "n_own": 126,
+  "own_sets": [
+    "partner/2026-11-10_s007/set01",
+    "partner/2026-11-10_PUSHUP/set01",
+    "partner/2026-11-10_EX3IHEB/set01",
+    "partner/2026-11-10_SHOULDERPRESS/set01",
+    "partner/2026-11-10_SHOULDERDUMB2/set01",
+    "partner/2026-11-10_s01/set01",
+    "partner/2026-11-10_s01/set02",
+    "partner/2026-11-10_s01/set03"
+  ],
+  "seed": 42,
+  "git_commit": "4704c8a4fcd6379dbc4eb6aed22a407429bf9985"
+}
