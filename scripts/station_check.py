@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from awc.config import STATION_CERT_FILE, STATION_KEY_FILE, STATION_PORT  # noqa: E402
-from awc.station.netutil import firewall_rule_cmd, lan_ips, phone_url, qr_data_url  # noqa: E402
+from awc.station.netutil import (  # noqa: E402
+    ensure_certs, firewall_rule_cmd, lan_ips, phone_url, qr_data_url, station_pin,
+)
 
 
 def check(name, ok, fix=""):
@@ -36,18 +38,34 @@ def main(argv=None):
 
     results = []
     ips = lan_ips()
-    url = phone_url(ips[0] if ips else "127.0.0.1")
+    url = phone_url(ips[0] if ips else "127.0.0.1", station_pin())
     print("LAN IPs:", ", ".join(ips))
     print("Phone URL:", url)
     qr = qr_data_url(url)
     print("QR data URL length:", len(qr), "(open the control page for the image)")
     print("Firewall command:\n ", firewall_rule_cmd())
 
+    try:
+        _c, _k, names = ensure_certs()  # re-issues for new IPs (same root CA)
+        cert_ok = all(ip in names for ip in ips)
+    except SystemExit as exc:
+        cert_ok, names = False, [str(exc)]
     results.append(check(
-        "mkcert cert files",
-        STATION_CERT_FILE.is_file() and STATION_KEY_FILE.is_file(),
-        f"run: mkcert -install && mkcert -cert-file {STATION_CERT_FILE} -key-file {STATION_KEY_FILE} "
-        f"{' '.join(ips + ['localhost', '127.0.0.1'])}",
+        "certificate covers every laptop IP + iPhone hotspot range",
+        cert_ok and STATION_CERT_FILE.is_file() and STATION_KEY_FILE.is_file(),
+        "put mkcert.exe in C:/awc_tmp/bin/ and re-run",
+    ))
+
+    import subprocess
+    fw = subprocess.run(["netsh", "advfirewall", "firewall", "show", "rule", f"name=AWC Gym Station {STATION_PORT}"],
+                        capture_output=True, text=True).stdout
+    profiles = " ".join(line for line in fw.splitlines() if "Profiles" in line or "Profils" in line)
+    fw_any = bool(fw) and ("Domain,Private,Public" in profiles.replace(" ", "") or "Any" in profiles
+                           or "Public" in profiles)
+    results.append(check(
+        f"firewall rule allows port {STATION_PORT} on public networks too ({profiles.strip() or 'no rule'})",
+        fw_any,
+        "Admin PowerShell: " + firewall_rule_cmd() + "  (hotspot / gym Wi-Fi is usually a Public network)",
     ))
 
     sock_ok = False

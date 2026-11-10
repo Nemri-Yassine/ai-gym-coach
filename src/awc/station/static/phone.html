@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B1016">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>AWC Phone · Gym Station</title>
 <style>
 :root{--bg:#0B1016;--panel:#141C25;--line:#26313C;--ink:#EEF2F6;--muted:#8C9AA7;--accent:#7393FF;--rec:#FF5A5F;--ok:#4CC487;--warn:#EFB043;--f:system-ui,-apple-system,sans-serif}
@@ -12,16 +13,22 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1
 .wrap{max-width:560px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 h1{font:800 22px/1.1 system-ui;margin:0} h1 b{color:var(--accent)}
 .sub{color:var(--muted);font-size:14px;margin:0}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .btn{border:0;border-radius:12px;padding:18px;font-weight:800;font-size:18px;background:var(--accent);color:#0B1016;width:100%}
+.btn.small{padding:12px;font-size:15px;background:var(--line);color:var(--ink)}
 .btn:disabled{opacity:.4}
-.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;max-height:55vh}
-.cam video{width:100%;height:100%;object-fit:cover;display:block}
-.hud{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;pointer-events:none}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;background:none;border:0;padding:12px 8px;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0B1016}
+.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;max-height:60vh}
+.cam video{width:100%;height:100%;object-fit:contain;display:block}
+.hud{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;gap:6px;pointer-events:none}
 .pill{background:rgba(11,16,22,.75);border-radius:999px;padding:6px 12px;font:700 13px ui-monospace,monospace}
 .pill.rec{background:var(--rec);color:#fff}
+.pill.ok{background:var(--ok);color:#0B1016}
 .warn{border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:10px;font-size:14px}
 .status{font:13px ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
+.lbl{font:700 11px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 canvas{display:none}
 video#wake{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
 </style>
@@ -30,213 +37,301 @@ video#wake{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none}
 <main class="wrap">
   <div>
     <h1>AWC <b>Phone</b></h1>
-    <p class="sub">Laptop controls start/stop. Keep this screen open.</p>
+    <p class="sub">Each set is sent live to the laptop and saved there. The laptop controls start / stop.</p>
   </div>
-  <div class="warn" id="warn">Don't lock the phone / don't switch apps while filming.</div>
-  <div class="card">
+  <div class="warn" id="warn">Keep this page open: don't lock the phone or switch apps while the session runs.</div>
+  <div class="card" id="setupCard">
+    <span class="lbl">Frame rate (choose before the camera starts)</span>
+    <div class="seg" id="fpsSeg">
+      <button data-v="24" aria-pressed="false">24</button>
+      <button data-v="30" aria-pressed="true">30</button>
+      <button data-v="60" aria-pressed="false">60</button>
+    </div>
+    <p class="sub">Use <b>30</b> for this project.</p>
     <button class="btn" id="connectCam">Connect camera</button>
-    <p class="status" id="line">waiting for camera tap…</p>
   </div>
   <div class="cam" id="camBox" hidden>
     <video id="preview" autoplay playsinline muted></video>
-    <div class="hud"><span class="pill" id="pill">idle</span><span class="pill" id="batt">batt —</span></div>
+    <div class="hud"><span class="pill" id="pill">idle</span><span class="pill" id="net">offline</span><span class="pill" id="batt">batt —</span></div>
   </div>
+  <p class="status" id="line">waiting for camera tap…</p>
+  <button class="btn small" id="saveCopy" hidden>Also save last set on this phone</button>
 </main>
 <video id="wake" muted playsinline loop></video>
 <canvas id="cv"></canvas>
 <script>
 "use strict";
 const $ = s => document.querySelector(s);
+const PIN = new URLSearchParams(location.search).get("pin") || (document.cookie.match(/awc_pin=(\d+)/)||[])[1] || "";
 const S = {
-  stream: null, recorder: null, mime: "", ws: NoneLike(),
-  setIndex: null, seq: 0, pending: new Map(), frames: [],
-  recording: false, chunksSent: 0, wake: null,
+  stream: null, recorder: null, mime: "", ws: NoneLike(), fps: 30,
+  setIndex: null, seq: 0, frames: [], recStart: null, recording: false,
+  queue: [], pumping: false, uploadedBytes: 0, lastSet: null, curBlobs: [],
+  pc: null, jpegOn: false, jpegFps: 10, jpegTimer: null, wake: null, battery: null,
 };
-function NoneLike(){ return {readyState:3, send(){}, close(){}}; }
-
+function NoneLike(){ return {readyState:3, send(){}, close(){}, bufferedAmount:0}; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 function setLine(t){ $("#line").textContent = t; }
+function wsSend(o){ if (S.ws.readyState === 1) { S.ws.send(JSON.stringify(o)); return true; } return false; }
 function wsUrl(){
   const u = new URL(location.href);
   u.protocol = u.protocol === "https:" ? "wss:" : "ws:";
-  u.pathname = "/ws/phone"; u.search = ""; u.hash = "";
+  u.pathname = "/ws/phone"; u.search = PIN ? "?pin=" + PIN : ""; u.hash = "";
   return u.toString();
 }
+
+// ---------------------------------------------------------------- screen awake
 async function wakeLock(){
   try { S.wake = await navigator.wakeLock?.request("screen"); } catch(e) {}
-  // muted looping video fallback
   const w = $("#wake");
-  if (!S.wake && w.captureStream) {
-    const c = document.createElement("canvas"); c.width=2; c.height=2;
-    c.getContext("2d").fillRect(0,0,2,2);
-    w.srcObject = c.captureStream(1);
-    w.play().catch(()=>{});
+  if (!S.wake && !w.srcObject) {
+    const c = document.createElement("canvas"); c.width = 2; c.height = 2;
+    c.getContext("2d").fillRect(0, 0, 2, 2);
+    if (c.captureStream) { w.srcObject = c.captureStream(1); w.play().catch(()=>{}); }
   }
 }
-document.addEventListener("visibilitychange", () => { if (document.visibilityState==="visible") wakeLock(); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") wakeLock(); });
+
+$("#fpsSeg").onclick = e => {
+  const b = e.target.closest("button"); if (!b || S.stream) return;
+  S.fps = +b.dataset.v;
+  [...$("#fpsSeg").children].forEach(x => x.setAttribute("aria-pressed", x === b));
+};
 
 function pickMime(){
   return ["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"]
     .find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
 }
+function camSettings(){ return S.stream?.getVideoTracks()?.[0]?.getSettings?.() || {}; }
 
 $("#connectCam").onclick = async () => {
   try {
     S.stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 },
+               frameRate: { ideal: S.fps, max: S.fps } },
     });
     const v = $("#preview"); v.srcObject = S.stream; await v.play().catch(()=>{});
     S.mime = pickMime();
-    $("#camBox").hidden = false; $("#connectCam").disabled = true;
+    $("#camBox").hidden = false; $("#setupCard").hidden = true;
     await wakeLock();
     connectWs();
-    startPreviewLoop();
     batteryLoop();
-    setLine("camera on · connecting to laptop…");
+    const st = camSettings();
+    setLine(`camera ${st.width||"?"}×${st.height||"?"} @ ${Math.round(st.frameRate||0)||"?"} fps · connecting to laptop…`);
   } catch (e) {
-    setLine("camera error: " + (e.message || e.name));
+    setLine("camera error: " + (e.message || e.name) + "\nIs this page on https and the certificate trusted?");
   }
 };
 
+// ---------------------------------------------------------------- websocket
 function connectWs(){
   const ws = new WebSocket(wsUrl());
   S.ws = ws;
   ws.onopen = () => {
-    const st = S.stream?.getVideoTracks()?.[0]?.getSettings?.() || {};
-    ws.send(JSON.stringify({
-      type: "hello", ua: navigator.userAgent, mime: S.mime,
-      resolution: `${st.width||"?"}x${st.height||"?"}`, model: navigator.userAgent,
-      battery: S.battery,
-    }));
-    setLine(statusText());
+    const st = camSettings();
+    wsSend({ type: "hello", ua: navigator.userAgent, mime: S.mime,
+             resolution: `${st.width||"?"}x${st.height||"?"}`,
+             fps_requested: S.fps, fps_actual: st.frameRate || null, battery: S.battery });
+    paint();
+    pump();
   };
-  ws.onclose = () => { setLine("disconnected · retrying…"); setTimeout(connectWs, 1500); };
-  ws.onmessage = ev => {
+  ws.onclose = ev => {
+    paint();
+    if (ev.code === 4401) { setLine("wrong PIN — reopen the link from the laptop QR code"); return; }
+    if (ev.code === 4000) return; // replaced by a newer tab
+    setTimeout(connectWs, 1000);
+  };
+  ws.onmessage = async ev => {
     let msg; try { msg = JSON.parse(ev.data); } catch(e) { return; }
-    if (msg.type === "ping") {
-      ws.send(JSON.stringify({ type: "pong", t0: msg.t0, phone_ts: Date.now() }));
-    } else if (msg.type === "start_set") {
-      startSet(msg.set);
-    } else if (msg.type === "end_set") {
-      endSet();
-    } else if (msg.type === "ack_chunk") {
-      S.pending.delete(msg.seq);
-    } else if (msg.type === "set_done_ack") {
-      setLine(statusText() + ` · upload ${msg.complete ? "complete" : "waiting chunks"}`);
+    switch (msg.type) {
+      case "ping": wsSend({ type: "pong", t0: msg.t0, phone_ts: Date.now() }); break;
+      case "start_set": startSet(msg.set); break;
+      case "end_set": endSet(); break;
+      case "rtc_request": startRtc(); break;
+      case "rtc_answer": try { await S.pc?.setRemoteDescription({ type: "answer", sdp: msg.sdp }); } catch(e) {} break;
+      case "rtc_ice": try { if (msg.candidate) await S.pc?.addIceCandidate(msg.candidate); } catch(e) {} break;
+      case "jpeg": setJpeg(!!msg.on, msg.fps || 10); break;
     }
   };
 }
 
-function statusText(){
-  const st = S.ws.readyState === 1 ? "connected" : "offline";
-  const rec = S.recording ? `recording set ${S.setIndex}` : "idle";
-  return `${st} · ${rec} · pending ${S.pending.size}`;
+function paint(){
+  const on = S.ws.readyState === 1;
+  $("#net").textContent = on ? "laptop ✓" : "offline";
+  $("#net").className = "pill" + (on ? " ok" : "");
+  const pend = S.queue.length;
+  const rec = S.recording ? `REC set ${S.setIndex}` : (pend ? `uploading set ${S.lastSet?.set ?? ""}` : "idle");
+  $("#pill").textContent = rec;
+  $("#pill").className = "pill" + (S.recording ? " rec" : "");
+  const st = camSettings();
+  setLine(`${on ? "connected" : "offline (will retry)"} · ${rec} · ${Math.round(st.frameRate||S.fps)} fps`
+    + ` · to upload: ${pend} · sent ${(S.uploadedBytes/1e6).toFixed(1)} MB`
+    + (S.pc ? ` · live view: ${S.pc.connectionState}` : "") + (S.jpegOn ? " · live view: images" : ""));
 }
+setInterval(paint, 1000);
 
+// ---------------------------------------------------------------- recording + upload
 function startSet(n){
-  if (!S.stream) return;
-  S.setIndex = n; S.seq = 0; S.pending.clear(); S.frames = []; S.chunksSent = 0; S.recording = true;
-  S.phoneStart = Date.now();
-  const opts = S.mime ? { mimeType: S.mime, videoBitsPerSecond: 5e6 } : { videoBitsPerSecond: 5e6 };
-  const rec = new MediaRecorder(S.stream, opts);
-  rec.ondataavailable = async e => {
+  if (!S.stream) { wsSend({ type: "rec_error", set: n, detail: "camera not started" }); return; }
+  if (S.recorder) endSet();
+  S.setIndex = n; S.seq = 0; S.frames = []; S.recStart = null; S.curBlobs = []; S.recording = true;
+  let rec;
+  try {
+    const opts = S.mime ? { mimeType: S.mime, videoBitsPerSecond: 5e6 } : { videoBitsPerSecond: 5e6 };
+    rec = new MediaRecorder(S.stream, opts);
+  } catch (e) {
+    S.recording = false;
+    wsSend({ type: "rec_error", set: n, detail: String(e.message || e) });
+    return;
+  }
+  const setNo = n;
+  rec.onstart = () => {
+    S.recStart = Date.now();
+    wsSend({ type: "rec_started", set: setNo, phone_ts: S.recStart });
+  };
+  rec.ondataavailable = e => {
     if (!e.data || !e.data.size) return;
     const seq = S.seq++;
-    const buf = await e.data.arrayBuffer();
-    S.pending.set(seq, buf);
-    await uploadChunk(seq, buf);
+    S.curBlobs.push(e.data);
+    S.queue.push({ kind: "chunk", set: setNo, seq, blob: e.data });
+    pump();
   };
+  rec.onerror = e => wsSend({ type: "rec_error", set: setNo, detail: String(e.error || e) });
   rec.onstop = () => {
     S.recording = false;
-    flushFrames();
-    if (S.ws.readyState === 1) {
-      S.ws.send(JSON.stringify({
-        type: "set_done", set: S.setIndex, n_chunks: S.seq,
-        phone_start_ms: S.phoneStart, phone_end_ms: Date.now(),
-      }));
-    }
-    $("#pill").textContent = `set ${S.setIndex} · done`;
-    $("#pill").className = "pill";
-    setLine(statusText());
+    const frames = S.frames.slice();
+    let fpsActual = null;
+    if (frames.length > 2) fpsActual = (frames.length - 1) / ((frames[frames.length-1] - frames[0]) / 1000);
+    S.queue.push({ kind: "done", set: setNo, body: {
+      n_chunks: S.seq, phone_rec_start_ms: S.recStart, phone_end_ms: Date.now(),
+      frames, fps_actual: fpsActual ? +fpsActual.toFixed(2) : null, mime: rec.mimeType || S.mime,
+    }});
+    S.lastSet = { set: setNo, blobs: S.curBlobs, type: rec.mimeType || S.mime || "video/mp4" };
+    $("#saveCopy").hidden = false;
+    pump(); paint();
   };
   rec.start(1000);
   S.recorder = rec;
-  frameLoop();
-  $("#pill").textContent = `REC set ${n}`;
-  $("#pill").className = "pill rec";
-  setLine(statusText());
+  frameLoop(setNo);
+  paint();
 }
 
 function endSet(){
   if (!S.recorder) return;
   try { S.recorder.requestData?.(); } catch(e) {}
-  S.recorder.stop();
+  try { S.recorder.stop(); } catch(e) {}
   S.recorder = null;
 }
 
-async function uploadChunk(seq, buf){
-  const url = `/api/upload/${S.setIndex}/${seq}`;
-  for (let attempt = 0; attempt < 8; attempt++) {
-    try {
-      const res = await fetch(url, { method: "POST", body: buf, headers: { "Content-Type": "application/octet-stream" } });
-      if (res.ok) {
-        const j = await res.json();
-        S.pending.delete(seq);
-        S.chunksSent++;
-        setLine(statusText());
-        return j;
-      }
-    } catch (e) {}
-    await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
-  }
-}
-
-function frameLoop(){
+function frameLoop(setNo){
   const v = $("#preview");
   if (!v.requestVideoFrameCallback) return;
-  const epoch = t => Math.round(performance.timeOrigin + t);
+  const epoch = t => performance.timeOrigin + t;
   const cb = (now, meta) => {
-    if (!S.recording) return;
-    S.frames.push(epoch(meta.captureTime ?? meta.expectedDisplayTime ?? now));
-    if (S.frames.length >= 30) flushFrames();
+    if (!S.recording || S.setIndex !== setNo) return;
+    S.frames.push(Math.round(epoch(meta.captureTime ?? meta.expectedDisplayTime ?? now)));
     v.requestVideoFrameCallback(cb);
   };
   v.requestVideoFrameCallback(cb);
 }
-function flushFrames(){
-  if (!S.frames.length || S.ws.readyState !== 1) return;
-  S.ws.send(JSON.stringify({ type: "frames", set: S.setIndex, frames: S.frames.slice() }));
-  S.frames = [];
+
+async function pump(){
+  if (S.pumping) return;
+  S.pumping = true;
+  let wait = 300;
+  while (S.queue.length) {
+    const it = S.queue[0];
+    let ok = false;
+    try {
+      let res;
+      if (it.kind === "chunk") {
+        res = await fetch(`/api/upload/${it.set}/${it.seq}`, { method: "POST", body: it.blob,
+          headers: { "Content-Type": "application/octet-stream", "X-AWC-Pin": PIN } });
+        if (res.ok) S.uploadedBytes += it.blob.size;
+      } else {
+        res = await fetch(`/api/phone/set_done/${it.set}`, { method: "POST", body: JSON.stringify(it.body),
+          headers: { "Content-Type": "application/json", "X-AWC-Pin": PIN } });
+      }
+      ok = res.ok;
+      if (res.status === 401) setLine("wrong PIN — reopen the link from the laptop QR code");
+    } catch (e) { ok = false; }
+    if (ok) { S.queue.shift(); wait = 300; }
+    else { await sleep(wait); wait = Math.min(wait * 2, 3000); }
+    paint();
+  }
+  S.pumping = false;
 }
 
-function startPreviewLoop(){
+$("#saveCopy").onclick = () => {
+  if (!S.lastSet) return;
+  const ext = S.lastSet.type.includes("mp4") ? "mp4" : "webm";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(S.lastSet.blobs, { type: S.lastSet.type }));
+  a.download = `awc_set${String(S.lastSet.set).padStart(2, "0")}.${ext}`;
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+// ---------------------------------------------------------------- live view: WebRTC (smooth)
+async function startRtc(){
+  if (!S.stream || !window.RTCPeerConnection) { setJpeg(true, 10); return; }
+  try { S.pc?.close(); } catch(e) {}
+  const pc = new RTCPeerConnection({ iceServers: [] });
+  S.pc = pc;
+  const track = S.stream.getVideoTracks()[0];
+  const sender = pc.addTrack(track, S.stream);
+  pc.onicecandidate = e => wsSend({ type: "rtc_ice", candidate: e.candidate ? e.candidate.toJSON() : null });
+  pc.onconnectionstatechange = async () => {
+    paint();
+    if (pc.connectionState === "connected") {
+      setJpeg(false);
+      try {
+        const p = sender.getParameters();
+        p.encodings = p.encodings && p.encodings.length ? p.encodings : [{}];
+        p.encodings[0].maxBitrate = 2_000_000;
+        p.encodings[0].maxFramerate = 30;
+        p.encodings[0].scaleResolutionDownBy = 1.5;
+        p.degradationPreference = "maintain-framerate";
+        await sender.setParameters(p);
+      } catch(e) {}
+    }
+  };
+  try {
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    wsSend({ type: "rtc_offer", sdp: pc.localDescription.sdp });
+  } catch (e) { setJpeg(true, 10); }
+}
+
+// ---------------------------------------------------------------- live view fallback: JPEG frames
+function setJpeg(on, fps){
+  S.jpegOn = on; if (fps) S.jpegFps = fps;
+  clearInterval(S.jpegTimer); S.jpegTimer = null;
+  if (!on) return;
   const v = $("#preview"), c = $("#cv"), g = c.getContext("2d");
-  setInterval(() => {
-    if (!S.stream || S.ws.readyState !== 1) return;
-    const w = 480, h = Math.round(480 * (v.videoHeight || 720) / (v.videoWidth || 1280));
-    c.width = w; c.height = h;
+  S.jpegTimer = setInterval(() => {
+    if (!S.stream || S.ws.readyState !== 1 || S.ws.bufferedAmount > 150_000) return;
+    const vw = v.videoWidth || 1280, vh = v.videoHeight || 720;
+    const w = 480, h = Math.round(w * vh / vw);
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
     g.drawImage(v, 0, 0, w, h);
     c.toBlob(async blob => {
-      if (!blob) return;
-      const buf = new Uint8Array(await blob.arrayBuffer());
-      let bin = "";
-      for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-      const b64 = btoa(bin);
-      try { S.ws.send(JSON.stringify({ type: "preview", jpeg_b64: b64 })); } catch(e) {}
-    }, "image/jpeg", 0.6);
-  }, 250);
+      if (!blob || S.ws.readyState !== 1) return;
+      try { S.ws.send(await blob.arrayBuffer()); } catch(e) {}
+    }, "image/jpeg", 0.55);
+  }, Math.round(1000 / S.jpegFps));
 }
 
 async function batteryLoop(){
   try {
     const b = await navigator.getBattery?.();
     if (!b) return;
-    const paint = () => {
+    const show = () => {
       S.battery = Math.round(b.level * 100);
       $("#batt").textContent = `batt ${S.battery}%`;
-      if (S.ws.readyState === 1) S.ws.send(JSON.stringify({ type: "status", battery: S.battery }));
+      wsSend({ type: "status", battery: S.battery });
     };
-    paint(); b.addEventListener("levelchange", paint);
+    show(); b.addEventListener("levelchange", show);
   } catch(e) {}
 }
 </script>

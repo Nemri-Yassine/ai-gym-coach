@@ -110,7 +110,7 @@ def test_station_api_smoke(tmp_path: Path, monkeypatch):
     RUNTIME.pending_labels = None
     RUNTIME.command_q.clear()
 
-    client = TestClient(create_app())
+    client = TestClient(create_app(pin="1234"))
     assert client.get("/").status_code == 200
     assert client.get("/phone").status_code == 200
     r = client.post("/api/session/start", json={
@@ -118,7 +118,7 @@ def test_station_api_smoke(tmp_path: Path, monkeypatch):
     })
     assert r.status_code == 200
     assert r.json()["next_set"] == 1
-    r2 = client.post("/api/set/start", json={})
+    r2 = client.post("/api/set/start", json={"allow_no_phone": True})
     assert r2.status_code == 200
     assert RUNTIME.recording is True
     assert any(c.get("type") == "start_set" for c in RUNTIME.command_q) or True
@@ -131,3 +131,101 @@ def test_recordings_plank_not_in_m1_classes():
 
     assert "plank" in rec.EXERCISES
     assert "plank" not in MMFIT_CLASSES
+
+
+def _reset_runtime():
+    from awc.station.state import RUNTIME
+
+    RUNTIME.session = None
+    RUNTIME.recording = False
+    RUNTIME.pending_labels = None
+    RUNTIME.upload = {}
+    RUNTIME.command_q.clear()
+    return RUNTIME
+
+
+def test_station_pin_guard():
+    from fastapi.testclient import TestClient
+
+    from awc.station.app import create_app
+
+    app = create_app(pin="4321")
+    phone = TestClient(app, client=("192.168.1.50", 50000))
+    assert phone.get("/phone").status_code == 401  # PIN page
+    assert phone.get("/phone?pin=4321").status_code == 200
+    assert phone.get("/").status_code == 403  # control page is laptop-only
+    assert phone.post("/api/session/start", json={}).status_code == 403
+    assert phone.post("/api/upload/1/0", content=b"x").status_code == 401
+    assert phone.post("/api/upload/1/0", content=b"x", headers={"X-AWC-Pin": "4321"}).status_code == 200
+
+
+def _make_fmp4(path: Path, seconds=2, fps=30):
+    import subprocess
+
+    import imageio_ffmpeg
+
+    cmd = [imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-loglevel", "error", "-f", "lavfi",
+           "-i", f"testsrc=size=320x240:rate={fps}", "-t", str(seconds), "-c:v", "libx264",
+           "-pix_fmt", "yuv420p", "-movflags", "frag_keyframe+empty_moov+default_base_moof",
+           "-frag_duration", "1000000", str(path)]
+    subprocess.run(cmd, check=True, capture_output=True)
+    return path.read_bytes()
+
+
+def test_station_upload_flow_real_fmp4(tmp_path: Path, monkeypatch):
+    """Phone uploads fragmented-MP4 pieces out of order + a retry; set_done after the
+    chunks → playable remuxed mp4, frames_setNN.csv on the laptop clock from video PTS."""
+    from fastapi.testclient import TestClient
+
+    from awc.station.app import create_app
+
+    monkeypatch.setattr(rec, "OWN_DIR", tmp_path)
+    rt = _reset_runtime()
+    raw = _make_fmp4(tmp_path / "src.mp4", seconds=2, fps=30)
+    pieces = [raw[i:i + 40_000] for i in range(0, len(raw), 40_000)]
+
+    client = TestClient(create_app(pin="1111"))
+    r = client.post("/api/session/start", json={"user": "yassine", "session_id": "up1", "date": "2026-11-10"})
+    folder = Path(r.json()["folder"])
+    r = client.post("/api/set/start", json={"allow_no_phone": True})
+    assert r.json()["set"] == 1
+    rt.clock.add(1000.0, 1000.0 + 500 + 5, 1010.0)  # phone clock = laptop + 500 ms
+
+    order = list(range(len(pieces)))[::-1] + [0]  # reversed, then a duplicate retry
+    for seq in order:
+        assert client.post(f"/api/upload/1/{seq}", content=pieces[seq]).status_code == 200
+    assert client.post("/api/set/end").status_code == 200
+    # Save is blocked until the video is complete
+    assert client.post("/api/set/save", json={"exercise": "squats", "reps": 5, "rpe": 7,
+                                              "form_label": "correct"}).status_code == 409
+    rec_start_phone = 1_800_000_000_500.0
+    r = client.post("/api/phone/set_done/1", json={"n_chunks": len(pieces), "phone_rec_start_ms": rec_start_phone,
+                                                   "frames": [rec_start_phone + i * 33.3 for i in range(60)]})
+    assert r.status_code == 200, r.text
+    assert r.json()["frames"] == 60
+    assert abs(r.json()["fps"] - 30) < 0.5
+
+    video = folder / "sets" / "set01.mp4"
+    import cv2
+    cap = cv2.VideoCapture(str(video))
+    assert cap.isOpened()
+    n = 0
+    while cap.grab():
+        n += 1
+    cap.release()
+    assert n == 60
+
+    with (folder / "frames_set01.csv").open(newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) == 60
+    t = [int(x["pc_ts_ms"]) for x in rows]
+    assert t[0] == 1_800_000_000_000  # phone start − 500 ms offset → laptop clock
+    assert all(b > a for a, b in zip(t, t[1:]))
+    assert abs((t[-1] - t[0]) - 59 * 1000 / 30) < 5
+
+    r = client.post("/api/set/save", json={"exercise": "squats", "reps": 5, "rpe": 7, "form_label": "correct"})
+    assert r.status_code == 200 and r.json()["video_ok"]
+    loaded = rec.load(folder)
+    assert len(loaded["sets"]) == 1 and loaded["sets"][0]["video"].endswith("set01.mp4")
+    # next set never reuses an existing video number
+    assert client.get("/api/status").json()["next_set"] == 2

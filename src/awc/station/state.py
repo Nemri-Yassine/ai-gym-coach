@@ -11,13 +11,14 @@ from awc.station.session_io import StationSession
 
 @dataclass
 class Runtime:
-    lock: threading.Lock = field(default_factory=threading.Lock)
+    lock: threading.RLock = field(default_factory=threading.RLock)
     cmd_lock: threading.Lock = field(default_factory=threading.Lock)
     clock: ClockSync = field(default_factory=ClockSync)
     session: StationSession | None = None
     phone_connected: bool = False
     phone_ua: str = ""
     phone_battery: float | None = None
+    phone_info: dict = field(default_factory=dict)  # resolution, fps, mime
     preview_jpeg: bytes | None = None
     preview_ts: float = 0.0
     hr_bpm: float | None = None
@@ -25,11 +26,11 @@ class Runtime:
     hr_source: str = "none"
     hr_status: str = "idle"
     hr_history: list = field(default_factory=list)  # (pc_ts_ms, bpm)
+    hr_drops: int = 0
     recording: bool = False
     current_set: int | None = None
+    rec_confirmed: bool = False  # phone said its MediaRecorder started
     upload: dict = field(default_factory=dict)  # set → {received, acked, pending, done}
-    cam_source: str = "iphone"  # iphone | webcam (Camo/Iriun/DroidCam fallback)
-    webcam_index: int = 0
     pending_labels: dict | None = None  # after set_done, waiting for Save set
     command_q: list = field(default_factory=list)  # commands for phone WS
     last_rtt_ms: float | None = None
@@ -65,19 +66,22 @@ class Runtime:
                 "phone_connected": self.phone_connected,
                 "phone_ua": self.phone_ua,
                 "phone_battery": self.phone_battery,
+                "phone_info": dict(self.phone_info),
                 "recording": self.recording,
+                "rec_confirmed": self.rec_confirmed,
                 "current_set": self.current_set,
-                "upload": dict(self.upload),
+                "upload": {str(k): v for k, v in self.upload.items()},
                 "hr_bpm": self.hr_bpm,
                 "hr_age_s": hr_age,
                 "hr_source": self.hr_source,
                 "hr_status": self.hr_status,
+                "hr_drops": self.hr_drops,
                 "hr_series": list(self.hr_history[-180:]),
                 "clock_offset_ms": offset,
                 "clock_rtt_ms": rtt,
-                "cam_source": self.cam_source,
                 "pending_labels": self.pending_labels,
                 "session": None if self.session is None else str(self.session.folder),
+                "next_set": None if self.session is None else self.session.next_set(),
                 "preview_fresh_ms": (time.time() * 1000 - self.preview_ts) if self.preview_ts else None,
             }
 
