@@ -246,6 +246,19 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
 
     @app.post("/api/set/save")
     def set_save(body: dict = Body(...)):
+        # Reps must be typed (no station default). Empty / missing → 400.
+        reps_raw = body.get("reps", None)
+        if reps_raw in (None, ""):
+            return JSONResponse({"error": "reps required (type the count; no default)"}, status_code=400)
+        try:
+            reps_val = int(reps_raw)
+        except (TypeError, ValueError):
+            return JSONResponse({"error": "reps must be an integer"}, status_code=400)
+        if reps_val < 1:
+            return JSONResponse({"error": "reps must be >= 1"}, status_code=400)
+        rpe_raw = body.get("rpe", None)
+        if rpe_raw in (None, ""):
+            return JSONResponse({"error": "rpe required (no default)"}, status_code=400)
         with RUNTIME.lock:
             sess = RUNTIME.session
             pending = RUNTIME.pending_labels
@@ -272,7 +285,7 @@ def create_app(pin: str | None = None, port: int = STATION_PORT) -> FastAPI:
             }
             sess.save_set_labels(
                 n, body["exercise"], start_ms, end_ms,
-                body["reps"], body["rpe"], body["form_label"], extra,
+                reps_val, body["rpe"], body["form_label"], extra,
             )
             RUNTIME.pending_labels = None
             RUNTIME.current_set = None

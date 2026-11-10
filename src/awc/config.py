@@ -1,4 +1,5 @@
 """Project paths and constants. Every script and module imports paths from here."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -9,6 +10,7 @@ MMFIT_DIR = RAW / "mm-fit"              # w00 … w20, one folder per workout se
 EC3D_DIR = RAW / "ec3d"                 # data_3D.pickle, data.pickle
 OWN_DIR = RAW / "own_recordings"        # our phone + Galaxy Watch 7 sessions (real only)
 OWN_MANIFEST = DATA / "own_manifest.csv"  # note-corrected labels for own recordings (tracked)
+OWN_REPS_VERIFIED = DATA / "own_reps_verified.csv"  # hand-counted reps (tracked; never in data/raw)
 MMFIT_VIDEO_DIR = RAW / "mm-fit-video"  # RGB videos for replay / sync checks
 REPCOUNT_DIR = RAW / "repcount"         # RepCount-A test split (Lance), public gym videos with rep counts
 INTERIM = DATA / "interim"              # synced, cleaned, normalized (Parquet)
@@ -32,11 +34,17 @@ W20_VIDEO_SENSOR_OFFSET = 3.0
 W20_VIDEO_SENSOR_SLOPE = 0.00169
 W20_VIDEO_SENSOR_PIVOT = 2178.0
 
-MODELS = ROOT / "models"                # trained checkpoints
-POSE_MODEL = MODELS / "pose_landmarker_full.task"   # MediaPipe Pose Landmarker (pretrained, downloaded)
+# Checkpoints / experiment folders. Env overrides keep pytest quick-trains out of the real trees.
+_MODELS_REAL = ROOT / "models"
+MODELS = Path(os.environ["AWC_MODELS_DIR"]) if os.environ.get("AWC_MODELS_DIR") else _MODELS_REAL
+EXPERIMENTS = (
+    Path(os.environ["AWC_EXPERIMENTS_DIR"])
+    if os.environ.get("AWC_EXPERIMENTS_DIR")
+    else (ROOT / "experiments")
+)
+POSE_MODEL = _MODELS_REAL / "pose_landmarker_full.task"  # always the real MediaPipe weights
 POSE_MODEL_URL = ("https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
                   "pose_landmarker_full/float16/latest/pose_landmarker_full.task")
-EXPERIMENTS = ROOT / "experiments"      # one folder per experiment: config + metrics
 REPORTS = ROOT / "reports"
 FIGURES = REPORTS / "figures"
 PRESENTATION = ROOT / "presentation"

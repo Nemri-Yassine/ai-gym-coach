@@ -1,23 +1,23 @@
-person,session_folder,set,video,start_ms,end_ms,exercise_button,note,exercise,reps,rpe,form_label,use,label_source,hr_n,hr_coverage,hr_mean,hr_peak,hr_start,hr_end,hr_ok
-partner,2026-11-10_s007,1,sets/set01.mp4,1794335612035,1794335633044,pushups,PUSHU¨IHEB,pushups,10,10,correct,eval,note,0,0.0,,,,,False
-partner,2026-11-10_PUSHUP,1,sets/set01.mp4,1794336083669,1794336103090,pushups,PUSHUP 2,pushups,10,10,correct,eval,note,0,0.0,,,,,False
-partner,2026-11-10_EX3IHEB,1,sets/set01.mp4,1794336347220,1794336361201,jumping_jacks,EX2 JUMP JACKS,jumping_jacks,10,10,correct,eval,note,0,0.0,,,,,False
-partner,2026-11-10_SHOULDERPRESS,1,sets/set01.mp4,1794336646395,1794336673906,dumbbell_shoulder_press,DUMB SHOULD PRESS,dumbbell_shoulder_press,10,10,correct,eval,note,3,0.1786,104.0,106.0,106.0,,False
-partner,2026-11-10_SHOULDERDUMB2,1,sets/set01.mp4,1794337009551,1794337048333,dumbbell_shoulder_press,DUMB SHOULD PRESS,dumbbell_shoulder_press,10,10,correct,eval,note,19,1.0,100.9,105.0,98.0,97.0,True
-partner,2026-11-10_s01,1,sets/set01.mp4,1794337537789,1794337564917,lateral_shoulder_raises,LATERAL,lateral_shoulder_raises,10,10,correct,eval,note,13,1.0,105.1,108.0,108.0,105.0,True
-partner,2026-11-10_s01,2,sets/set02.mp4,1794337693456,1794337726328,tricep_extensions,TRICEPS,tricep_extensions,10,10,correct,eval,note,17,1.0,114.6,121.0,107.0,120.0,True
-partner,2026-11-10_s01,3,sets/set03.mp4,1794338384882,1794338415414,situps,SITUPS,situps,10,10,correct,eval,note,15,1.0,131.8,141.0,144.0,129.0,True
-yassine,2026-11-10_s007,1,sets/set01.mp4,1794335779042,1794335795665,squats,PUSHU¨YASSINE,pushups,10,10,correct,eval,note,2,0.3529,99.0,99.0,,,False
-yassine,2026-11-10_PUHSUP2,1,sets/set01.mp4,1794336176311,1794336192064,,,pushups,,,correct,eval,folder_name,0,0.0,,,,,False
-yassine,2026-11-10_JUMPJACK,1,sets/set01.mp4,1794336437735,1794336455121,,,jumping_jacks,,,correct,eval,folder_name,4,0.6667,114.5,125.0,114.0,127.0,True
-yassine,2026-11-10_DUMBSHOULD,1,sets/set01.mp4,1794336762341,1794336783037,dumbbell_shoulder_press,,dumbbell_shoulder_press,10,10,correct,eval,button,0,0.0,,,,,False
-yassine,2026-11-10_DUMBSHOULD,2,sets/set02.mp4,1794336834181,1794336856990,dumbbell_shoulder_press,DUMB SHOULD PRESS,dumbbell_shoulder_press,10,10,correct,eval,note,0,0.0,,,,,False
-yassine,2026-11-10_SQUAT,1,sets/set01.mp4,1794337191756,1794337217025,squats,SQUAT,squats,10,10,correct,eval,note,13,1.0,121.0,131.0,110.0,129.0,True
-yassine,2026-11-10_SQUAT,2,sets/set02.mp4,1794337405783,1794337429358,squats,SQUAT2,squats,10,10,correct,eval,note,11,1.0,125.3,127.0,122.0,125.0,True
-yassine,2026-11-10_TRICEPS,1,sets/set01.mp4,1794337793930,1794337815888,squats,TRICEPS,tricep_extensions,10,10,correct,eval,note,5,0.5,109.6,111.0,109.0,110.0,True
-yassine,2026-11-10_TRICEPS,2,sets/set02.mp4,1794337842829,1794337866343,tricep_extensions,TRICEP EXTENSION,tricep_extensions,10,10,correct,eval,note,11,1.0,116.9,118.0,117.0,115.0,True
-yassine,2026-11-10_TRICEPS,3,sets/set03.mp4,1794337976138,1794338003030,bicep_curls,BICEPS 1,bicep_curls,10,10,correct,eval,note,13,1.0,115.0,123.0,117.0,105.0,True
-yassine,2026-11-10_TRICEPS,4,sets/set04.mp4,1794338130882,1794338167545,lateral_shoulder_raises,BICEP 2,bicep_curls,10,10,correct,eval,note,18,1.0,124.8,128.0,126.0,120.0,True
-yassine,2026-11-10_DUMBLLROWS,1,sets/set01.mp4,1794338686045,1794338710890,dumbbell_rows,DUMBELL ROWS,dumbbell_rows,10,10,correct,eval,note,0,0.0,,,,,False
-yassine,2026-11-09_s01,1,sets/set01.mp4,1794250963239,1794250975591,lunges,tt,lunges,8,5,correct,test,button,0,0.2308,96.0,96.0,96.0,,False
-yassine,2026-11-10_s01,1,sets/set01.mp4,1794331434432,1794331456324,squats,tt,squats,10,2,correct,test,button,2,0.2727,92.0,93.0,,,False
+person,session_folder,set,video,start_ms,end_ms,exercise_button,note,exercise,reps,reps_typed,reps_source,rpe,form_label,use,label_source,hr_n,hr_coverage,hr_mean,hr_peak,hr_start,hr_end,hr_ok
+partner,2026-11-10_s007,1,sets/set01.mp4,1794335612035,1794335633044,pushups,PUSHU¨IHEB,pushups,10,10,typed_default,10,correct,eval,note,0,0.0,,,,,False
+partner,2026-11-10_PUSHUP,1,sets/set01.mp4,1794336083669,1794336103090,pushups,PUSHUP 2,pushups,10,10,typed_default,10,correct,eval,note,0,0.0,,,,,False
+partner,2026-11-10_EX3IHEB,1,sets/set01.mp4,1794336347220,1794336361201,jumping_jacks,EX2 JUMP JACKS,jumping_jacks,10,10,typed_default,10,correct,eval,note,0,0.0,,,,,False
+partner,2026-11-10_SHOULDERPRESS,1,sets/set01.mp4,1794336646395,1794336673906,dumbbell_shoulder_press,DUMB SHOULD PRESS,dumbbell_shoulder_press,10,10,typed_default,10,correct,eval,note,3,0.1786,104.0,106.0,106.0,,False
+partner,2026-11-10_SHOULDERDUMB2,1,sets/set01.mp4,1794337009551,1794337048333,dumbbell_shoulder_press,DUMB SHOULD PRESS,dumbbell_shoulder_press,10,10,typed_default,10,correct,eval,note,19,1.0,100.9,105.0,98.0,97.0,True
+partner,2026-11-10_s01,1,sets/set01.mp4,1794337537789,1794337564917,lateral_shoulder_raises,LATERAL,lateral_shoulder_raises,10,10,typed_default,10,correct,eval,note,13,1.0,105.1,108.0,108.0,105.0,True
+partner,2026-11-10_s01,2,sets/set02.mp4,1794337693456,1794337726328,tricep_extensions,TRICEPS,tricep_extensions,10,10,typed_default,10,correct,eval,note,17,1.0,114.6,121.0,107.0,120.0,True
+partner,2026-11-10_s01,3,sets/set03.mp4,1794338384882,1794338415414,situps,SITUPS,situps,10,10,typed_default,10,correct,eval,note,15,1.0,131.8,141.0,144.0,129.0,True
+yassine,2026-11-10_s007,1,sets/set01.mp4,1794335779042,1794335795665,squats,PUSHU¨YASSINE,pushups,10,10,typed_default,10,correct,eval,note,2,0.3529,99.0,99.0,,,False
+yassine,2026-11-10_PUHSUP2,1,sets/set01.mp4,1794336176311,1794336192064,,,pushups,,,unknown,,correct,eval,folder_name,0,0.0,,,,,False
+yassine,2026-11-10_JUMPJACK,1,sets/set01.mp4,1794336437735,1794336455121,,,jumping_jacks,,,unknown,,correct,eval,folder_name,4,0.6667,114.5,125.0,114.0,127.0,True
+yassine,2026-11-10_DUMBSHOULD,1,sets/set01.mp4,1794336762341,1794336783037,dumbbell_shoulder_press,,dumbbell_shoulder_press,10,10,typed_default,10,correct,eval,button,0,0.0,,,,,False
+yassine,2026-11-10_DUMBSHOULD,2,sets/set02.mp4,1794336834181,1794336856990,dumbbell_shoulder_press,DUMB SHOULD PRESS,dumbbell_shoulder_press,10,10,typed_default,10,correct,eval,note,0,0.0,,,,,False
+yassine,2026-11-10_SQUAT,1,sets/set01.mp4,1794337191756,1794337217025,squats,SQUAT,squats,10,10,typed_default,10,correct,eval,note,13,1.0,121.0,131.0,110.0,129.0,True
+yassine,2026-11-10_SQUAT,2,sets/set02.mp4,1794337405783,1794337429358,squats,SQUAT2,squats,10,10,typed_default,10,correct,eval,note,11,1.0,125.3,127.0,122.0,125.0,True
+yassine,2026-11-10_TRICEPS,1,sets/set01.mp4,1794337793930,1794337815888,squats,TRICEPS,tricep_extensions,10,10,typed_default,10,correct,eval,note,5,0.5,109.6,111.0,109.0,110.0,True
+yassine,2026-11-10_TRICEPS,2,sets/set02.mp4,1794337842829,1794337866343,tricep_extensions,TRICEP EXTENSION,tricep_extensions,10,10,typed_default,10,correct,eval,note,11,1.0,116.9,118.0,117.0,115.0,True
+yassine,2026-11-10_TRICEPS,3,sets/set03.mp4,1794337976138,1794338003030,bicep_curls,BICEPS 1,bicep_curls,10,10,typed_default,10,correct,eval,note,13,1.0,115.0,123.0,117.0,105.0,True
+yassine,2026-11-10_TRICEPS,4,sets/set04.mp4,1794338130882,1794338167545,lateral_shoulder_raises,BICEP 2,bicep_curls,10,10,typed_default,10,correct,eval,note,18,1.0,124.8,128.0,126.0,120.0,True
+yassine,2026-11-10_DUMBLLROWS,1,sets/set01.mp4,1794338686045,1794338710890,dumbbell_rows,DUMBELL ROWS,dumbbell_rows,10,10,typed_default,10,correct,eval,note,0,0.0,,,,,False
+yassine,2026-11-09_s01,1,sets/set01.mp4,1794250963239,1794250975591,lunges,tt,lunges,8,8,typed_default,5,correct,test,button,0,0.2308,96.0,96.0,96.0,,False
+yassine,2026-11-10_s01,1,sets/set01.mp4,1794331434432,1794331456324,squats,tt,squats,10,10,typed_default,2,correct,test,button,2,0.2727,92.0,93.0,,,False

@@ -77,9 +77,10 @@ def test_write_manifest_roundtrip(tmp_path):
         rows = list(csv.DictReader(f))
     assert len(rows) == len(EXPECTED_CORE)
     assert set(rows[0].keys()) >= {
-        "person", "session_folder", "set", "exercise", "reps", "use",
-        "label_source", "hr_n", "hr_coverage", "hr_ok",
+        "person", "session_folder", "set", "exercise", "reps", "reps_typed",
+        "reps_source", "use", "label_source", "hr_n", "hr_coverage", "hr_ok",
     }
+    assert rows[0]["reps_source"] in ("verified", "typed_default", "unknown")
 
 
 def test_expected_eval_counts():
@@ -92,3 +93,68 @@ def test_expected_eval_counts():
     exercises = {r[4] for r in eval_rows}
     assert len(exercises) == 9
     assert "lunges" not in exercises
+
+
+def test_manifest_prefers_verified_reps():
+    from awc.data.own_manifest import apply_verified_overrides
+
+    rows = [
+        {
+            "person": "yassine",
+            "session_folder": "2026-11-10_SQUAT",
+            "set": 1,
+            "exercise": "squats",
+            "reps": 10,
+            "reps_typed": 10,
+            "reps_source": "typed_default",
+            "label_source": "button",
+        },
+        {
+            "person": "partner",
+            "session_folder": "2026-11-10_s01",
+            "set": 2,
+            "exercise": "pushups",
+            "reps": 10,
+            "reps_typed": 10,
+            "reps_source": "typed_default",
+            "label_source": "button",
+        },
+    ]
+    verified = {
+        ("yassine", "2026-11-10_SQUAT", 1): {
+            "reps_verified": "8",
+            "exercise_verified": "",
+            "cant_tell": "",
+        },
+        ("partner", "2026-11-10_s01", 2): {
+            "reps_verified": "12",
+            "exercise_verified": "bicep_curls",
+            "cant_tell": "",
+        },
+    }
+    apply_verified_overrides(rows, verified)
+    assert rows[0]["reps"] == 8
+    assert rows[0]["reps_source"] == "verified"
+    assert rows[0]["reps_typed"] == 10
+    assert rows[0]["exercise"] == "squats"
+    assert rows[1]["reps"] == 12
+    assert rows[1]["reps_source"] == "verified"
+    assert rows[1]["exercise"] == "bicep_curls"
+    assert rows[1]["label_source"] == "verified"
+
+
+def test_rep_metrics_use_only_verified_rows():
+    """Mirror eval_own_recordings filter: main MAE uses reps_source==verified only."""
+    items = [
+        {"key": "a", "true": 10, "pred": 10, "reps_source": "typed_default"},
+        {"key": "b", "true": 8, "pred": 9, "reps_source": "verified"},
+        {"key": "c", "true": 12, "pred": 12, "reps_source": "verified"},
+        {"key": "d", "true": 10, "pred": 33, "reps_source": "unknown"},
+    ]
+    verified = [r for r in items if r["reps_source"] == "verified"]
+    typed = [r for r in items if r["reps_source"] == "typed_default"]
+    assert len(verified) == 2
+    assert {r["key"] for r in verified} == {"b", "c"}
+    assert len(typed) == 1
+    mae = sum(abs(r["true"] - r["pred"]) for r in verified) / len(verified)
+    assert mae == 0.5

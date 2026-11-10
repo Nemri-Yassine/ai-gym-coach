@@ -28,6 +28,7 @@ from awc.config import (
     OWN_DIR,
     OWN_INTERIM,
     OWN_MANIFEST,
+    OWN_REPS_VERIFIED,
     REPORTS,
     VIDEO_FPS,
 )
@@ -211,16 +212,23 @@ def evaluate(rows: list[dict]) -> dict:
         # Rep counting: oracle exercise + M1 predicted
         finite = segment[np.isfinite(segment).all(axis=(1, 2))]
         n_true = row["reps"]
+        reps_source = row.get("reps_source") or "unknown"
         n_oracle = n_m1 = None
         if len(finite) >= 16:
             n_oracle, _ = count_reps(normalize(finite), exercise=row["exercise"])
             n_m1, _ = count_reps(normalize(finite), exercise=pred_name)
             if n_true is not None:
-                rep_true_ex.append({"key": key, "person": row["person"], "exercise": row["exercise"],
-                                    "true": int(n_true), "pred": int(n_oracle), "mode": "true_ex"})
-                rep_pred_ex.append({"key": key, "person": row["person"], "exercise": row["exercise"],
-                                   "true": int(n_true), "pred": int(n_m1), "mode": "m1_ex",
-                                   "pred_exercise": pred_name})
+                entry = {
+                    "key": key, "person": row["person"], "exercise": row["exercise"],
+                    "true": int(n_true), "pred": int(n_oracle), "mode": "true_ex",
+                    "reps_source": reps_source,
+                }
+                rep_true_ex.append(entry)
+                rep_pred_ex.append({
+                    "key": key, "person": row["person"], "exercise": row["exercise"],
+                    "true": int(n_true), "pred": int(n_m1), "mode": "m1_ex",
+                    "pred_exercise": pred_name, "reps_source": reps_source,
+                })
 
         # Model 2 on squat/lunge/plank reps
         m2_set = []
@@ -334,11 +342,30 @@ def evaluate(rows: list[dict]) -> dict:
             "rows": items,
         }
 
-    # only eval sets with known reps
-    rep_oracle = [r for r in rep_true_ex if any(
-        s["key"] == r["key"] and s["use"] == "eval" for s in set_rows)]
-    rep_m1 = [r for r in rep_pred_ex if any(
-        s["key"] == r["key"] and s["use"] == "eval" for s in set_rows)]
+    # Main rep metrics: verified only. Typed defaults kept separately (provisional).
+    def _eval_reps(items, source=None):
+        out = []
+        for r in items:
+            s = next((x for x in set_rows if x["key"] == r["key"] and x["use"] == "eval"), None)
+            if not s:
+                continue
+            if source is not None and r.get("reps_source") != source:
+                continue
+            out.append(r)
+        return out
+
+    has_verified_file = OWN_REPS_VERIFIED.is_file()
+    if not has_verified_file:
+        print("!" * 72)
+        print("WARNING: data/own_reps_verified.csv missing.")
+        print("Run:  python scripts/review_reps.py")
+        print("Rep MAE numbers are PROVISIONAL (typed station defaults, not counts).")
+        print("!" * 72)
+
+    rep_oracle = _eval_reps(rep_true_ex, source="verified")
+    rep_m1 = _eval_reps(rep_pred_ex, source="verified")
+    rep_oracle_typed = _eval_reps(rep_true_ex, source="typed_default")
+    rep_m1_typed = _eval_reps(rep_pred_ex, source="typed_default")
 
     m2_eval = [r for r in m2_probs if r["use"] == "eval" and r["exercise"] == "squats"]
     m2_all_squats = [r for r in m2_probs if r["exercise"] == "squats"]
@@ -387,6 +414,14 @@ def evaluate(rows: list[dict]) -> dict:
         "rep_counting": {
             "true_exercise": _rep_summary(rep_oracle),
             "m1_exercise": _rep_summary(rep_m1),
+            "typed_default_provisional": {
+                "note": "typed station default (usually 10), NOT a counted ground truth",
+                "true_exercise": _rep_summary(rep_oracle_typed),
+                "m1_exercise": _rep_summary(rep_m1_typed),
+            },
+            "has_verified_file": has_verified_file,
+            "n_verified_eval": len(rep_oracle),
+            "n_typed_eval": len(rep_oracle_typed),
         },
         "m2": {
             "eval_squats": {
@@ -550,19 +585,33 @@ def write_report(result: dict, run_dir: Path):
         "",
         "Confusion: `reports/figures/m1_confusion_own.png`.",
         "",
+    ]
+
+    lines += [
         "## Rep counting",
         "",
-        "No peak-parameter tuning on these sets.",
+        "No peak-parameter tuning on these sets. **Main numbers use hand-verified reps only** "
+        f"(`reps_source=verified`).",
         "",
     ]
-    if rc_t:
+    rc_block = result["rep_counting"]
+    if not rc_block.get("has_verified_file"):
         lines += [
-            f"True exercise: MAE **{rc_t['mae']:.2f}**, exact **{rc_t['exact']*100:.1f}%**, "
+            "> **PROVISIONAL:** `data/own_reps_verified.csv` is missing. "
+            "Run `python scripts/review_reps.py` and count the 22 sets. "
+            "Do not cite typed-default MAE as a result.",
+            "",
+        ]
+    if rc_t and rc_t.get("n"):
+        lines += [
+            f"Verified · true exercise: MAE **{rc_t['mae']:.2f}**, exact **{rc_t['exact']*100:.1f}%**, "
             f"within ±1 **{rc_t['within_1']*100:.1f}%** (n={rc_t['n']}).",
         ]
-    if rc_m:
+    elif rc_block.get("has_verified_file"):
+        lines += ["Verified file present but **0** verified eval sets with counts yet.", ""]
+    if rc_m and rc_m.get("n"):
         lines += [
-            f"M1-predicted exercise: MAE **{rc_m['mae']:.2f}**, exact **{rc_m['exact']*100:.1f}%**, "
+            f"Verified · M1-predicted exercise: MAE **{rc_m['mae']:.2f}**, exact **{rc_m['exact']*100:.1f}%**, "
             f"within ±1 **{rc_m['within_1']*100:.1f}%** (n={rc_m['n']}).",
             "",
             "| Exercise | n | MAE (true ex) |",
@@ -573,6 +622,14 @@ def write_report(result: dict, run_dir: Path):
         lines += ["", "| Person | n | MAE (true ex) |", "|---|---:|---:|"]
         for person, v in (rc_t.get("per_person") or {}).items():
             lines.append(f"| {person} | {v['n']} | {v['mae']:.2f} |")
+    typed = (rc_block.get("typed_default_provisional") or {}).get("true_exercise")
+    if typed and typed.get("n"):
+        lines += [
+            "",
+            f"**Typed default (not a count):** MAE {typed['mae']:.2f}, exact {typed['exact']*100:.1f}%, "
+            f"±1 {typed['within_1']*100:.1f}% (n={typed['n']}). "
+            "Station UI used to default reps=10 — these numbers are **not** ground truth.",
+        ]
     lines += [
         "",
         "Figure: `reports/figures/rep_counting_own.png`.",
@@ -665,6 +722,17 @@ def main(argv=None):
         "rep_counting": {
             "true_exercise": {k: v for k, v in (result["rep_counting"]["true_exercise"] or {}).items() if k != "rows"},
             "m1_exercise": {k: v for k, v in (result["rep_counting"]["m1_exercise"] or {}).items() if k != "rows"},
+            "typed_default_provisional": {
+                "true_exercise": {
+                    k: v for k, v in (
+                        (result["rep_counting"].get("typed_default_provisional") or {})
+                        .get("true_exercise") or {}
+                    ).items() if k != "rows"
+                },
+            },
+            "has_verified_file": result["rep_counting"].get("has_verified_file"),
+            "n_verified_eval": result["rep_counting"].get("n_verified_eval"),
+            "n_typed_eval": result["rep_counting"].get("n_typed_eval"),
         },
         "m2": {k: v for k, v in result["m2"].items() if k != "rows"},
         "wrong_button": result["wrong_button"],
@@ -679,8 +747,16 @@ def main(argv=None):
     m1 = result["model1"].get(result["primary_model"], {})
     print(f"M1 set acc {m1.get('set_accuracy')} CI {m1.get('wilson95')} macro-F1 {m1.get('macro_f1')}")
     rc = result["rep_counting"]["true_exercise"]
-    if rc:
-        print(f"rep MAE {rc['mae']:.2f} exact {rc['exact']:.2f} ±1 {rc['within_1']:.2f} n={rc['n']}")
+    if rc and rc.get("n"):
+        print(f"rep MAE (verified) {rc['mae']:.2f} exact {rc['exact']:.2f} ±1 {rc['within_1']:.2f} n={rc['n']}")
+    else:
+        print("rep MAE (verified): n=0 — run python scripts/review_reps.py")
+    typed = (result["rep_counting"].get("typed_default_provisional") or {}).get("true_exercise")
+    if typed and typed.get("n"):
+        print(
+            f"rep MAE (typed default, not a count) {typed['mae']:.2f} "
+            f"exact {typed['exact']:.2f} ±1 {typed['within_1']:.2f} n={typed['n']}"
+        )
     print(f"M2 P(correct) {result['m2']['eval_squats']}")
     print(f"RUN_DIR={run_dir}")
 

@@ -13,12 +13,13 @@ from pathlib import Path
 
 import numpy as np
 
-from awc.config import OWN_DIR, OWN_MANIFEST
+from awc.config import OWN_DIR, OWN_MANIFEST, OWN_REPS_VERIFIED
 from awc.data.recordings import EXERCISES
 
 MANIFEST_COLUMNS = [
     "person", "session_folder", "set", "video", "start_ms", "end_ms",
-    "exercise_button", "note", "exercise", "reps", "rpe", "form_label",
+    "exercise_button", "note", "exercise", "reps", "reps_typed", "reps_source",
+    "rpe", "form_label",
     "use", "label_source",
     "hr_n", "hr_coverage", "hr_mean", "hr_peak", "hr_start", "hr_end", "hr_ok",
 ]
@@ -377,9 +378,66 @@ def build_rows(root: Path | None = None, print_overrides: bool = True) -> list[d
         for key, before, after in overrides_used:
             print(f"override {key}: {before} → {after}")
 
+    # Typed reps before verification merge
+    for row in rows:
+        typed = row["reps"]
+        row["reps_typed"] = typed
+        if typed in (None, ""):
+            row["reps_source"] = "unknown"
+        else:
+            # Station defaulted to 10 for almost every set — treat typed numbers as provisional
+            # until hand-verified. Source name marks that clearly in reports.
+            row["reps_source"] = "typed_default"
+
+    apply_verified_overrides(rows, print_overrides=print_overrides)
+
     # Stable order matching EXPECTED_CORE then any extras
     order = {(p, f, s): i for i, (p, f, s, *_rest) in enumerate(EXPECTED_CORE)}
     rows.sort(key=lambda r: order.get((r["person"], r["session_folder"], int(r["set"])), 10_000))
+    return rows
+
+
+def _load_verified_file(path: Path | None = None) -> dict[tuple[str, str, int], dict]:
+    path = Path(path) if path is not None else OWN_REPS_VERIFIED
+    if not path.is_file():
+        return {}
+    out = {}
+    for r in _read_csv(path):
+        try:
+            key = (r["person"], r["session_folder"], int(r["set"]))
+        except (KeyError, TypeError, ValueError):
+            continue
+        out[key] = r
+    return out
+
+
+def apply_verified_overrides(
+    rows: list[dict],
+    verified: dict[tuple[str, str, int], dict] | None = None,
+    *,
+    print_overrides: bool = False,
+) -> list[dict]:
+    """Prefer hand-verified reps / exercise from own_reps_verified.csv."""
+    if verified is None:
+        verified = _load_verified_file()
+    for row in rows:
+        key = (row["person"], row["session_folder"], int(row["set"]))
+        v = verified.get(key)
+        if not v:
+            continue
+        cant = str(v.get("cant_tell", "")).lower() in ("1", "true", "yes")
+        if cant:
+            row["reps"] = ""
+            row["reps_source"] = "unknown"
+        elif v.get("reps_verified") not in (None, ""):
+            row["reps"] = int(float(v["reps_verified"]))
+            row["reps_source"] = "verified"
+        ex_v = (v.get("exercise_verified") or "").strip()
+        if ex_v and ex_v != row["exercise"]:
+            if print_overrides:
+                print(f"exercise_verified {key}: {row['exercise']} → {ex_v}")
+            row["exercise"] = ex_v
+            row["label_source"] = "verified"
     return rows
 
 
@@ -406,6 +464,11 @@ def load_manifest(path: Path | None = None) -> list[dict]:
             r["reps"] = int(float(r["reps"]))
         else:
             r["reps"] = None
+        if r.get("reps_typed") not in (None, ""):
+            r["reps_typed"] = int(float(r["reps_typed"]))
+        else:
+            r["reps_typed"] = None
+        r["reps_source"] = (r.get("reps_source") or "unknown").strip() or "unknown"
         if r.get("rpe") not in (None, ""):
             r["rpe"] = int(float(r["rpe"]))
         else:
@@ -420,7 +483,7 @@ def load_manifest(path: Path | None = None) -> list[dict]:
 
 def print_table(rows: list[dict] | None = None) -> None:
     rows = rows if rows is not None else build_rows(print_overrides=False)
-    header = ("person", "folder", "set", "button", "note", "exercise", "reps", "use", "src", "hr_ok", "hr_cov")
+    header = ("person", "folder", "set", "button", "note", "exercise", "reps", "src_reps", "use", "src", "hr_ok", "hr_cov")
     print("\t".join(header))
     for r in rows:
         print("\t".join(str(x) for x in (
@@ -429,6 +492,7 @@ def print_table(rows: list[dict] | None = None) -> None:
             (r.get("note") or "—").replace("\t", " "),
             r["exercise"],
             r["reps"] if r["reps"] not in (None, "") else "(unknown)",
+            r.get("reps_source", ""),
             r["use"], r["label_source"],
             r["hr_ok"], f"{float(r['hr_coverage']):.2f}",
         )))

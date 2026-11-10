@@ -42,6 +42,9 @@ input,select{background:var(--bg);border:1px solid var(--line);border-radius:10p
 .pin{font:800 40px/1 ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
 .rpe{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .rpe button[aria-pressed=true]{background:var(--accent);color:#0B1016}
+.exLive{position:absolute;left:12px;bottom:12px;font-size:1.35rem;font-weight:700;text-transform:capitalize;
+  background:rgba(11,16,22,.72);padding:6px 12px;border-radius:8px;letter-spacing:.02em}
+.live{position:relative}
 .stepper{display:flex;gap:10px;align-items:center}
 .stepper button{width:48px;height:48px;font-size:22px;font-weight:800}
 .stepper b{font-size:30px;min-width:50px;text-align:center}
@@ -110,6 +113,7 @@ input,select{background:var(--bg);border:1px solid var(--line);border-radius:10p
           <canvas id="jpeg" class="hidden"></canvas>
           <div class="msg" id="liveMsg">waiting for the iPhone…</div>
           <div class="badge"><span class="pill" id="recPill">ready</span><span class="pill" id="liveMode">live: —</span><span class="pill" id="timer">0:00</span></div>
+          <div class="exLive" id="exLive">squats</div>
         </div>
         <div class="row" style="margin-top:8px">
           <span class="sub" id="uploadTxt">no set yet</span>
@@ -136,21 +140,27 @@ input,select{background:var(--bg);border:1px solid var(--line);border-radius:10p
     </div>
 
     <div class="card" id="details" style="margin-top:12px" hidden>
-      <div class="lbl">Set #<span id="saveSetN"></span> · <span id="saveEx"></span></div>
+      <div class="lbl">Set #<span id="saveSetN"></span></div>
+      <p style="font-size:1.6rem;font-weight:700;text-transform:capitalize;margin:4px 0 10px" id="saveExBig">squats</p>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn link" id="changeEx">change exercise</button>
+        <span class="sub" id="saveEx" hidden></span>
+      </div>
       <div class="row" style="gap:28px;align-items:flex-start">
         <div>
-          <div class="lbl">Reps</div>
-          <div class="stepper"><button class="btn" id="repMinus">−</button><b id="reps">10</b><button class="btn" id="repPlus">+</button></div>
+          <div class="lbl">Reps (required — count them)</div>
+          <div class="stepper"><button class="btn" id="repMinus">−</button><b id="reps">—</b><button class="btn" id="repPlus">+</button></div>
+          <input type="number" id="repsInput" min="1" max="99" placeholder="type count" style="width:110px;margin-top:6px">
         </div>
         <div style="flex:1;min-width:260px">
-          <div class="lbl">RPE (1 easy · 10 max)</div>
+          <div class="lbl">RPE (1 easy · 10 max) — required, no default</div>
           <div class="rpe" id="rpe"></div>
         </div>
       </div>
       <div class="row" style="margin-top:10px">
         <div><div class="lbl">Form</div><select id="form"></select></div>
         <div><div class="lbl">Weight kg</div><input id="weight" style="width:100px"></div>
-        <div style="flex:1;min-width:160px"><div class="lbl">Note</div><input id="note" style="width:100%"></div>
+        <div style="flex:1;min-width:160px"><div class="lbl">Note</div><input id="note" style="width:100%" placeholder="exercise + anything special"></div>
       </div>
       <div class="row" style="margin-top:12px">
         <button class="btn primary" id="saveSet" disabled>Save set</button>
@@ -173,11 +183,21 @@ input,select{background:var(--bg);border:1px solid var(--line);border-radius:10p
 "use strict";
 const $ = s => document.querySelector(s);
 const S = {
-  exercise: "squats", reps: 10, rpe: null, formBy: {},
+  exercise: "squats", reps: null, rpe: null, formBy: {},
   sessionOn: false, recording: false, setStart: null, restSince: Date.now(),
   pending: null, status: {}, ws: null, pc: null, rtcTimer: null, mode: "none",
   jpegFrames: 0, videoFrames: 0, lastFpsAt: Date.now(), liveFps: 0,
 };
+function paintEx(){
+  const label = S.exercise.replaceAll("_", " ");
+  const el = $("#exLive"); if (el) el.textContent = label;
+  const big = $("#saveExBig"); if (big) big.textContent = label;
+  const sm = $("#saveEx"); if (sm) sm.textContent = label;
+}
+function paintReps(){
+  $("#reps").textContent = S.reps == null ? "—" : S.reps;
+  const inp = $("#repsInput"); if (inp && document.activeElement !== inp) inp.value = S.reps == null ? "" : S.reps;
+}
 const EX = ["squats","lunges","pushups","situps","dumbbell_rows","bicep_curls","jumping_jacks","tricep_extensions","dumbbell_shoulder_press","lateral_shoulder_raises","plank"];
 
 async function api(path, body){
@@ -208,11 +228,12 @@ function mmss(s){ s = Math.max(0, s|0); return `${Math.floor(s/60)}:${String(s%6
   S.formBy = setup.form_by_exercise || {};
   $("#exGrid").innerHTML = EX.map(e => `<button class="btn" data-e="${e}" aria-pressed="${e==="squats"}">${e.replaceAll("_"," ")}</button>`).join("");
   $("#exGrid").onclick = e => {
-    const b = e.target.closest("button"); if (!b || S.recording) return;
+    const b = e.target.closest("button"); if (!b) return;
     S.exercise = b.dataset.e;
     [...$("#exGrid").children].forEach(x => x.setAttribute("aria-pressed", x === b));
-    fillForm();
+    fillForm(); paintEx();
   };
+  paintEx();
   $("#rpe").innerHTML = Array.from({length: 10}, (_, i) => `<button class="btn" data-v="${i+1}">${i+1}</button>`).join("");
   $("#rpe").onclick = e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -284,8 +305,10 @@ async function toggleSet(){
   }
 }
 function openDetails(n){
-  S.rpe = null; [...$("#rpe").children].forEach(x => x.setAttribute("aria-pressed", "false"));
-  $("#saveSetN").textContent = n; $("#saveEx").textContent = S.exercise.replaceAll("_", " ");
+  S.rpe = null; S.reps = null;
+  [...$("#rpe").children].forEach(x => x.setAttribute("aria-pressed", "false"));
+  $("#saveSetN").textContent = n;
+  paintEx(); paintReps();
   $("#note").value = "";
   $("#details").hidden = false;
   updateSaveBtn();
@@ -304,16 +327,32 @@ $("#endSession").onclick = async () => {
   if (!confirm("End this session?")) return;
   await api("/api/session/end", {}); location.reload();
 };
-$("#repMinus").onclick = () => { S.reps = Math.max(1, S.reps - 1); $("#reps").textContent = S.reps; };
-$("#repPlus").onclick = () => { S.reps += 1; $("#reps").textContent = S.reps; };
+$("#repMinus").onclick = () => { S.reps = Math.max(1, (S.reps ?? 1) - 1); paintReps(); updateSaveBtn(); };
+$("#repPlus").onclick = () => { S.reps = (S.reps ?? 0) + 1; paintReps(); updateSaveBtn(); };
+document.addEventListener("input", e => {
+  if (e.target && e.target.id === "repsInput") {
+    const t = e.target.value;
+    S.reps = t === "" ? null : Math.max(1, parseInt(t, 10) || 0);
+    paintReps(); updateSaveBtn();
+  }
+});
+$("#changeEx").onclick = () => {
+  flash("Pick another exercise in the grid above, then save");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 function uploadDone(){ return !!(S.status.pending_labels && S.status.pending_labels.upload_complete); }
 function updateSaveBtn(){
   const done = uploadDone();
-  $("#saveSet").disabled = !(S.rpe && done);
-  $("#saveHint").textContent = !done ? "waiting for the video upload…" : (!S.rpe ? "pick the RPE" : "ready");
+  const hasReps = S.reps != null && S.reps >= 1;
+  $("#saveSet").disabled = !(S.rpe && done && hasReps);
+  if (!done) $("#saveHint").textContent = "waiting for the video upload…";
+  else if (!hasReps) $("#saveHint").textContent = "type the rep count (no default)";
+  else if (!S.rpe) $("#saveHint").textContent = "pick the RPE";
+  else $("#saveHint").textContent = "ready";
 }
 async function save(force){
+  if (S.reps == null || S.reps < 1) return flash("Type the rep count first (no default)");
   if (!S.rpe) return flash("Pick the RPE first");
   const body = { exercise: S.exercise, reps: S.reps, rpe: S.rpe, form_label: $("#form").value,
                  weight_kg: $("#weight").value, note: $("#note").value, force: !!force };

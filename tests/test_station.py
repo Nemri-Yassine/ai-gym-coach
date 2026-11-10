@@ -128,6 +128,30 @@ def test_station_api_smoke(tmp_path: Path, monkeypatch):
     assert RUNTIME.current_set == 1
 
 
+def test_set_save_requires_reps(tmp_path: Path, monkeypatch):
+    """Saving without a typed rep count must 400 (no station default of 10)."""
+    monkeypatch.setattr(rec, "OWN_DIR", tmp_path)
+    from awc.station.app import create_app
+    from fastapi.testclient import TestClient
+
+    _reset_runtime()
+    client = TestClient(create_app(pin="1234"))
+    assert client.post("/api/session/start", json={
+        "user": "yassine", "session_id": "noreps", "date": "2026-11-10",
+    }).status_code == 200
+    assert client.post("/api/set/start", json={"allow_no_phone": True}).status_code == 200
+    assert client.post("/api/set/end").status_code == 200
+    r = client.post("/api/set/save", json={
+        "exercise": "squats", "rpe": 7, "form_label": "correct",
+    })
+    assert r.status_code == 400
+    assert "reps" in r.json()["error"].lower()
+    r2 = client.post("/api/set/save", json={
+        "exercise": "squats", "reps": "", "rpe": 7, "form_label": "correct",
+    })
+    assert r2.status_code == 400
+
+
 def test_recordings_plank_not_in_m1_classes():
     from awc.config import MMFIT_CLASSES
 
