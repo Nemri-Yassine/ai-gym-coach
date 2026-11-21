@@ -187,8 +187,14 @@ def test_analysis_worker_on_cached_set():
     assert int(result["reps"]) >= 0
     assert "confidence" in result and "summary" in result
     assert "elapsed_s" in result
-    assert result.get("form_shown") is False
-    assert "not calibrated" in (result.get("form_note") or result["summary"]).lower()
+    form = result.get("form")
+    if form is not None:  # Model 2 v2 (models/m2_gym.pickle) covers this exercise
+        assert result["form_shown"] is True
+        assert form["verdict"] in ("good", "unsure", "check form")
+        assert 0.0 <= form["p_correct"] <= 1.0 and form["windows"] > 0
+        assert form["message"] in result["summary"]
+    else:
+        assert result.get("form_shown") is False
     assert "timings" in result and "pose_s" in result["timings"]
     path = analysis_path(person, session, set_n)
     assert path.is_file()

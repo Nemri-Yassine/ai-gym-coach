@@ -44,8 +44,13 @@ def main(argv=None):
     RUNTIME.show_form = bool(args.show_form)
     if args.kafka:
         print("Kafka: enabled (will log once and continue if the broker is down)", flush=True)
-    if not args.show_form:
-        print("Form model: hidden (not calibrated for this camera). Pass --show-form to force.", flush=True)
+    from awc.models.m2_gym import load_model as load_form_model
+    if load_form_model() is not None:
+        print("Form model: Model 2 v2 (gym-trained) for squats, push-ups, curls, rows, shoulder press, "
+              "triceps.", flush=True)
+    elif not args.show_form:
+        print("Form model: hidden (models/m2_gym.pickle missing). Pass --show-form to force the old one.",
+              flush=True)
     app = create_app(pin=pin, port=args.port)
     kwargs = {"host": "0.0.0.0", "port": args.port, "log_level": "warning", "ws_max_size": 32 * 1024 * 1024}
     if not args.http:

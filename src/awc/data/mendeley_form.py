@@ -77,5 +77,58 @@ def load_reps(path=REPS_NPZ):
         return {k: z[k].copy() for k in z.files}
 
 
+WINDOWS_NPZ = DATA / "processed" / "m2_mendeley_windows.npz"
+
+
+def build_windows(path=WINDOWS_NPZ):
+    """Every cached Mendeley skeleton (all exercises) → 3 s windows + hand-made features."""
+    from awc.features.form_windows import (MENDELEY_EXERCISE, proportion_features, set_windows,
+                                           window_features)
+
+    wins, feats, props, rows = [], [], [], []
+    files = sorted(POSE_DIR.glob("subject_*.npy"))
+    for k, npy in enumerate(files, 1):
+        m = NAME.match(npy.stem)
+        if not m:
+            continue
+        subject, folder, quality, view = m.groups()
+        pose = np.load(npy)
+        finite = pose[np.isfinite(pose).all(axis=(1, 2))]
+        if len(finite) < VIDEO_FPS:
+            continue
+        w = set_windows(normalize(finite))
+        if not len(w):
+            continue
+        wins.append(w)
+        feats.append(window_features(w))
+        props.append(proportion_features(w))
+        rows += [dict(subject=f"m{subject}", exercise=MENDELEY_EXERCISE[folder], quality=quality,
+                      view=view, video=npy.stem, widx=i) for i in range(len(w))]
+        if k % 100 == 0:
+            print(f"  windows: {k}/{len(files)} videos", flush=True)
+    meta = pd.DataFrame(rows)
+    pack = {
+        "windows": np.concatenate(wins).astype(np.float16),   # half precision: ~4x smaller on disk
+        "features": np.concatenate(feats),
+        "proportions": np.concatenate(props),
+        "subject": meta.subject.to_numpy(str), "exercise": meta.exercise.to_numpy(str),
+        "view": meta.view.to_numpy(str), "video": meta.video.to_numpy(str),
+        "widx": meta.widx.to_numpy(np.int64),
+        "is_correct": (meta.quality == "good").to_numpy(np.int64),
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(path, **pack)
+    print(f"mendeley windows {len(meta)} from {meta.video.nunique()} videos -> {path}")
+    print(meta.groupby(["exercise", "quality"]).size().unstack().to_string())
+    return pack
+
+
+def load_windows(path=WINDOWS_NPZ):
+    with np.load(path, allow_pickle=False) as z:
+        return {k: z[k].copy() for k in z.files}
+
+
 if __name__ == "__main__":
-    build_reps()
+    import sys
+
+    build_windows() if "--windows" in sys.argv else build_reps()

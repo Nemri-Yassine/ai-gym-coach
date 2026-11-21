@@ -24,7 +24,8 @@ log = logging.getLogger("awc.station.analyze")
 
 WINDOW, HOP = 90, 45
 PRIMARY = "m1_transformer_pose"
-# Own-camera M2 is uncalibrated (P(correct)≈0.06 on correct squats). Never show "bad form".
+# Old EC3D-only M2 was uncalibrated on our camera (P(correct)≈0.06 on correct squats), so form was
+# hidden. Model 2 v2 (models/m2_gym.pickle, trained on real gym people) is shown when present.
 FORM_CALIBRATED = False
 # Live suggestion only: every 2nd frame (~15 fps) + 480px long side to keep MediaPipe under ~15 s.
 LIVE_FRAME_STRIDE = 2
@@ -250,8 +251,15 @@ def analyze_set(session_dir: Path, set_n: int, person: str | None = None,
     t_reps = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    if pose_n is not None and (show_form or FORM_CALIBRATED):
+    form = None
+    if pose_n is not None:
+        from awc.models.m2_gym import check_set
+        form = check_set(exercise, pose_n, person=person, set_key=f"{session_folder}/set{int(set_n):02d}")
+    if form is not None:
+        form_score = form["p_correct"]
+    elif pose_n is not None and (show_form or FORM_CALIBRATED):
         form_score = _m2_mean(exercise, pose_n)
+    show_form = show_form or FORM_CALIBRATED or form is not None
     t_m2 = time.perf_counter() - t0
 
     hr_start = hr_end = hr_mean = None
@@ -281,9 +289,10 @@ def analyze_set(session_dir: Path, set_n: int, person: str | None = None,
         "confidence": round(confidence, 3),
         "reps": int(n_reps),
         "form_score": None if form_score is None else round(float(form_score), 3),
-        "form_shown": bool(show_form or FORM_CALIBRATED),
-        "form_note": None if (show_form or FORM_CALIBRATED) else (
-            "form model: not calibrated for this camera (P(correct) 0.06 on our correct squats)"
+        "form_shown": bool(show_form),
+        "form": form,
+        "form_note": None if show_form else (
+            "form model: not covered for this exercise"
         ),
         "hr_start": None if hr_start is None else round(hr_start, 1),
         "hr_end": None if hr_end is None else round(hr_end, 1),
@@ -292,7 +301,7 @@ def analyze_set(session_dir: Path, set_n: int, person: str | None = None,
         "timings": timings,
         "summary": _format_summary(
             exercise, confidence, n_reps, form_score, hr_start, hr_end, elapsed,
-            show_form=show_form or FORM_CALIBRATED,
+            show_form=show_form, form=form,
         ),
     }
     out = analysis_path(person, session_folder, set_n)
@@ -302,12 +311,14 @@ def analyze_set(session_dir: Path, set_n: int, person: str | None = None,
 
 
 def _format_summary(exercise, confidence, reps, form_score, hr_start, hr_end, elapsed,
-                    show_form: bool = False):
-    if show_form:
-        form = "—" if form_score is None else f"{form_score:.2f}"
-        form_part = f"form: {form}"
+                    show_form: bool = False, form: dict | None = None):
+    if form is not None:
+        form_part = form["message"]
+    elif show_form:
+        score = "—" if form_score is None else f"{form_score:.2f}"
+        form_part = f"form: {score}"
     else:
-        form_part = "form model: not calibrated for this camera (P(correct) 0.06 on our correct squats)"
+        form_part = "form: not covered for this exercise"
     if hr_start is not None and hr_end is not None:
         hr = f"HR {hr_start:.0f} → {hr_end:.0f} bpm"
     else:
