@@ -29,9 +29,10 @@ GOOD_ABOVE, BAD_BELOW = 0.55, 0.40
 # See reports/m2_gym_windows.md. Turn on only once it is trained with references from another set.
 USE_CALIBRATION = False
 # Relative judgement: flag a set when its mean P(correct) is this much below the person's usual
-# (median of their earlier sets of the same exercise). On Mendeley, ranking a person's two sets is
-# right 82% of the time vs 69% for the absolute verdict; with this drop: bad sets caught 67%,
-# our own correct sets flagged 17% (absolute: ~35%). scripts/analysis/m2_relative.py.
+# (median of their earlier sets of the same exercise). With the ensemble (RF + boosting + temporal
+# CNN), ranking a person's two sets is right 85% of the time on unseen people vs 69% for the absolute
+# verdict. With this drop: bad sets caught 70% (514 Mendeley pairs), our own correct sets flagged
+# 28% (only 18 pairs; boosting alone: 67% / 17%). scripts/analysis/m2_relative.py, ensemble.json.
 RELATIVE_DROP = 0.10
 
 
@@ -41,6 +42,44 @@ def load_model(path=MODEL_PATH):
         return None
     with open(path, "rb") as fh:
         return pickle.load(fh)
+
+
+@lru_cache(maxsize=1)
+def _ensemble_tcn(id_pack: int):
+    """Rebuild the temporal CNN once per loaded pack."""
+    import torch
+
+    from awc.training.train_m2_gym import TCN
+
+    pack = load_model()
+    ens = pack["ensemble"]
+    net = TCN(ens["tcn_channels"], len(pack["exercises"]))
+    net.load_state_dict(ens["tcn_state"])
+    return net.eval()
+
+
+def ensemble_proba(pack, exercise: str, windows) -> np.ndarray:
+    """Mean P(correct) of forest + boosting + temporal CNN per window."""
+    import torch
+
+    from awc.features.form_windows import angle_sequence
+
+    rf, hgb = pack["ensemble"]["forests"][exercise]
+    feats = window_features(windows)
+    p = [rf.predict_proba(feats)[:, 1], hgb.predict_proba(feats)[:, 1]]
+    from awc.training.train_m2_gym import TCN
+
+    if pack is load_model():
+        net = _ensemble_tcn(id(pack))
+    else:  # pack passed in directly (training script): build the net from it
+        net = TCN(pack["ensemble"]["tcn_channels"], len(pack["exercises"]))
+        net.load_state_dict(pack["ensemble"]["tcn_state"])
+        net.eval()
+    ex = torch.full((len(windows),), list(pack["exercises"]).index(exercise), dtype=torch.long)
+    onehot = torch.eye(len(pack["exercises"]))[ex]
+    with torch.no_grad():
+        p.append(torch.sigmoid(net(torch.from_numpy(angle_sequence(windows)), onehot)).numpy())
+    return np.mean(p, axis=0)
 
 
 def reference_path(person: str, exercise: str):
@@ -115,6 +154,8 @@ def check_set(exercise: str, pose_n, person: str | None = None, set_key: str | N
     if ref is not None:
         x = np.concatenate([feats, feats - ref[None, :]], axis=1)
         p = pack["cal"][exercise].predict_proba(x)[:, 1]
+    elif "ensemble" in pack:
+        p = ensemble_proba(pack, exercise, w)
     else:
         p = pack["plain"][exercise].predict_proba(feats)[:, 1]
     mean_p = float(p.mean())

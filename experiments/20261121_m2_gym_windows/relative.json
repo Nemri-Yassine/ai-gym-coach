@@ -15,11 +15,18 @@
       "median_margin": 0.291
     },
     {
-      "model": "ensemble",
-      "absolute_set_acc": 0.69,
-      "relative_pair_acc": 0.817,
+      "model": "tcn",
+      "absolute_set_acc": 0.695,
+      "relative_pair_acc": 0.796,
       "pairs": 514,
-      "median_margin": 0.233
+      "median_margin": 0.242
+    },
+    {
+      "model": "ensemble",
+      "absolute_set_acc": 0.691,
+      "relative_pair_acc": 0.85,
+      "pairs": 514,
+      "median_margin": 0.237
     },
     {
       "model": "prop",
@@ -48,14 +55,23 @@
       "squats": 0.773,
       "tricep_extensions": 0.865
     },
+    "tcn": {
+      "bicep_curls": 0.853,
+      "dumbbell_rows": 0.775,
+      "dumbbell_shoulder_press": 0.707,
+      "pushups": 0.783,
+      "side_bends": 0.88,
+      "squats": 0.72,
+      "tricep_extensions": 0.851
+    },
     "ensemble": {
-      "bicep_curls": 0.867,
-      "dumbbell_rows": 0.746,
-      "dumbbell_shoulder_press": 0.76,
-      "pushups": 0.855,
-      "side_bends": 0.827,
-      "squats": 0.8,
-      "tricep_extensions": 0.865
+      "bicep_curls": 0.907,
+      "dumbbell_rows": 0.775,
+      "dumbbell_shoulder_press": 0.8,
+      "pushups": 0.884,
+      "side_bends": 0.867,
+      "squats": 0.84,
+      "tricep_extensions": 0.878
     },
     "prop": {
       "bicep_curls": 0.573,

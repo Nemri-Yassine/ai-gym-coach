@@ -717,6 +717,75 @@
           ]
         }
       }
+    },
+    "tcn": {
+      "mean_balanced_acc": 0.672311572126409,
+      "mean_video_acc": 0.6938252155518343,
+      "per_exercise": {
+        "squats": {
+          "n": 2312,
+          "balanced_acc": 0.6449168693809577,
+          "auc": 0.6836374555119512,
+          "good_called_good": 0.5984095427435387,
+          "bad_called_bad": 0.6914241960183767,
+          "video_acc": 0.6666666666666666,
+          "n_videos": 150
+        },
+        "pushups": {
+          "n": 1389,
+          "balanced_acc": 0.6317437472014329,
+          "auc": 0.709277383313077,
+          "good_called_good": 0.6252158894645942,
+          "bad_called_bad": 0.6382716049382716,
+          "video_acc": 0.6330935251798561,
+          "n_videos": 139
+        },
+        "bicep_curls": {
+          "n": 2485,
+          "balanced_acc": 0.6794529074529074,
+          "auc": 0.7384779688779689,
+          "good_called_good": 0.7603603603603604,
+          "bad_called_bad": 0.5985454545454545,
+          "video_acc": 0.7066666666666667,
+          "n_videos": 150
+        },
+        "dumbbell_rows": {
+          "n": 2213,
+          "balanced_acc": 0.6593592942022817,
+          "auc": 0.6971538578306652,
+          "good_called_good": 0.6917670682730924,
+          "bad_called_bad": 0.6269515201314708,
+          "video_acc": 0.6503496503496503,
+          "n_videos": 143
+        },
+        "dumbbell_shoulder_press": {
+          "n": 2329,
+          "balanced_acc": 0.6592252187784189,
+          "auc": 0.7183069457489154,
+          "good_called_good": 0.7145593869731801,
+          "bad_called_bad": 0.6038910505836576,
+          "video_acc": 0.6866666666666666,
+          "n_videos": 150
+        },
+        "tricep_extensions": {
+          "n": 2374,
+          "balanced_acc": 0.7355034382270957,
+          "auc": 0.7944003547651408,
+          "good_called_good": 0.7925430210325047,
+          "bad_called_bad": 0.6784638554216867,
+          "video_acc": 0.7733333333333333,
+          "n_videos": 150
+        },
+        "side_bends": {
+          "n": 2298,
+          "balanced_acc": 0.6959795296417688,
+          "auc": 0.7403005385927586,
+          "good_called_good": 0.8005865102639296,
+          "bad_called_bad": 0.5913725490196079,
+          "video_acc": 0.74,
+          "n_videos": 150
+        }
+      }
     }
   },
   "own": {

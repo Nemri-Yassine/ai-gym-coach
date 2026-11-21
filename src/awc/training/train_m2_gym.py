@@ -400,6 +400,26 @@ def write_report(out, path=REPORTS / "m2_gym_windows.md"):
         ens = rel["per_exercise"].get("ensemble", {})
         lines += ["", "Relative accuracy per exercise (ensemble): "
                   + ", ".join(f"{SHORT.get(e, e)} {v:.2f}" for e, v in ens.items()), ""]
+    ens_path = rel_path.parent / "ensemble.json"
+    if ens_path.is_file():
+        e = json.loads(ens_path.read_text())
+        lines += [
+            "## Live verdict: ensemble, 'worse than your usual'",
+            "",
+            "The app scores each set with the mean of RF + boosting + temporal CNN (all trained on every "
+            "Mendeley person) and flags it when it is at least the drop below the person's usual (median of "
+            "earlier sets of the same exercise).",
+            "",
+            "| Drop | Bad sets caught (Mendeley pairs) | Our correct sets flagged (own pairs) |",
+            "|---:|---:|---:|",
+        ]
+        for t in e["tradeoff"]:
+            lines.append(f"| {t['drop']:.2f} | {t['mendeley_bad_caught']:.0%} | "
+                         f"{t['own_correct_flagged']:.0%} ({t['own_pairs']}) |")
+        lines += ["", f"Chosen drop: 0.10. Absolute verdict with the ensemble: Mendeley set acc "
+                  f"{e['absolute']['mendeley_set_acc']:.3f}, our correct sets called correct "
+                  f"{e['absolute']['own_sets_called_correct']:.0%}. Own pairs are few (18): one pair = 5.6 points.",
+                  ""]
     lines += [
         "## Reading (hand-written summary, 2026-11-21)",
         "",
@@ -407,10 +427,13 @@ def write_report(out, path=REPORTS / "m2_gym_windows.md"):
         "balanced accuracy is about 0.68 per window on unseen people. Triceps is the best (0.75), rows the weakest (0.60).",
         "- **Set accuracy is about the same as window accuracy (0.69).** Errors are whole people, not "
         "random moments: one absolute line does not fit 26 different bodies and setups.",
-        "- **Relative judgement is the fix:** ranking a person's two sets is right about 82% of the time "
-        "(control on body proportions only: 0.58). The live demo now compares each set with the person's "
-        "usual (median of earlier sets of the exercise) and flags a drop of 0.10 or more. Measured: bad sets "
-        "caught 67% (Mendeley), our own correct sets flagged 17% (18 pairs; absolute verdict about 35%).",
+        "- **Relative judgement is the fix:** ranking a person's two sets is right 81% of the time with the "
+        "best single model and **85% with the ensemble** (RF + boosting + temporal CNN; control on body "
+        "proportions only: 0.58). The live demo compares each set with the person's usual and flags a "
+        "drop of 0.10 or more: bad sets caught 70%, our own correct sets flagged 28% (18 pairs).",
+        "- **Temporal CNN (deep learning):** alone it ties the forests (0.672 per window, best set accuracy "
+        "0.695, best on rows), but its mistakes differ, so it lifts the ensemble from 0.81 to 0.85 "
+        "on the relative question.",
         "- **Personal calibration failed (leak):** features minus a reference from the start of the good "
         "set looked +1.5 points better, but reference and good test windows share one recording. On our "
         "own new sets it called only 23% correct. Switched off (`USE_CALIBRATION = False`).",
@@ -430,8 +453,19 @@ def main(argv=None):
     ap.add_argument("--no-tcn", action="store_true")
     ap.add_argument("--only-tcn", action="store_true", help="train/evaluate only the temporal CNN, merge into metrics")
     ap.add_argument("--report-only", action="store_true")
+    ap.add_argument("--final-ensemble", action="store_true",
+                    help="train RF + boosting + temporal CNN on everyone, add to models/m2_gym.pickle")
+    ap.add_argument("--eval-ensemble", action="store_true", help="only re-measure the saved ensemble")
     args = ap.parse_args(argv)
-    run_dir = EXPERIMENTS / f"{date.today():%Y%m%d}_m2_gym_windows"
+    # Latest run with out-of-fold predictions (a run can cross midnight).
+    done = sorted(p for p in EXPERIMENTS.glob("*_m2_gym_windows") if (p / "oof.npz").exists())
+    run_dir = done[-1] if done else EXPERIMENTS / f"{date.today():%Y%m%d}_m2_gym_windows"
+    if args.final_ensemble:
+        final_ensemble(args.epochs, run_dir)
+        return
+    if args.eval_ensemble:
+        evaluate_ensemble(run_dir)
+        return
     if args.report_only:
         print(write_report(json.loads((run_dir / "metrics.json").read_text())))
         return
@@ -440,6 +474,86 @@ def main(argv=None):
         return
     out = run(args.epochs, not args.no_tcn)
     print(write_report(out))
+
+
+def final_ensemble(epochs, run_dir):
+    """Final ensemble for the app: per-exercise RF + boosting, one temporal CNN, all trained on every
+    Mendeley person. Mean of the three = P(correct). Then false alarms on our own correct sets and
+    the relative-drop trade-off are recomputed with the ensemble."""
+    import itertools
+
+    from joblib import Parallel, delayed
+
+    torch.set_num_threads(16)
+    d = load_windows()
+    feats, y, ex_name = d["features"], d["is_correct"], d["exercise"]
+    ex_id = np.array([FORM_EXERCISES.index(e) for e in ex_name])
+
+    def fit_pair(e):
+        from threadpoolctl import threadpool_limits
+
+        m = ex_id == e
+        with threadpool_limits(THREADS_PER_JOB):
+            return FORM_EXERCISES[e], fit_rf(feats[m], y[m]), fit_hgb(feats[m], y[m])
+
+    forests = {name: (rf, hgb) for name, rf, hgb in
+               Parallel(n_jobs=len(FORM_EXERCISES))(delayed(fit_pair)(e) for e in range(len(FORM_EXERCISES)))}
+    log("final forests + boosting trained")
+    seq = angle_sequence(d["windows"].astype(np.float32))
+    tcn = fit_tcn(seq, ex_id, y, epochs)
+    del seq
+    log("final temporal CNN trained")
+
+    path = MODELS / "m2_gym.pickle"
+    with open(path, "rb") as fh:
+        pack = pickle.load(fh)
+    pack["ensemble"] = {"forests": forests, "tcn_state": tcn.state_dict(), "tcn_channels": 45,
+                        "members": ["rf", "hgb", "tcn"], "epochs": epochs}
+    with open(path, "wb") as fh:
+        pickle.dump(pack, fh)
+    log(f"saved ensemble into {path}")
+    evaluate_ensemble(run_dir)
+
+
+def evaluate_ensemble(run_dir):
+    """False alarms on our own correct sets and the relative-drop trade-off, with the saved ensemble."""
+    import itertools
+
+    import pandas as pd
+
+    from awc.models.m2_gym import ensemble_proba, load_model
+
+    load_model.cache_clear()
+    pack = load_model()
+
+    own = []
+    for key, person, exn, w in own_sets():
+        own.append({"key": key, "person": person, "exercise": exn,
+                    "p": float(ensemble_proba(pack, exn, w).mean())})
+    z = np.load(run_dir / "oof.npz", allow_pickle=False)
+    p_ens = np.mean([z["p_rf"], z["p_hgb"], np.load(run_dir / "oof_tcn.npy")], axis=0)
+    ev = z["evaluate"]
+    sets = (pd.DataFrame({"subject": z["subject"][ev], "exercise": z["exercise"][ev], "view": z["view"][ev],
+                          "video": z["video"][ev], "y": z["y"][ev], "p": p_ens[ev]})
+            .groupby(["subject", "exercise", "view", "video"], as_index=False).mean(numeric_only=True))
+    pairs = np.array([(g[g.y == 1].p.iloc[0], g[g.y == 0].p.iloc[0])
+                      for _k, g in sets.groupby(["subject", "exercise", "view"]) if set(g.y) == {0.0, 1.0}])
+    own_df = pd.DataFrame(own)
+    own_pairs = np.array([(a, b) for (_pp, _ee), g in own_df.groupby(["person", "exercise"])
+                          for a, b in itertools.permutations(g.p.values, 2)])
+    tradeoff = []
+    for drop in (0.0, 0.05, 0.10, 0.15, 0.20):
+        tradeoff.append({"drop": drop, "mendeley_bad_caught": float((pairs[:, 1] < pairs[:, 0] - drop).mean()),
+                         "own_correct_flagged": float((own_pairs[:, 1] < own_pairs[:, 0] - drop).mean()),
+                         "own_pairs": int(len(own_pairs))})
+        log(f"drop {drop:.2f}: bad caught {tradeoff[-1]['mendeley_bad_caught']:.0%}, "
+            f"own correct flagged {tradeoff[-1]['own_correct_flagged']:.0%} ({len(own_pairs)} pairs)")
+    absolute = {"own_sets_called_correct": float((own_df.p >= 0.5).mean()),
+                "mendeley_set_acc": float(((sets.p >= 0.5).astype(float) == sets.y).mean())}
+    log(f"absolute with ensemble: own correct sets called correct {absolute['own_sets_called_correct']:.0%}, "
+        f"Mendeley set acc {absolute['mendeley_set_acc']:.3f}")
+    (run_dir / "ensemble.json").write_text(json.dumps(
+        {"tradeoff": tradeoff, "absolute": absolute, "own_sets": own}, indent=2))
 
 
 def run_tcn_only(epochs, run_dir):
