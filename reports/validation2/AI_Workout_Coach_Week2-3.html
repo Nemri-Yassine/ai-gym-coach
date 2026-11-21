@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>AI Workout Coach · Week 2–3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root { --bg:#0B1016; --fg:#E8EEF5; --muted:#8FA3B8; --accent:#3DDC97; --card:#141B24; }
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+  font-family:"DM Sans",system-ui,sans-serif; overflow:hidden; }
+#stage { position:absolute; inset:0; }
+.slide { position:absolute; inset:0; padding:8vh 10vw; display:none; flex-direction:column; justify-content:center;
+  background: radial-gradient(1200px 600px at 10% -10%, #1a2736 0%, var(--bg) 55%); }
+.slide.on { display:flex; animation:in .35s ease; }
+@keyframes in { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+.num { font-family:"IBM Plex Mono",monospace; color:var(--muted); letter-spacing:.08em; margin-bottom:2vh; }
+h1 { font-size:clamp(2rem,5vw,3.4rem); margin:0 0 3vh; max-width:18ch; line-height:1.1; }
+p { font-size:clamp(1.05rem,2.1vw,1.45rem); line-height:1.55; color:var(--muted); max-width:52ch; margin:0; }
+.brand { position:fixed; left:10vw; bottom:4vh; font-family:"IBM Plex Mono",monospace; font-size:.85rem; color:var(--accent); }
+.hint { position:fixed; right:10vw; bottom:4vh; font-size:.85rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div id="stage">
+<section class="slide" id="s1"><div class="num">1 / 11</div><h1>What changed</h1><p>Until Nov 10 we used MM-Fit RGB as a stand-in (injury). Own gym-station sessions are now in: iPhone Safari → laptop HTTPS + Galaxy Watch 7 BLE. MM-Fit baselines stay within-session. Own data is test-only (no fine-tune yet).</p></section><section class="slide" id="s2"><div class="num">2 / 11</div><h1>Our own recordings</h1><p>Gym station · 2 people · 1 day · 20 eval sets (+2 test) · 9 exercises. Notes corrected 3 wrong buttons. RPE≈10 ignored. HR coverage ~0.5 (watch silent 20–80 s on some sets). Session folders: yassine 9, partner 6. Manifest: data/own_manifest.csv.</p></section><section class="slide" id="s3"><div class="num">3 / 11</div><h1>Models on our videos</h1><p>Pose-only transformer: set accuracy 0.70 (14/20, Wilson [0.48, 0.85]), macro-F1 0.51. Rep MAE 3.17 (n=18). M2 P(correct) on correct squats 0.06 — false alarms, same EC3D→phone gap. Confusion: reports/figures/m1_confusion_own.png · tables: reports/rq4_own.md.</p></section><section class="slide" id="s4"><div class="num">4 / 11</div><h1>Live detection demo</h1><p>python -m awc.station → after each set, background pose→M1→reps→M2→HR. Suggestion on the control page; never written into sets.csv. Cached-pose analysis latency 0.84 / 0.03 / 0.03 s on 3 sets. Optional --kafka. docs/demo.md.</p></section><section class="slide" id="s5"><div class="num">5 / 11</div><h1>Kafka replay</h1><p>Docker apache/kafka. Pose 29.8 msg/s @ 48 ms median; HR 0.79 msg/s @ 19 ms. Sink writes under data/interim/replay/ only. Setup: docs/kafka_setup.md · demo: docs/demo.md.</p></section><section class="slide" id="s6"><div class="num">6 / 11</div><h1>RQ4 · MM-Fit raw video</h1><p>MediaPipe from RGB vs dataset pose. Domain shift: EC3D Model 2 P(correct)≈0.08 on MM-Fit squats. Four sessions; mean keeps sync≥70% only. w20 auto sync within 1.4 frames of measured. Table: reports/rq4_first_look.md.</p></section><section class="slide" id="s7"><div class="num">7 / 11</div><h1>Spark rep table</h1><p>MM-Fit: 5,918 reps · 616 sets · has_baseline 0.67. Own: 269 reps · 22 sets · 2 people (data/interim/own_rep_table.parquet).</p></section><section class="slide" id="s8"><div class="num">8 / 11</div><h1>Model 3 labels</h1><p>Speed-only breakdown (use_form=False). Risk = 1 from breakdown−2 to end of set. Squats breakdown rate 0.42 (was ~100% when form polluted the label). jumping_jacks rate 0.018 — reported, not hidden.</p></section><section class="slide" id="s9"><div class="num">9 / 11</div><h1>Model 3 results</h1><p>Fair B1 continuous AUC 0.751. B4 0.641 ± 0.022 — does not beat B1 or the exercise-only control (0.773). RQ2/RQ3 negative for personal+HR. Old “beats apps” claim withdrawn. reports/m3_results.md.</p></section><section class="slide" id="s10"><div class="num">10 / 11</div><h1>Limits</h1><p>Own n=20 · one day · no lunges in eval · RPE unusable · HR gaps · within-session MM-Fit baselines · Model 2 does not transfer EC3D→phone. Own data not used for training in this package.</p></section><section class="slide" id="s11"><div class="num">11 / 11</div><h1>Demo</h1><p>Live station: python -m awc.station. Offline: process_recording + eval_own_recordings. Kafka MM-Fit: pose_producer (--start-frame 2100) + hr_producer + live.py --kafka. docs/demo.md.</p></section>
+</div>
+<div class="brand">AI Workout Coach · Week 2–3</div>
+<div class="hint">← → · F fullscreen</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let i=0;
+function show(n){ i=(n+slides.length)%slides.length; slides.forEach((s,k)=>s.classList.toggle('on',k===i)); }
+show(0);
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ') show(i+1);
+  if(e.key==='ArrowLeft') show(i-1);
+  if(e.key==='f'||e.key==='F'){
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+{
+  "file": "form_demo.mp4",
+  "setup": "leave-one-person-out, 2D random forest (Model 2), trained on yaws 0-90 + mirror of the other people",
+  "folds": [
+    {
+      "held_out": "Hugues",
+      "n": 85,
+      "acc_45": 0.5764705882352941
+    },
+    {
+      "held_out": "Isinsu",
+      "n": 92,
+      "acc_45": 0.6739130434782609
+    },
+    {
+      "held_out": "Sena",
+      "n": 97,
+      "acc_45": 0.7835051546391752
+    },
+    {
+      "held_out": "Vidit",
+      "n": 88,
+      "acc_45": 0.6931818181818182
+    }
+  ],
+  "pairs": [
+    {
+      "exercise": "squat",
+      "code": "3",
+      "yaw": 0,
+      "hl": [
+        9,
+        10,
+        12,
+        13
+      ],
+      "why": "front view: watch the knees",
+      "person": "Hugues",
+      "good": 5,
+      "bad": 15,
+      "kind": "success"
+    },
+    {
+      "exercise": "squat",
+      "code": "4",
+      "yaw": 90,
+      "hl": [
+        8,
+        9,
+        11,
+        12
+      ],
+      "why": "side view: watch how low the hips go",
+      "person": "Hugues",
+      "good": 1,
+      "bad": 21,
+      "kind": "success"
+    },
+    {
+      "exercise": "squat",
+      "code": "5",
+      "yaw": 90,
+      "hl": [
+        1,
+        8,
+        11
+      ],
+      "why": "side view: watch the back",
+      "person": "Hugues",
+      "good": 1,
+      "bad": 26,
+      "kind": "success"
+    },
+    {
+      "exercise": "lunge",
+      "code": "6",
+      "yaw": 90,
+      "hl": [
+        9,
+        10,
+        12,
+        13
+      ],
+      "why": "side view: watch the front knee",
+      "person": "Hugues",
+      "good": 134,
+      "bad": 144,
+      "kind": "success"
+    },
+    {
+      "exercise": "plank",
+      "code": "7",
+      "yaw": 90,
+      "hl": [
+        1,
+        8,
+        11
+      ],
+      "why": "side view: watch the hips and back",
+      "person": "Hugues",
+      "good": 259,
+      "bad": 266,
+      "kind": "success"
+    },
+    {
+      "exercise": "squat",
+      "code": "2",
+      "yaw": 90,
+      "hl": [],
+      "why": "a miss: the model calls this mistake correct",
+      "person": "Hugues",
+      "good": 1,
+      "bad": 10,
+      "kind": "miss"
+    }
+  ],
+  "pair_predictions": [
+    {
+      "rep": 5,
+      "yaw": 0,
+      "truth": "Correct",
+      "pred": "Correct"
+    },
+    {
+      "rep": 15,
+      "yaw": 0,
+      "truth": "Knees inward",
+      "pred": "Knees inward"
+    },
+    {
+      "rep": 1,
+      "yaw": 90,
+      "truth": "Correct",
+      "pred": "Correct"
+    },
+    {
+      "rep": 21,
+      "yaw": 90,
+      "truth": "Not low enough",
+      "pred": "Not low enough"
+    },
+    {
+      "rep": 1,
+      "yaw": 90,
+      "truth": "Correct",
+      "pred": "Correct"
+    },
+    {
+      "rep": 26,
+      "yaw": 90,
+      "truth": "Front bent",
+      "pred": "Front bent"
+    },
+    {
+      "rep": 134,
+      "yaw": 90,
+      "truth": "Correct",
+      "pred": "Correct"
+    },
+    {
+      "rep": 144,
+      "yaw": 90,
+      "truth": "Knee passes toe",
+      "pred": "Knee passes toe"
+    },
+    {
+      "rep": 259,
+      "yaw": 90,
+      "truth": "Correct",
+      "pred": "Correct"
+    },
+    {
+      "rep": 266,
+      "yaw": 90,
+      "truth": "Arched back",
+      "pred": "Arched back"
+    },
+    {
+      "rep": 1,
+      "yaw": 90,
+      "truth": "Correct",
+      "pred": "Correct"
+    },
+    {
+      "rep": 10,
+      "yaw": 90,
+      "truth": "Feet too wide",
+      "pred": "Correct"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "risk_auc": 0.8140356444021365,
+  "lead_time": 0.8545454545454545,
+  "false_alarms": 1.2,
+  "spearman_set_idx": -0.5739538037740438,
+  "n_sets": 139,
+  "variant": "B3",
+  "per_session": {
+    "w00": {
+      "risk_auc": 0.7806437389770723,
+      "lead_time": 1.25,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.7405166100994277,
+      "n_sets": 30
+    },
+    "w05": {
+      "risk_auc": 0.8443858878641487,
+      "lead_time": 1.5555555555555556,
+      "false_alarms": 2.0,
+      "spearman_set_idx": -0.5141166273938702,
+      "n_sets": 30
+    },
+    "w12": {
+      "risk_auc": 0.8714596949891067,
+      "lead_time": 0.7777777777777778,
+      "false_alarms": 4.0,
+      "spearman_set_idx": -0.7454521845334331,
+      "n_sets": 22
+    },
+    "w13": {
+      "risk_auc": 0.7843443819053575,
+      "lead_time": 0.46153846153846156,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.41034996865382306,
+      "n_sets": 30
+    },
+    "w20": {
+      "risk_auc": 0.8245192307692307,
+      "lead_time": 0.4166666666666667,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.4134901300403122,
+      "n_sets": 27
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "adapt_person": "yassine",
+  "test_person": "partner",
+  "n_own_adapt_windows": 163,
+  "n_own_adapt_sets": 12,
+  "zero_shot": {
+    "n_sets": 8,
+    "set_accuracy": 0.625,
+    "set_correct": 5,
+    "preds": [
+      {
+        "key": "partner/2026-11-10_s007/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_PUSHUP/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_EX3IHEB/set01",
+        "truth": "jumping_jacks",
+        "pred": "jumping_jacks",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_SHOULDERPRESS/set01",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_SHOULDERDUMB2/set01",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_s01/set01",
+        "truth": "lateral_shoulder_raises",
+        "pred": "jumping_jacks",
+        "ok": false
+      },
+      {
+        "key": "partner/2026-11-10_s01/set02",
+        "truth": "tricep_extensions",
+        "pred": "dumbbell_rows",
+        "ok": false
+      },
+      {
+        "key": "partner/2026-11-10_s01/set03",
+        "truth": "situps",
+        "pred": "pushups",
+        "ok": false
+      }
+    ]
+  },
+  "adapted": {
+    "n_sets": 8,
+    "set_accuracy": 0.625,
+    "set_correct": 5,
+    "preds": [
+      {
+        "key": "partner/2026-11-10_s007/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_PUSHUP/set01",
+        "truth": "pushups",
+        "pred": "pushups",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_EX3IHEB/set01",
+        "truth": "jumping_jacks",
+        "pred": "jumping_jacks",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_SHOULDERPRESS/set01",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_SHOULDERDUMB2/set01",
+        "truth": "dumbbell_shoulder_press",
+        "pred": "dumbbell_shoulder_press",
+        "ok": true
+      },
+      {
+        "key": "partner/2026-11-10_s01/set01",
+        "truth": "lateral_shoulder_raises",
+        "pred": "jumping_jacks",
+        "ok": false
+      },
+      {
+        "key": "partner/2026-11-10_s01/set02",
+        "truth": "tricep_extensions",
+        "pred": "dumbbell_rows",
+        "ok": false
+      },
+      {
+        "key": "partner/2026-11-10_s01/set03",
+        "truth": "situps",
+        "pred": "no_exercise_detected",
+        "ok": false
+      }
+    ]
+  },
+  "checkpoint": "m1_transformer_pose_lopo_partner.pt"
+}

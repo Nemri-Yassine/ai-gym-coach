@@ -1,0 +1,100 @@
+{
+  "sessions": [
+    {
+      "session": "w00",
+      "n_sets_m1": 30,
+      "m1_macro_f1_dataset_pose_only": 1.0,
+      "m1_macro_f1_dataset_both": 0.8,
+      "m1_macro_f1_mediapipe_pose_only": 0.890909090909091,
+      "m1_macro_f1_mediapipe_both": 0.8181818181818182,
+      "rep_mae_dataset": 0.5333333333333333,
+      "rep_mae_mediapipe": 0.8666666666666667,
+      "sync": {
+        "a": 9.225349827491954,
+        "b": 0.0006456720397581816,
+        "pivot": 14297.0,
+        "n_sets": 12,
+        "n_within_3": 0,
+        "frac_within_3": 0.0,
+        "source": "cross_corr_midhip"
+      },
+      "form_p_correct_mean_dataset": 0.3946892655367232,
+      "form_p_correct_mean_mediapipe": 0.2660919540229885,
+      "form_note": "MM-Fit has no form labels; numbers are Model 2 RF P(correct) only",
+      "n_form_reps_dataset": 59,
+      "n_form_reps_mediapipe": 58
+    },
+    {
+      "session": "w12",
+      "n_sets_m1": 22,
+      "m1_macro_f1_dataset_pose_only": 0.7777777777777778,
+      "m1_macro_f1_dataset_both": 0.7777777777777778,
+      "m1_macro_f1_mediapipe_pose_only": 0.7777777777777778,
+      "m1_macro_f1_mediapipe_both": 0.7777777777777778,
+      "rep_mae_dataset": 0.3181818181818182,
+      "rep_mae_mediapipe": 1.0,
+      "sync": {
+        "a": 13.240509966167146,
+        "b": -0.001178191133259057,
+        "pivot": 14325.0,
+        "n_sets": 12,
+        "n_within_3": 2,
+        "frac_within_3": 0.16666666666666666,
+        "source": "auto"
+      },
+      "form_p_correct_mean_dataset": 0.2521666666666667,
+      "form_p_correct_mean_mediapipe": 0.2791256830601093,
+      "form_note": "MM-Fit has no form labels; numbers are Model 2 RF P(correct) only",
+      "n_form_reps_dataset": 60,
+      "n_form_reps_mediapipe": 61
+    },
+    {
+      "session": "w13",
+      "n_sets_m1": 30,
+      "m1_macro_f1_dataset_pose_only": 1.0,
+      "m1_macro_f1_dataset_both": 0.8272727272727273,
+      "m1_macro_f1_mediapipe_pose_only": 0.890909090909091,
+      "m1_macro_f1_mediapipe_both": 0.8,
+      "rep_mae_dataset": 0.7333333333333333,
+      "rep_mae_mediapipe": 0.6333333333333333,
+      "sync": {
+        "a": -3.737351367089919,
+        "b": -8.470066680858374e-05,
+        "pivot": 16397.5,
+        "n_sets": 12,
+        "n_within_3": 2,
+        "frac_within_3": 0.16666666666666666,
+        "source": "auto"
+      },
+      "form_p_correct_mean_dataset": 0.23707602339181288,
+      "form_p_correct_mean_mediapipe": 0.28235632183908044,
+      "form_note": "MM-Fit has no form labels; numbers are Model 2 RF P(correct) only",
+      "n_form_reps_dataset": 57,
+      "n_form_reps_mediapipe": 58
+    },
+    {
+      "session": "w20",
+      "n_sets_m1": 27,
+      "m1_macro_f1_dataset_pose_only": 0.85,
+      "m1_macro_f1_dataset_both": 0.6599999999999999,
+      "m1_macro_f1_mediapipe_pose_only": 0.8,
+      "m1_macro_f1_mediapipe_both": 0.48,
+      "rep_mae_dataset": 0.9259259259259259,
+      "rep_mae_mediapipe": 1.3703703703703705,
+      "sync": {
+        "a": 31.04837552922159,
+        "b": 0.0017185092023086614,
+        "pivot": 17954.0,
+        "n_sets": 12,
+        "n_within_3": 10,
+        "frac_within_3": 0.8333333333333334,
+        "source": "auto"
+      },
+      "form_p_correct_mean_dataset": 0.08096045197740112,
+      "form_p_correct_mean_mediapipe": 0.1267231638418079,
+      "form_note": "MM-Fit has no form labels; numbers are Model 2 RF P(correct) only",
+      "n_form_reps_dataset": 59,
+      "n_form_reps_mediapipe": 59
+    }
+  ]
+}

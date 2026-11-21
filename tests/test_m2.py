@@ -1,6 +1,8 @@
 """Model 2: graph, angles, and the quick training entry points."""
+import os
 import subprocess
 import sys
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -70,8 +72,16 @@ def test_features_2d_finite():
     assert np.isfinite(vector).all()
 
 
-def test_train_quick():
+def test_train_quick(tmp_path):
+    env = {
+        **os.environ,
+        "AWC_MODELS_DIR": str(tmp_path / "models"),
+        "AWC_EXPERIMENTS_DIR": str(tmp_path / "experiments"),
+    }
     for model in ("stgcn", "rf"):
         subprocess.check_call(
             [sys.executable, "-m", "awc.training.train_m2", "--model", model, "--quick"],
+            env=env,
         )
+    assert (tmp_path / "models" / "m2_stgcn_quick.pt").is_file()
+    assert (tmp_path / "models" / "m2_rf_quick.pickle").is_file()

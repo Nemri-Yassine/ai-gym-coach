@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Week 2 Study Guide · AI Workout Coach</title>
+<style>
+@page{size:A4;margin:12mm 14mm 12mm 14mm}
+:root{--ink:#14181f;--muted:#5b6673;--line:#d9dee5;--accent:#2f55d4;--ok:#1d8a52;--bad:#c23b40;--warn:#a36a00;--bg2:#f4f6f9}
+*{box-sizing:border-box}
+body{font-family:"Segoe UI",system-ui,sans-serif;color:var(--ink);font-size:10pt;line-height:1.36;margin:0}
+h1{font-size:24pt;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:15.5pt;margin:0 0 8px;padding-bottom:5px;border-bottom:2px solid var(--accent);color:var(--accent)}
+h3{font-size:11pt;margin:9px 0 3px}
+p{margin:0 0 7px}
+.sub{color:var(--muted);font-size:10.5pt}
+.part{page-break-before:always}
+.part:first-of-type{page-break-before:avoid}
+.num{display:inline-block;background:var(--accent);color:#fff;font-weight:700;border-radius:6px;padding:1px 8px;margin-right:6px;font-size:10pt}
+.box{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:8px 0}
+.box.ok{border-left:4px solid var(--ok)} .box.bad{border-left:4px solid var(--bad)} .box.acc{border-left:4px solid var(--accent)}
+table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:9.8pt}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{background:var(--bg2);font-weight:600;color:var(--muted);font-size:9pt;text-transform:uppercase;letter-spacing:.04em}
+td.n{text-align:right;font-weight:600;white-space:nowrap}
+code{font-family:"Cascadia Mono",Consolas,monospace;font-size:9pt;background:#eef1f6;padding:0 3px;border-radius:3px}
+.file{border:1px solid var(--line);border-radius:8px;margin:7px 0;page-break-inside:avoid}
+.file .hd{background:var(--bg2);padding:5px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.file .hd b{font-family:"Cascadia Mono",Consolas,monospace;font-size:9.4pt}
+.file .hd span{color:var(--muted);font-size:9.4pt}
+.file .bd{padding:5px 10px 6px}
+.file .bd p{margin:0 0 4px}
+.fn{display:grid;grid-template-columns:250px 1fr;gap:2px 10px;font-size:9.5pt}
+.fn code{background:none;padding:0;color:var(--accent);overflow-wrap:anywhere}
+.qa{page-break-inside:avoid;margin:0 0 6px}
+.qa .q{font-weight:700}
+.qa .a{margin-left:14px}
+.steps{counter-reset:s;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;position:relative;padding-left:30px;margin:0 0 7px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:9.5pt;text-align:center;line-height:21px}
+.flow{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:6px 0 10px;font-size:9.4pt}
+.flow span{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+.flow i{color:var(--accent);font-style:normal;font-weight:700}
+.toc{columns:2;font-size:10.5pt}
+.toc div{margin:0 0 4px}
+.tag{font-size:8.5pt;font-weight:700;border-radius:4px;padding:0 5px;color:#fff}
+.tag.new{background:var(--ok)} .tag.mod{background:var(--accent)}
+.file .hd span.tag,.sub .tag{color:#fff}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ COVER -->
+<section class="part">
+  <h1>Week 2 · Study Guide</h1>
+  <p class="sub">AI Workout Coach · Deep Learning &amp; Big Data · Yassine Nemri · Iheb Lamouchi · 11 Nov 2026</p>
+  <div class="box acc"><b>How to use it.</b> Read Part 1 to understand the story, learn the numbers in Part 2, practise Part 3 out loud. Part 4 tells you where each piece of code lives and what each function does, in case the professor opens the code.</div>
+  <h3>Contents</h3>
+  <div class="toc">
+    <div><span class="num">1</span>Week 2 technical approach</div>
+    <div><span class="num">2</span>Key numbers to remember</div>
+    <div><span class="num">3</span>Answers for the professor</div>
+    <div><span class="num">4</span>File map: where the code is</div>
+    <div><span class="num">5</span>Commands for the demo</div>
+  </div>
+  <h3>The project in one line</h3>
+  <p>An AI coach that watches you train with a <b>phone camera</b> and a <b>smartwatch</b>, recognises the exercise, counts reps, checks the form, and (week 3) says <b>stop</b> before fatigue turns into injury.</p>
+  <div class="flow"><span>iPhone video + watch HR</span><i>→</i><span>MediaPipe skeleton (18 joints)</span><i>→</i><span><b>Model 1</b> exercise + reps</span><i>→</i><span><b>Model 2</b> form</span><i>→</i><span><b>Model 3</b> fatigue (W3)</span><i>→</i><span>coach</span></div>
+  <h3>Week 2 in five words</h3>
+  <p><b>Real recordings, honest transfer test.</b> Week 1 trained on public datasets; week 2 asks whether the models still work on <b>our phone, in our gym, on our bodies</b> (research question RQ4).</p>
+</section>
+
+<!-- ============================================================ PART 1 -->
+<section class="part">
+  <h2><span class="num">1</span>Week 2 · technical approach (the story)</h2>
+
+  <h3>1 · The goal</h3>
+  <p>In week 1 the models were trained and tested on datasets (MM-Fit for Model 1, EC3D for Model 2). Week 2 had to deliver: Model 2 (form), streaming (Kafka), the Spark rep table, and above all a <b>test on our own real recordings</b>. The research question RQ4 is: <i>how much accuracy do we lose when we move from a dataset to a real phone camera?</i></p>
+
+  <h3>2 · We built the capture system (the "gym station")</h3>
+  <p>The iPhone opens a page in <b>Safari</b> (no app to install). Because Safari only gives camera access over HTTPS, the laptop runs an HTTPS server (FastAPI) with a certificate made by <b>mkcert</b>; the iPhone trusts the mkcert root once, and the laptop re-issues its own certificate at every start for its current IP (home Wi-Fi, gym Wi-Fi or iPhone hotspot). The phone page is protected by a <b>PIN</b>. While recording, the phone's <b>MediaRecorder</b> sends the video every second in small pieces; the laptop writes them in order and acknowledges each one, so a Wi-Fi drop loses nothing. The laptop shows a smooth live view through <b>WebRTC</b>. The <b>Galaxy Watch 7</b> sends heart rate over <b>Bluetooth</b> (app "Heart for Bluetooth", standard heart-rate service 0x180D) and the laptop reads it with <code>bleak</code>. Phone and laptop clocks are synchronised NTP-style, so video, heart rate and labels share one clock.</p>
+
+  <h3>3 · We recorded and cleaned the labels</h3>
+  <p>Two people, one day, <b>20 sets, 9 exercises</b>. Sometimes we pressed the wrong exercise button, so the <b>written note</b> of each set is the truth: a manifest (<code>data/own_manifest.csv</code>) maps every set to its true exercise, never editing the raw files. The rep box was pre-filled with 10, so rep counts are being re-checked by hand with a review tool; rep numbers are marked <i>provisional</i> until then.</p>
+
+  <h3>4 · From video to skeleton</h3>
+  <p>For every set, <b>MediaPipe</b> extracts 33 landmarks per frame, mapped to an <b>18-joint skeleton</b> (the same one used for MM-Fit and EC3D). Frames are resampled to 30 fps on the <b>real frame times</b> recorded by the station. The skeleton is <b>normalised</b>: centred on the hips and scaled by the torso length, so the camera distance and the person's size don't matter. Heart rate is joined to each frame by nearest timestamp.</p>
+
+  <h3>5 · Testing the models on our videos (zero-shot = no training on our data)</h3>
+  <p><b>Model 1</b> (transformer on 3-second windows of skeleton) votes over the windows of each set. Result: <b>14/20 sets (70%)</b>, perfect on push-ups, squats, shoulder press, bicep curls and jumping jacks, wrong on triceps, lateral raises, sit-ups and rows. All three architectures fail on the <b>same sets</b>, so the errors are systematic. The diagnosis (plotting our joint trajectories against MM-Fit's) shows <b>different variants or camera views</b>: cable push-down instead of overhead triceps, one-arm rows from the side, etc.</p>
+  <p><b>Fix tested:</b> leave-one-person-out adaptation: fine-tune on MM-Fit + one person's sets, test on the other person. Yassine: <b>75% → 92%</b>; Iheb: unchanged at 62.5%. The test person is never used in training.</p>
+
+  <h3>6 · Model 2 (form)</h3>
+  <p>On EC3D, with a fair leave-one-person-out test, the random forest on 2D joint-angle features reaches squat 54%, lunge 72%, plank 83%. On real phone videos it is <b>not calibrated</b>: it flags our correct squats as "front bent" (P(correct) 0.06), but it correctly calls a public clip of <b>half squats "not low enough" on 10/10 reps</b>. So it catches clear mistakes but raises false alarms; the live coach hides it until calibration (week 3).</p>
+
+  <h3>7 · Big data and live</h3>
+  <p><b>Spark</b> builds one row per rep (speed, range of motion, duration, heart rate, form score) and within-set baselines with window functions: 5,918 reps for MM-Fit, 269 for our data. <b>Kafka</b> streams pose and heart rate (replay: 29.8 msg/s, 48 ms latency). After each set the station runs the whole chain in the background and shows the result about <b>8 s</b> later.</p>
+
+  <div class="box ok"><b>The message:</b> the models work where our gym looks like their training data; where it doesn't, we found <b>why</b> and showed <b>how to fix it</b>. Everything is tested honestly: our videos are test data only.</div>
+</section>
+
+<!-- ============================================================ PART 2 -->
+<section class="part">
+  <h2><span class="num">2</span>Key numbers to remember</h2>
+  <h3>Our recordings</h3>
+  <table>
+    <tr><th>What</th><th>Value</th></tr>
+    <tr><td>People / sets / exercises</td><td class="n">2 / 20 (+2 test) / 9</td></tr>
+    <tr><td>Video</td><td class="n">30 fps on every set, 22/22 uploaded</td></tr>
+    <tr><td>Phone ↔ laptop clock round trip</td><td class="n">3.5 ms median</td></tr>
+    <tr><td>Heart-rate coverage during sets</td><td class="n">≈ 50% (Yassine 0.54, Iheb 0.52)</td></tr>
+    <tr><td>Wrong exercise buttons corrected from notes</td><td class="n">3</td></tr>
+  </table>
+  <h3>Model 1 (exercise) on our videos</h3>
+  <table>
+    <tr><th>Metric</th><th>Value</th></tr>
+    <tr><td>Set accuracy, zero-shot</td><td class="n">70% (14/20) · 95% CI 48–85%</td></tr>
+    <tr><td>Per person</td><td class="n">Yassine 75% (n=12) · Iheb 62.5% (n=8)</td></tr>
+    <tr><td>Macro-F1 (9 exercises)</td><td class="n">0.51</td></tr>
+    <tr><td>Perfect exercises</td><td class="n">push-ups, squats, shoulder press, curls, jumping jacks</td></tr>
+    <tr><td>Failing exercises</td><td class="n">triceps 0/3, lateral raises, sit-ups, rows</td></tr>
+    <tr><td>Leave-one-person-out adaptation</td><td class="n">Yassine 75% → 92% · Iheb 62.5% → 62.5%</td></tr>
+    <tr><td>Same model elsewhere</td><td class="n">MM-Fit unseen 0.85–0.88 F1 · public videos 81%</td></tr>
+  </table>
+  <h3>Rep counting</h3>
+  <table>
+    <tr><td>MM-Fit (week 1)</td><td class="n">MAE 0.49 reps</td></tr>
+    <tr><td>Our videos (provisional, typed "10")</td><td class="n">MAE 3.2 · squats exact (10/10, both sets)</td></tr>
+  </table>
+  <h3>Model 2 (form)</h3>
+  <table>
+    <tr><th></th><th>Squat</th><th>Lunge</th><th>Plank</th></tr>
+    <tr><td>Random forest (EC3D, leave-one-person-out)</td><td class="n">53.8%</td><td class="n">71.6%</td><td class="n">82.8%</td></tr>
+    <tr><td>ST-GCN</td><td class="n">55.6%</td><td class="n">68.5%</td><td class="n">70.2%</td></tr>
+  </table>
+  <table>
+    <tr><td>Our correct squats (phone)</td><td class="n">P(correct) 0.06 → false alarm "front bent"</td></tr>
+    <tr><td>Public half-squat clip</td><td class="n">"Not low enough" on 10/10 reps ✓</td></tr>
+    <tr><td>Public before/after clip</td><td class="n">bad flagged ✓ · corrected also flagged ✗</td></tr>
+  </table>
+  <h3>Big data and live</h3>
+  <table>
+    <tr><td>Kafka replay, pose stream</td><td class="n">29.8 msg/s · 48 ms</td></tr>
+    <tr><td>Kafka replay, heart-rate stream</td><td class="n">0.79 msg/s · 19 ms</td></tr>
+    <tr><td>Spark rep table</td><td class="n">MM-Fit 5,918 reps (616 sets) · ours 269 reps</td></tr>
+    <tr><td>Result after each set (live)</td><td class="n">≈ 8 s (13 s with full-quality pose)</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ PART 3 -->
+<section class="part">
+  <h2><span class="num">3</span>Answers for the professor</h2>
+  <div class="qa"><div class="q">Q · Why only 70% on your videos?</div><div class="a">Domain shift. The training data uses other exercise variants and a front camera. All three models fail on the same sets, and the trajectory plots show why (e.g. our triceps are a cable push-down). Adapting on one person and testing on the other raises Yassine from 75% to 92%.</div></div>
+  <div class="qa"><div class="q">Q · Is 20 sets enough?</div><div class="a">No, it's a first signal. That's why we give a 95% confidence interval (48–85%) and count per person. Week 3 adds more sessions and people.</div></div>
+  <div class="qa"><div class="q">Q · Did you tune anything on your test videos?</div><div class="a">No. Our videos are test data only. The adaptation experiment trains on one person and tests on the other person, never the same one. Rep-counter parameters were not changed on our videos.</div></div>
+  <div class="qa"><div class="q">Q · How do you know the true labels?</div><div class="a">Each set has a typed exercise and a written note. When the button was wrong, the note is the truth; a manifest records every correction, and the raw files are never edited. Reps are being re-counted by hand from the videos with a review tool.</div></div>
+  <div class="qa"><div class="q">Q · How does Model 1 work?</div><div class="a">MediaPipe gives 18 joints per frame. We normalise the skeleton (hip-centred, torso-scaled), cut 3-second windows (90 frames), and a small transformer classifies each window into 10 exercises + "no exercise". The set label is a majority vote over its windows. In week 1 it can also use the watch motion (IMU).</div></div>
+  <div class="qa"><div class="q">Q · How does Model 2 work?</div><div class="a">EC3D 3D reps are projected to 2D from 7 camera angles (0–90°) and mirrored, to look like phone skeletons. We compute joint-angle features (knee angle, hip depth, trunk lean, knee position, stance width…) and a random forest predicts "correct" or the named mistake. Deep models (ST-GCN, LSTM) were not better, so the random forest stays.</div></div>
+  <div class="qa"><div class="q">Q · Can Model 2 detect a mistake on real video?</div><div class="a">Partly: on a public half-squat clip it says "not low enough" on all 10 reps. But on correct squats it raises false alarms, so it isn't calibrated for phone skeletons. The fix is to record our own correct and wrong reps and calibrate with a person split (week 3). Until then the live coach hides form.</div></div>
+  <div class="qa"><div class="q">Q · How do you count reps?</div><div class="a">From the skeleton we build a movement signal for the exercise (hip height for squats, wrist relative to shoulder for curls…), smooth it, and count its peaks with a minimum distance. Alternating exercises are counted per arm.</div></div>
+  <div class="qa"><div class="q">Q · Where is the Big Data part?</div><div class="a">Spark joins MM-Fit video pose, watch motion and heart rate (70.8 M sensor rows) into one table, and builds the per-rep table with window functions for personal baselines. Kafka streams pose and heart rate as topics and the coach consumes them.</div></div>
+  <div class="qa"><div class="q">Q · How do video and heart rate stay in sync?</div><div class="a">Everything is on the laptop clock. The phone's clock offset is measured with NTP-style pings (round trip 3.5 ms); each video frame's time comes from the video file plus the recorder start time converted to the laptop clock; heart rate is timestamped on arrival.</div></div>
+  <div class="qa"><div class="q">Q · What's the weakest part?</div><div class="a">Watch heart rate (about 50% coverage, the watch goes silent) and Model 2 calibration. Both are known, measured, and planned for week 3.</div></div>
+  <div class="qa"><div class="q">Q · Why the demo videos? Are they real?</div><div class="a">Yes: our own recordings, processed frame by frame using only past frames, as it would run live. The overlay shows the truth in grey and a ✓ or ✗. Failures are shown on purpose.</div></div>
+</section>
+
+<!-- ============================================================ PART 4 -->
+<section class="part">
+  <h2><span class="num">4</span>File map: where the code is</h2>
+  <p class="sub"><span class="tag new">NEW</span> created in week 2 · <span class="tag mod">MOD</span> changed in week 2. Paths are relative to the project folder.</p>
+
+  <h3>A · Capture: the gym station (<code>src/awc/station/</code>)</h3>
+  <div class="file"><div class="hd"><b>__main__.py</b><span><span class="tag mod">MOD</span> start command</span></div><div class="bd">
+    <p><code>python -m awc.station</code> starts the HTTPS server on port 8443, prints the phone URLs and PIN, opens the control page.</p>
+    <div class="fn"><code>main()</code><span>reads options (<code>--pin</code>, <code>--renew-cert</code>, <code>--kafka</code>), calls <code>ensure_certs</code>, runs uvicorn.</span></div></div></div>
+  <div class="file"><div class="hd"><b>netutil.py</b><span><span class="tag mod">MOD</span> network, PIN, certificate</span></div><div class="bd"><div class="fn">
+    <code>lan_ips()</code><span>the laptop's IP addresses (hotspot first).</span>
+    <code>ensure_certs()</code><span>re-issues the HTTPS certificate with mkcert when the IP changed (same root CA, nothing new on the iPhone).</span>
+    <code>station_pin()</code><span>4-digit PIN stored in <code>C:/awc_tmp/station.json</code>.</span>
+    <code>phone_url() · qr_data_url()</code><span>phone link with the PIN, and its QR code.</span>
+    <code>firewall_rule_cmd()</code><span>the Windows firewall command (all network profiles).</span></div></div></div>
+  <div class="file"><div class="hd"><b>app.py</b><span><span class="tag mod">MOD</span> the server (FastAPI)</span></div><div class="bd">
+    <div class="fn"><code>create_app()</code><span>builds the server; a guard lets only the laptop open the control page and asks the phone for the PIN.</span>
+    <code>/api/session/start · /end</code><span>create or continue a session folder in <code>data/raw/own_recordings/</code>.</span>
+    <code>/api/set/start · /end · /save</code><span>tell the phone to record, then save labels (save is blocked until the video is complete; reps must be typed).</span>
+    <code>/api/upload/{set}/{seq}</code><span>receives each 1-second video piece.</span>
+    <code>/api/phone/set_done</code><span>last message of a set: checks all pieces arrived, then finalises the video.</span>
+    <code>/ws/phone · /ws/control</code><span>websockets: commands, clock pings, WebRTC live-view signalling, image fallback.</span>
+    <code>/api/hr/devices · /connect</code><span>scan and connect the watch (Bluetooth, Pulsoid or demo).</span></div></div></div>
+  <div class="file"><div class="hd"><b>chunks.py · clock.py · session_io.py · state.py</b><span>helpers</span></div><div class="bd"><div class="fn">
+    <code>ChunkAssembler.add()</code><span>writes video pieces in order, exactly once, even if they arrive out of order or twice.</span>
+    <code>ClockSync.add/estimate()</code><span>NTP-style phone↔laptop clock offset (median of the 5 fastest pings).</span>
+    <code>verify_video()</code><span>remuxes the uploaded pieces into a normal MP4 (ffmpeg, no re-encode) and reads each frame's time.</span>
+    <code>StationSession.finish_upload()</code><span>writes <code>frames_setNN.csv</code> on the laptop clock.</span>
+    <code>state.Runtime</code><span>live state shown on the control page (phone, HR, upload, analyses).</span></div></div></div>
+  <div class="file"><div class="hd"><b>hr_ble.py · hr_parse.py</b><span>watch heart rate</span></div><div class="bd"><div class="fn">
+    <code>BleHR</code><span>connects to the watch with bleak, auto-reconnects, counts drops.</span>
+    <code>parse_hr_measurement()</code><span>decodes the standard Bluetooth heart-rate message (bpm + RR intervals).</span></div></div></div>
+  <div class="file"><div class="hd"><b>analyze.py</b><span><span class="tag new">NEW</span> live result after each set</span></div><div class="bd"><div class="fn">
+    <code>analyze_set()</code><span>pose → Model 1 vote → rep count → heart-rate stats for a saved set; writes <code>analysis_setNN.json</code>.</span>
+    <code>schedule_analysis()</code><span>runs it in a background thread so recording is never slowed down.</span></div></div></div>
+  <div class="file"><div class="hd"><b>static/phone.html · static/control.html</b><span><span class="tag mod">MOD</span> the two web pages</span></div><div class="bd">
+    <p><b>phone.html</b>: camera, MediaRecorder upload queue (retries until the laptop confirms), WebRTC sender, frame timestamps. <b>control.html</b>: live view, exercise buttons, Space = start/end set, reps/RPE/form form, heart-rate chart, upload progress.</p></div></div>
+
+  <h3>B · Labels and data preparation</h3>
+  <div class="file"><div class="hd"><b>src/awc/data/own_manifest.py</b><span><span class="tag new">NEW</span> true labels of our sets</span></div><div class="bd"><div class="fn">
+    <code>parse_note_exercise()</code><span>reads the note ("PUSHUP", "TRICEPS"…) and returns the exercise.</span>
+    <code>exercise_from_folder()</code><span>exercise from the folder name, for the 2 sets whose labels were never saved.</span>
+    <code>build_rows()</code><span>one row per set: video, times, true exercise, reps, heart-rate coverage, eval/test.</span>
+    <code>apply_verified_overrides()</code><span>uses the hand-counted reps when they exist.</span>
+    <code>write_manifest()</code><span>writes <code>data/own_manifest.csv</code> (raw data never edited).</span></div></div></div>
+  <div class="file"><div class="hd"><b>scripts/review_reps.py</b><span><span class="tag new">NEW</span> count reps by hand</span></div><div class="bd"><p>Local web page: each video with a + / − counter; saves <code>data/own_reps_verified.csv</code>.</p></div></div>
+  <div class="file"><div class="hd"><b>scripts/process_recording.py</b><span><span class="tag new">NEW</span> video → skeleton</span></div><div class="bd"><div class="fn">
+    <code>process_one()</code><span>MediaPipe on one set with the real frame times, 18-joint skeleton, heart rate joined → <code>data/interim/own/…parquet</code>.</span>
+    <code>draw_pose_check()</code><span>draws the skeleton on 3 frames to check it visually.</span></div></div></div>
+  <div class="file"><div class="hd"><b>src/awc/features/</b><span>shared building blocks</span></div><div class="bd"><div class="fn">
+    <code>pose_video.extract_pose()</code><span>MediaPipe on a video, resampled to 30 fps on real times.</span>
+    <code>skeleton.normalize()</code><span>hip-centred, torso-scaled skeleton (camera-distance invariant).</span>
+    <code>reps.count_reps() · rep_boundaries()</code><span>rep count and rep start/end from the movement signal's peaks.</span>
+    <code>form_features.features_2d()</code><span>joint angles and distances used by Model 2.</span>
+    <code>own_sync.join_hr_nearest()</code><span>nearest heart-rate reading for each frame (±2 s).</span></div></div></div>
+
+  <h3>C · Evaluation (RQ4) and the fix</h3>
+  <div class="file"><div class="hd"><b>scripts/eval_own_recordings.py</b><span><span class="tag new">NEW</span> the main week-2 result</span></div><div class="bd"><div class="fn">
+    <code>activity_span()</code><span>trims the still seconds before and after a set.</span>
+    <code>windows() · predict() · video_vote()</code><span>3-s windows → Model 1 → majority vote (no-exercise excluded).</span>
+    <code>m2_p_correct()</code><span>Model 2 probability of "correct" per rep.</span>
+    <code>wilson_ci()</code><span>95% confidence interval for small samples.</span>
+    <code>evaluate() · write_report()</code><span>all metrics → <code>reports/rq4_own.md</code> + figures.</span></div></div></div>
+  <div class="file"><div class="hd"><b>scripts/diagnose_own_m1.py</b><span><span class="tag new">NEW</span> why it fails</span></div><div class="bd"><p>Plots our mean joint trajectory against MM-Fit's for the true and the predicted class → <code>reports/figures/own_m1_diagnosis.png</code>.</p></div></div>
+  <div class="file"><div class="hd"><b>scripts/train_m1_lopo_own.py</b><span><span class="tag new">NEW</span> adaptation to a new person</span></div><div class="bd"><div class="fn">
+    <code>finetune(adapt, test)</code><span>fine-tunes Model 1 on MM-Fit + one person, tests on the other.</span>
+    <code>eval_person()</code><span>set accuracy for one person.</span></div></div></div>
+
+  <h3>D · Models and training (from weeks 1–2)</h3>
+  <div class="file"><div class="hd"><b>src/awc/models/m1_recognition.py · m2_form.py</b><span>model definitions</span></div><div class="bd"><div class="fn">
+    <code>M1Model</code><span>CNN / LSTM / transformer encoder + classifier (pose, IMU or both).</span>
+    <code>STGCN · AngleLSTM</code><span>Model 2 deep alternatives (graph network on the skeleton; LSTM on joint angles).</span></div></div></div>
+  <div class="file"><div class="hd"><b>src/awc/training/train_m2.py</b><span>Model 2 training</span></div><div class="bd"><div class="fn">
+    <code>project_cache()</code><span>every EC3D rep seen from 7 angles + mirrored.</span>
+    <code>_fit_forests()</code><span>one random forest per exercise on the angle features.</span>
+    <code>_train_folds_rf()</code><span>leave-one-person-out test → the reported accuracies.</span></div></div></div>
+
+  <h3>E · Big data</h3>
+  <div class="file"><div class="hd"><b>src/awc/bigdata/history.py</b><span><span class="tag mod">MOD</span> Spark rep table</span></div><div class="bd"><div class="fn">
+    <code>build_rep_table()</code><span>one row per rep for MM-Fit (Spark).</span>
+    <code>add_baselines_spark()</code><span>window functions: personal baseline from earlier sets.</span>
+    <code>build_own_rep_rows()</code><span>same rows for our recordings.</span>
+    <code>add_own_within_set_spark()</code><span>speed vs the first 2 reps of the set (velocity loss).</span></div></div></div>
+  <div class="file"><div class="hd"><b>src/awc/streaming/</b><span>Kafka</span></div><div class="bd"><div class="fn">
+    <code>kafka_io.make_producer/consumer()</code><span>connect to the broker; topics pose.keypoints, watch.hr, coach.events.</span>
+    <code>pose_producer.run_video()</code><span>publishes the skeleton of a video frame by frame.</span>
+    <code>hr_producer</code><span>publishes heart rate (replay or live).</span>
+    <code>monitor.py</code><span>shows the streams live.</span></div></div></div>
+
+  <h3>F · Demo videos and presentation</h3>
+  <div class="file"><div class="hd"><b>scripts/demo_video.py</b><span><span class="tag mod">MOD</span> annotated demo videos</span></div><div class="bd"><div class="fn">
+    <code>run()</code><span>frame by frame as live: skeleton → Model 1 every 0.1 s on the last 3 s → vote → reps; draws the info panel.</span>
+    <code>_score_step()</code><span>one model step: probabilities, vote rule, rep counting, Model 2 per rep.</span>
+    <code>m2_score_reps()</code><span>real Model 2 verdict + probabilities for each finished rep.</span>
+    <code>draw_portrait_canvas()</code><span>video left, live panel right (exercise, reps, heart rate, truth, form).</span>
+    <code>--exercise / --form-segments</code><span>exercise given (like the station button); held positions scored as one rep.</span></div></div></div>
+  <div class="file"><div class="hd"><b>scripts/docs/render_week2_demos.py · render_form_demo.py</b><span><span class="tag new">NEW</span> render all clips</span></div><div class="bd"><div class="fn">
+    <code>render_week2_demos.main()</code><span>all demo clips + the montage; <code>--montage-only</code> rebuilds the montage (constant 30 fps).</span>
+    <code>render_form_demo.loso_predictions()</code><span>Model 2 trained without each EC3D person, then tested on them.</span>
+    <code>render_form_demo.pick_pairs()</code><span>correct vs mistake reps of the same unseen person (+ one miss).</span></div></div></div>
+  <div class="file"><div class="hd"><b>scripts/docs/build_week2_deck.py</b><span><span class="tag new">NEW</span> the presentation</span></div><div class="bd"><p>Turns <code>reports/validation2/src/week2_deck_template.html</code> into <code>reports/validation2/AI_Workout_Coach_Week2.html</code> (figures inlined; videos in <code>demo/week2/</code>).</p></div></div>
+</section>
+
+<!-- ============================================================ PART 5 -->
+<section class="part">
+  <h2><span class="num">5</span>Commands for the demo</h2>
+  <ol class="steps">
+    <li><b>Presentation:</b> open <code>reports/validation2/AI_Workout_Coach_Week2.html</code> in Chrome (keep the <code>demo/</code> folder next to it). ← → change slide, F fullscreen, double-click a video for fullscreen. What to say per slide: <code>docs/week2_talk.md</code>.</li>
+    <li><b>Live station:</b> <code>.venv\Scripts\python.exe -m awc.station</code> → scan the QR with the iPhone → PIN → 30 fps → Connect camera → connect the watch → Start session → Space to start/end a set. The result appears about 8 s after the set.</li>
+    <li><b>Check devices first:</b> <code>.venv\Scripts\python.exe scripts\station_check.py</code></li>
+    <li><b>Re-run the RQ4 evaluation:</b> <code>python scripts/process_recording.py --all</code> then <code>python scripts/eval_own_recordings.py</code></li>
+    <li><b>Count reps by hand:</b> <code>python scripts/review_reps.py</code></li>
+    <li><b>One demo video:</b> <code>python scripts/demo_video.py --own yassine/2026-11-10_SQUAT/1</code></li>
+  </ol>
+  <div class="box bad"><b>If something fails live:</b> say it calmly and switch to the recorded demo videos (slides 7–11). Firewall must allow port 8443 on all networks; if the phone can't connect, use the iPhone hotspot and restart the station after the laptop joins it.</div>
+  <h3>Main reports to point to</h3>
+  <table>
+    <tr><td><code>reports/rq4_own.md</code></td><td>all numbers on our videos</td></tr>
+    <tr><td><code>reports/week2.md</code></td><td>week 2 package</td></tr>
+    <tr><td><code>reports/m2_benchmark.md</code></td><td>Model 2 on EC3D</td></tr>
+    <tr><td><code>docs/gym_station.md</code></td><td>how the station works and is set up</td></tr>
+    <tr><td><code>docs/decisions.md</code></td><td>why we chose iPhone Safari + Bluetooth watch</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

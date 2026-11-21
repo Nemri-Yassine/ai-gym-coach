@@ -12,12 +12,10 @@ but frames.csv is the reference clock: downstream code must take time from it, n
 from the video's fps.
 """
 import argparse
-import json
 import queue
 import threading
 import time
 from datetime import date, datetime
-from urllib.parse import urlparse
 
 from awc.data.recordings import (
     EXERCISES,
@@ -29,6 +27,7 @@ from awc.data.recordings import (
     session_dir,
     write_meta,
 )
+from awc.streaming.hr_sources import iter_hyperate, iter_pulsoid, iter_sensorlogger
 
 
 def _ask(prompt, default=None, valid=None):
@@ -46,11 +45,11 @@ def _hr_loop(source, token, port, stop, hr_path):
     """Append bpm values until stop is set. Failures are printed, not fatal."""
     try:
         if source == "pulsoid":
-            stream = _iter_pulsoid(token)
+            stream = iter_pulsoid(token)
         elif source == "hyperate":
-            stream = _iter_hyperate(token)
+            stream = iter_hyperate(token)
         elif source == "sensorlogger":
-            stream = _iter_sensorlogger(port, stop)
+            stream = iter_sensorlogger(port, stop)
         else:
             return
         for bpm in stream:
@@ -62,165 +61,6 @@ def _hr_loop(source, token, port, stop, hr_path):
                 print(f"hr skipped: {exc}")
     except Exception as exc:  # noqa: BLE001 — a dead HR source must not kill the video
         print(f"heart-rate source stopped: {exc}")
-
-
-def _iter_pulsoid(token):
-    url = f"wss://dev.pulsoid.net/api/v1/data/real_time?access_token={token}"
-    for text in _websocket_texts(url):
-        msg = json.loads(text)
-        data = msg.get("data", msg)
-        bpm = data.get("heart_rate", data.get("heartRate", data.get("bpm")))
-        if bpm is not None:
-            yield bpm
-
-
-def _iter_hyperate(token):
-    """HypeRate uses a Phoenix websocket. token is the HypeRate ID."""
-    url = "wss://app.hyperate.io/socket/websocket?vsn=2.0.0"
-    join = json.dumps({"topic": f"hr:{token}", "event": "phx_join", "payload": {}, "ref": "1"})
-    for text in _websocket_texts(url, first_message=join):
-        msg = json.loads(text)
-        payload = msg.get("payload") or {}
-        bpm = payload.get("hr") or payload.get("heart_rate") or payload.get("bpm")
-        if bpm is not None:
-            yield bpm
-
-
-def _iter_sensorlogger(port, stop):
-    """Tiny HTTP server. Sensor Logger (or a curl) POSTs JSON containing bpm."""
-    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-    import queue
-    found = queue.Queue()
-
-    class Handler(BaseHTTPRequestHandler):
-        def log_message(self, fmt, *args):
-            return
-
-        def do_POST(self):
-            n = int(self.headers.get("Content-Length", "0"))
-            body = self.rfile.read(n)
-            self.send_response(204)
-            self.end_headers()
-            try:
-                msg = json.loads(body.decode("utf-8"))
-            except json.JSONDecodeError:
-                return
-            bpm = _find_bpm(msg)
-            if bpm is not None:
-                found.put(bpm)
-
-    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    print(f"Sensor Logger push URL: http://<this-pc>:{port}/")
-    try:
-        while not stop.is_set():
-            try:
-                yield found.get(timeout=0.5)
-            except queue.Empty:
-                continue
-    finally:
-        server.shutdown()
-
-
-def _find_bpm(msg):
-    if isinstance(msg, dict):
-        for key in ("bpm", "heart_rate", "heartRate", "hr"):
-            if key in msg and isinstance(msg[key], (int, float)):
-                return msg[key]
-        for value in msg.values():
-            found = _find_bpm(value)
-            if found is not None:
-                return found
-    if isinstance(msg, list):
-        for item in msg:
-            found = _find_bpm(item)
-            if found is not None:
-                return found
-    return None
-
-
-def _websocket_texts(url, first_message=None):
-    """Minimal websocket client: yield server text frames. No extra dependency."""
-    import base64
-    import os
-    import socket
-    import ssl
-
-    parsed = urlparse(url)
-    host = parsed.hostname
-    port = parsed.port or (443 if parsed.scheme == "wss" else 80)
-    raw = socket.create_connection((host, port), timeout=10)
-    sock = ssl.create_default_context().wrap_socket(raw, server_hostname=host) if parsed.scheme == "wss" else raw
-    key = base64.b64encode(os.urandom(16)).decode()
-    path = parsed.path or "/"
-    if parsed.query:
-        path += "?" + parsed.query
-    sock.sendall((
-        f"GET {path} HTTP/1.1\r\nHost: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
-        f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n"
-    ).encode())
-    buf = b""
-    while b"\r\n\r\n" not in buf:
-        chunk = sock.recv(4096)
-        if not chunk:
-            raise ConnectionError("websocket handshake failed")
-        buf += chunk
-    head, buf = buf.split(b"\r\n\r\n", 1)
-    if b" 101 " not in head.split(b"\r\n", 1)[0]:
-        raise ConnectionError(head.decode("utf-8", errors="replace"))
-    if first_message:
-        _ws_send(sock, first_message)
-    sock.settimeout(5)
-    while True:
-        while len(buf) < 2:
-            buf += _recv(sock)
-        opcode = buf[0] & 0x0F
-        length = buf[1] & 0x7F
-        used = 2
-        if length == 126:
-            while len(buf) < 4:
-                buf += _recv(sock)
-            length = int.from_bytes(buf[2:4], "big")
-            used = 4
-        elif length == 127:
-            while len(buf) < 10:
-                buf += _recv(sock)
-            length = int.from_bytes(buf[2:10], "big")
-            used = 10
-        while len(buf) < used + length:
-            buf += _recv(sock)
-        payload, buf = buf[used:used + length], buf[used + length:]
-        if opcode == 1:
-            yield payload.decode("utf-8")
-        elif opcode == 8:
-            break
-        elif opcode == 9:
-            _ws_send(sock, payload, opcode=0xA)
-
-
-def _recv(sock):
-    chunk = sock.recv(65536)
-    if not chunk:
-        raise ConnectionError("websocket closed")
-    return chunk
-
-
-def _ws_send(sock, data, opcode=0x1):
-    import os
-    if isinstance(data, str):
-        data = data.encode()
-    mask = os.urandom(4)
-    masked = bytes(b ^ mask[i % 4] for i, b in enumerate(data))
-    header = bytes([0x80 | opcode])
-    n = len(data)
-    if n < 126:
-        header += bytes([0x80 | n])
-    elif n < 65536:
-        header += bytes([0x80 | 126]) + n.to_bytes(2, "big")
-    else:
-        header += bytes([0x80 | 127]) + n.to_bytes(8, "big")
-    sock.sendall(header + mask + masked)
 
 
 FPS_PROBE_SECONDS = 2.0

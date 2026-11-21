@@ -1,0 +1,100 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>AI Workout Coach · Final report</title>
+<style>
+:root{--ink:#101A23;--muted:#56646F;--line:#D5DCE3;--sunk:#EEF1F4;--accent:#1E4BD2}
+@page{size:A4;margin:16mm}
+*{print-color-adjust:exact;-webkit-print-color-adjust:exact;box-sizing:border-box}
+body{font:11pt/1.55 "Segoe UI",Arial,sans-serif;color:var(--ink);margin:0;max-width:180mm}
+h1{font:900 26pt/1.1 Arial,sans-serif;margin:0 0 4mm}
+h2{font:800 14pt/1.2 Arial,sans-serif;margin:8mm 0 3mm;padding:2.5mm 3mm;background:var(--ink);color:#fff;border-radius:2mm}
+p,li{margin:1.5mm 0}
+table{border-collapse:collapse;width:100%;margin:3mm 0;font-size:9.5pt}
+th,td{border-bottom:1px solid var(--line);padding:2mm 2.5mm;text-align:left;vertical-align:top}
+th{background:var(--sunk);font-size:8.5pt;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+code{font:9pt Consolas,monospace;background:var(--sunk);padding:.2mm 1mm;border-radius:1mm}
+ul{padding-left:5mm}
+.lede{color:var(--muted);font-size:12pt}
+</style></head><body><h1>AI Workout Coach · Final report</h1>
+<p><strong>Course:</strong> Deep Learning &amp; Big Data · 2026–2027<br />
+<strong>Team:</strong> Yassine Nemri, Iheb Lamouchi<br />
+<strong>Date:</strong> 7 Nov 2026 · tag v1.1</p>
+<h2>Objective</h2>
+<p>Build a coach that recognizes the exercise, counts reps, checks form, and warns before fatigue becomes risky — using a phone camera and a smartwatch, with a <strong>personal baseline</strong> as the main contribution.</p>
+<h2>Research questions</h2>
+<ol>
+<li><strong>RQ1:</strong> Public-data models on unseen people?  </li>
+<li><strong>RQ2:</strong> Does heart rate beat movement alone for fatigue risk?  </li>
+<li><strong>RQ3:</strong> Does a personal baseline warn earlier than a general model?  </li>
+<li><strong>RQ4:</strong> Do the models still work on raw RGB (phone-like) video?</li>
+</ol>
+<h2>Context and existing apps</h2>
+<p>Commercial apps (e.g. velocity-based training) often stop a set when bar speed drops by a fixed fraction (≈25%). Our B1 rule reproduces that idea on skeleton speed. The fair comparison uses a <strong>continuous</strong> speed-loss score for AUC, not a 0/1 step that was mismatched to the risk window.</p>
+<h2>Data</h2>
+<ul>
+<li><strong>MM-Fit:</strong> 21 sessions, pose + watch IMU + HR (missing in w05/w10/w18).  </li>
+<li><strong>EC3D:</strong> form mistakes for Model 2.  </li>
+<li><strong>Own recordings:</strong> none (injury). Replaced by MM-Fit RGB (Zenodo 7672767) + <strong>within-session</strong> baselines. No RPE.</li>
+</ul>
+<h2>Approach</h2>
+<p>Kafka (replay) → MediaPipe / dataset pose → Model 1 → rep counter → Model 2 (form RF, input only) → Spark rep history → Model 3 (GRU, B1–B5) → coach policy. Breakdown labels are <strong>speed-only</strong> after v1.1 (Model 2 does not define the label).</p>
+<h2>Results</h2>
+<table>
+<thead>
+<tr>
+<th>RQ</th>
+<th>Finding (v1.1)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RQ1</td>
+<td>Transformer pose+IMU macro-F1 <strong>0.880</strong> unseen; rep MAE <strong>0.49</strong></td>
+</tr>
+<tr>
+<td>RQ2</td>
+<td>B4 <strong>0.641 ± 0.022</strong> &lt; B3 <strong>0.689</strong> — HR does <strong>not</strong> help</td>
+</tr>
+<tr>
+<td>RQ3</td>
+<td>B2 <strong>0.729</strong> &gt; B4 <strong>0.641</strong> — within-session personal does <strong>not</strong> beat general</td>
+</tr>
+<tr>
+<td>Existing apps</td>
+<td>Fair B1 AUC <strong>0.751</strong> &gt; B4 <strong>0.641</strong> — “beats apps” claim <strong>withdrawn</strong></td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Exercise-only logistic AUC <strong>0.773</strong> ≥ all learned variants</td>
+</tr>
+<tr>
+<td>RQ4</td>
+<td>Four RGB sessions processed; mean uses sync≥70% only (w20). M1 pose 0.85→0.80; rep MAE 0.93→1.37; Model 2 P(correct)≈0.08 (domain shift). Auto sync on w20 within <strong>1.4</strong> frames of measured.</td>
+</tr>
+<tr>
+<td>Spark</td>
+<td>5,918 rep rows; within-session baselines</td>
+</tr>
+<tr>
+<td>Kafka coach</td>
+<td>Two w20 demos: median model <strong>0.83 ms</strong>, e2e <strong>75 ms</strong>. “Slow down” near rep 1 still present.</td>
+</tr>
+</tbody>
+</table>
+<p>Details: <code>reports/m3_results.md</code>, <code>reports/rq4_first_look.md</code>, <code>reports/results.md</code>.</p>
+<h2>Limits</h2>
+<ul>
+<li>No own recordings (injury); no multi-week personal history  </li>
+<li>No RPE; Spearman uses <code>set_idx_in_exercise</code> (sign negative; not explained by shorter later sets)  </li>
+<li>Within-session baseline only  </li>
+<li>Breakdown labels share the speed signal with the inputs (and with B1)  </li>
+<li>Live Galaxy Watch link not tested  </li>
+<li>MM-Fit rep counts assumed correct (teacher’s question — open)  </li>
+<li>Model 2 does not transfer from EC3D to MM-Fit  </li>
+<li>Youden-tuned alert thresholds give high false-alarm rates; use the 0.7 column for a coach operating point  </li>
+</ul>
+<h2>References</h2>
+<ul>
+<li>Strömbäck et al., MM-Fit, IMWUT 2020.  </li>
+<li>Zhao et al., EC3D form feedback.  </li>
+<li>Dritsas 2025 (Spark scaling context for the course).  </li>
+</ul></body></html>

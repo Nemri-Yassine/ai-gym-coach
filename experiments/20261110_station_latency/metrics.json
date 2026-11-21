@@ -1,0 +1,165 @@
+{
+  "sets": [
+    {
+      "key": "yassine/2026-11-10_SQUAT/set01",
+      "has_cache": true,
+      "cached": {
+        "exercise": "squats",
+        "reps": 10,
+        "elapsed_s": 0.08,
+        "timings": {
+          "pose_s": 0.067,
+          "m1_s": 0.014,
+          "reps_s": 0.001,
+          "m2_s": 0.0,
+          "total_s": 0.082,
+          "pose_source": "cache",
+          "use_cache": true,
+          "live_fast": false
+        }
+      },
+      "full_mediapipe": {
+        "exercise": "squats",
+        "reps": 10,
+        "elapsed_s": 14.34,
+        "timings": {
+          "pose_s": 14.335,
+          "m1_s": 0.007,
+          "reps_s": 0.001,
+          "m2_s": 0.0,
+          "total_s": 14.343,
+          "pose_source": "mediapipe_full",
+          "use_cache": false,
+          "live_fast": false
+        }
+      },
+      "live_fast": {
+        "exercise": "squats",
+        "reps": 10,
+        "elapsed_s": 8.3,
+        "timings": {
+          "pose_s": 8.295,
+          "m1_s": 0.006,
+          "reps_s": 0.001,
+          "m2_s": 0.0,
+          "total_s": 8.302,
+          "pose_source": "mediapipe_stride2_max480",
+          "use_cache": false,
+          "live_fast": true
+        }
+      },
+      "exercise_match_fast_vs_cache": true,
+      "reps_delta_fast_vs_cache": 0
+    },
+    {
+      "key": "partner/2026-11-10_PUSHUP/set01",
+      "has_cache": true,
+      "cached": {
+        "exercise": "pushups",
+        "reps": 14,
+        "elapsed_s": 0.02,
+        "timings": {
+          "pose_s": 0.007,
+          "m1_s": 0.007,
+          "reps_s": 0.001,
+          "m2_s": 0.0,
+          "total_s": 0.022,
+          "pose_source": "cache",
+          "use_cache": true,
+          "live_fast": false
+        }
+      },
+      "full_mediapipe": {
+        "exercise": "pushups",
+        "reps": 14,
+        "elapsed_s": 10.79,
+        "timings": {
+          "pose_s": 10.781,
+          "m1_s": 0.006,
+          "reps_s": 0.001,
+          "m2_s": 0.0,
+          "total_s": 10.788,
+          "pose_source": "mediapipe_full",
+          "use_cache": false,
+          "live_fast": false
+        }
+      },
+      "live_fast": {
+        "exercise": "pushups",
+        "reps": 14,
+        "elapsed_s": 6.37,
+        "timings": {
+          "pose_s": 6.358,
+          "m1_s": 0.006,
+          "reps_s": 0.001,
+          "m2_s": 0.0,
+          "total_s": 6.366,
+          "pose_source": "mediapipe_stride2_max480",
+          "use_cache": false,
+          "live_fast": true
+        }
+      },
+      "exercise_match_fast_vs_cache": true,
+      "reps_delta_fast_vs_cache": 0
+    },
+    {
+      "key": "partner/2026-11-10_s01/set01",
+      "has_cache": true,
+      "cached": {
+        "exercise": "jumping_jacks",
+        "reps": 11,
+        "elapsed_s": 0.02,
+        "timings": {
+          "pose_s": 0.005,
+          "m1_s": 0.007,
+          "reps_s": 0.004,
+          "m2_s": 0.0,
+          "total_s": 0.016,
+          "pose_source": "cache",
+          "use_cache": true,
+          "live_fast": false
+        }
+      },
+      "full_mediapipe": {
+        "exercise": "jumping_jacks",
+        "reps": 11,
+        "elapsed_s": 14.2,
+        "timings": {
+          "pose_s": 14.193,
+          "m1_s": 0.006,
+          "reps_s": 0.006,
+          "m2_s": 0.0,
+          "total_s": 14.204,
+          "pose_source": "mediapipe_full",
+          "use_cache": false,
+          "live_fast": false
+        }
+      },
+      "live_fast": {
+        "exercise": "jumping_jacks",
+        "reps": 10,
+        "elapsed_s": 8.72,
+        "timings": {
+          "pose_s": 8.704,
+          "m1_s": 0.007,
+          "reps_s": 0.006,
+          "m2_s": 0.0,
+          "total_s": 8.716,
+          "pose_source": "mediapipe_stride2_max480",
+          "use_cache": false,
+          "live_fast": true
+        }
+      },
+      "exercise_match_fast_vs_cache": true,
+      "reps_delta_fast_vs_cache": -1
+    }
+  ],
+  "mean_cached_s": 0.04,
+  "mean_full_s": 13.11,
+  "mean_live_fast_s": 7.796666666666667,
+  "mean_full_pose_s": 13.103,
+  "mean_live_fast_pose_s": 7.785666666666667,
+  "n_exercise_match_fast": 3,
+  "docker_kafka": false,
+  "docker_kafka_note": "Docker daemon not running; station --kafka not measured"
+}

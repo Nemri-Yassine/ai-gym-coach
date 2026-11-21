@@ -16,3 +16,9 @@ markdown
 pylance
 pymdown-extensions
 imageio-ffmpeg
+fastapi
+uvicorn[standard]
+httpx
+bleak
+qrcode
+Pillow

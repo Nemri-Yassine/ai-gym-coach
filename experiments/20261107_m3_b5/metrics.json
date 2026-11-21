@@ -1,0 +1,45 @@
+{
+  "risk_auc": 0.5127505420699139,
+  "lead_time": 0.0,
+  "false_alarms": 0.0,
+  "spearman_set_idx": -0.05285019707584114,
+  "n_sets": 139,
+  "variant": "B5",
+  "per_session": {
+    "w00": {
+      "risk_auc": 0.441468253968254,
+      "lead_time": 0.0,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.16508332072280238,
+      "n_sets": 30
+    },
+    "w05": {
+      "risk_auc": 0.3678817157078026,
+      "lead_time": 0.0,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.1556499881100708,
+      "n_sets": 30
+    },
+    "w12": {
+      "risk_auc": 0.7114280055456526,
+      "lead_time": 0.0,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.3113535228573375,
+      "n_sets": 22
+    },
+    "w13": {
+      "risk_auc": 0.6396706274755055,
+      "lead_time": 0.0,
+      "false_alarms": 0.0,
+      "spearman_set_idx": -0.03773333045092626,
+      "n_sets": 30
+    },
+    "w20": {
+      "risk_auc": 0.4071848290598291,
+      "lead_time": 0.0,
+      "false_alarms": 0.0,
+      "spearman_set_idx": 0.13977131156292244,
+      "n_sets": 27
+    }
+  }
+}

@@ -1,0 +1,1745 @@
+{
+  "primary_model": "m1_transformer_pose",
+  "model1": {
+    "m1_transformer_pose": {
+      "n_sets": 20,
+      "set_accuracy": 0.7,
+      "set_correct": 14,
+      "wilson95": [
+        0.481,
+        0.855
+      ],
+      "macro_f1": 0.511,
+      "n_no_detection": 2,
+      "per_person": {
+        "yassine": {
+          "n": 12,
+          "accuracy": 0.75,
+          "ci95": [
+            0.468,
+            0.911
+          ],
+          "n_no_detection": 2
+        },
+        "partner": {
+          "n": 8,
+          "accuracy": 0.625,
+          "ci95": [
+            0.306,
+            0.863
+          ],
+          "n_no_detection": 0
+        }
+      },
+      "per_exercise": {
+        "bicep_curls": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "dumbbell_rows": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "dumbbell_shoulder_press": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "jumping_jacks": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "lateral_shoulder_raises": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "pushups": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "situps": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "squats": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "tricep_extensions": {
+          "n": 3,
+          "accuracy": 0.0
+        }
+      },
+      "window_accuracy": 0.629,
+      "n_windows": 299,
+      "confusion": [
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "m1_cnn_pose": {
+      "n_sets": 20,
+      "set_accuracy": 0.7,
+      "set_correct": 14,
+      "wilson95": [
+        0.481,
+        0.855
+      ],
+      "macro_f1": 0.489,
+      "n_no_detection": 1,
+      "per_person": {
+        "yassine": {
+          "n": 12,
+          "accuracy": 0.75,
+          "ci95": [
+            0.468,
+            0.911
+          ],
+          "n_no_detection": 1
+        },
+        "partner": {
+          "n": 8,
+          "accuracy": 0.625,
+          "ci95": [
+            0.306,
+            0.863
+          ],
+          "n_no_detection": 0
+        }
+      },
+      "per_exercise": {
+        "bicep_curls": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "dumbbell_rows": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "dumbbell_shoulder_press": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "jumping_jacks": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "lateral_shoulder_raises": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "pushups": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "situps": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "squats": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "tricep_extensions": {
+          "n": 3,
+          "accuracy": 0.0
+        }
+      },
+      "window_accuracy": 0.615,
+      "n_windows": 299,
+      "confusion": [
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "m1_lstm_pose": {
+      "n_sets": 20,
+      "set_accuracy": 0.7,
+      "set_correct": 14,
+      "wilson95": [
+        0.481,
+        0.855
+      ],
+      "macro_f1": 0.521,
+      "n_no_detection": 3,
+      "per_person": {
+        "yassine": {
+          "n": 12,
+          "accuracy": 0.75,
+          "ci95": [
+            0.468,
+            0.911
+          ],
+          "n_no_detection": 2
+        },
+        "partner": {
+          "n": 8,
+          "accuracy": 0.625,
+          "ci95": [
+            0.306,
+            0.863
+          ],
+          "n_no_detection": 1
+        }
+      },
+      "per_exercise": {
+        "bicep_curls": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "dumbbell_rows": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "dumbbell_shoulder_press": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "jumping_jacks": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "lateral_shoulder_raises": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "pushups": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "situps": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "squats": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "tricep_extensions": {
+          "n": 3,
+          "accuracy": 0.0
+        }
+      },
+      "window_accuracy": 0.619,
+      "n_windows": 299,
+      "confusion": [
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "m1_transformer_both": {
+      "n_sets": 20,
+      "set_accuracy": 0.65,
+      "set_correct": 13,
+      "wilson95": [
+        0.433,
+        0.819
+      ],
+      "macro_f1": 0.57,
+      "n_no_detection": 6,
+      "per_person": {
+        "yassine": {
+          "n": 12,
+          "accuracy": 0.667,
+          "ci95": [
+            0.391,
+            0.862
+          ],
+          "n_no_detection": 4
+        },
+        "partner": {
+          "n": 8,
+          "accuracy": 0.625,
+          "ci95": [
+            0.306,
+            0.863
+          ],
+          "n_no_detection": 2
+        }
+      },
+      "per_exercise": {
+        "bicep_curls": {
+          "n": 2,
+          "accuracy": 0.5
+        },
+        "dumbbell_rows": {
+          "n": 1,
+          "accuracy": 1.0
+        },
+        "dumbbell_shoulder_press": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "jumping_jacks": {
+          "n": 2,
+          "accuracy": 1.0
+        },
+        "lateral_shoulder_raises": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "pushups": {
+          "n": 4,
+          "accuracy": 1.0
+        },
+        "situps": {
+          "n": 1,
+          "accuracy": 0.0
+        },
+        "squats": {
+          "n": 2,
+          "accuracy": 0.5
+        },
+        "tricep_extensions": {
+          "n": 3,
+          "accuracy": 0.0
+        }
+      },
+      "window_accuracy": 0.579,
+      "n_windows": 299,
+      "confusion": [
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "rep_counting": {
+    "true_exercise": {},
+    "m1_exercise": {},
+    "typed_default_provisional": {
+      "true_exercise": {
+        "n": 18,
+        "mae": 3.1666666666666665,
+        "exact": 0.2222222222222222,
+        "within_1": 0.5,
+        "per_exercise": {
+          "bicep_curls": {
+            "n": 2,
+            "mae": 11.5,
+            "exact": 0.5,
+            "within_1": 0.5
+          },
+          "dumbbell_rows": {
+            "n": 1,
+            "mae": 0.0,
+            "exact": 1.0,
+            "within_1": 1.0
+          },
+          "dumbbell_shoulder_press": {
+            "n": 4,
+            "mae": 3.5,
+            "exact": 0.0,
+            "within_1": 0.25
+          },
+          "jumping_jacks": {
+            "n": 1,
+            "mae": 1.0,
+            "exact": 0.0,
+            "within_1": 1.0
+          },
+          "lateral_shoulder_raises": {
+            "n": 1,
+            "mae": 1.0,
+            "exact": 0.0,
+            "within_1": 1.0
+          },
+          "pushups": {
+            "n": 3,
+            "mae": 2.0,
+            "exact": 0.0,
+            "within_1": 0.6666666666666666
+          },
+          "situps": {
+            "n": 1,
+            "mae": 2.0,
+            "exact": 0.0,
+            "within_1": 0.0
+          },
+          "squats": {
+            "n": 2,
+            "mae": 0.0,
+            "exact": 1.0,
+            "within_1": 1.0
+          },
+          "tricep_extensions": {
+            "n": 3,
+            "mae": 3.3333333333333335,
+            "exact": 0.0,
+            "within_1": 0.0
+          }
+        },
+        "per_person": {
+          "partner": {
+            "n": 8,
+            "mae": 2.875,
+            "exact": 0.0,
+            "within_1": 0.375
+          },
+          "yassine": {
+            "n": 10,
+            "mae": 3.4,
+            "exact": 0.4,
+            "within_1": 0.6
+          }
+        }
+      }
+    },
+    "has_verified_file": false,
+    "n_verified_eval": 0,
+    "n_typed_eval": 18
+  },
+  "m2": {
+    "eval_squats": {
+      "n_reps": 20,
+      "mean_p_correct": 0.06,
+      "pct_classified_correct": 0.0
+    },
+    "all_squats_incl_test": {
+      "n_reps": 34,
+      "mean_p_correct": 0.114
+    }
+  },
+  "wrong_button": [
+    {
+      "key": "yassine/2026-11-10_s007/set01",
+      "button": "squats",
+      "truth": "pushups",
+      "m1": "pushups",
+      "agrees_with": "note/truth"
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set01",
+      "button": "squats",
+      "truth": "tricep_extensions",
+      "m1": "no_exercise_detected",
+      "agrees_with": "neither"
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set04",
+      "button": "lateral_shoulder_raises",
+      "truth": "bicep_curls",
+      "m1": "bicep_curls",
+      "agrees_with": "note/truth"
+    }
+  ],
+  "hr_summary": {
+    "yassine": {
+      "n_sets": 12,
+      "hr_ok_sets": 7,
+      "mean_coverage": 0.54,
+      "median_coverage": 0.58,
+      "mean_hr_rise": 2.3,
+      "n_rise": 7
+    },
+    "partner": {
+      "n_sets": 8,
+      "hr_ok_sets": 4,
+      "mean_coverage": 0.52,
+      "median_coverage": 0.59,
+      "mean_hr_rise": -1.5,
+      "n_rise": 4
+    },
+    "test_sets": {
+      "n_sets": 2,
+      "hr_ok_sets": 0,
+      "mean_coverage": 0.25,
+      "median_coverage": 0.25,
+      "mean_hr_rise": null,
+      "n_rise": 0
+    }
+  },
+  "sets": [
+    {
+      "key": "partner/2026-11-10_s007/set01",
+      "person": "partner",
+      "session_folder": "2026-11-10_s007",
+      "set": 1,
+      "exercise": "pushups",
+      "exercise_button": "pushups",
+      "note": "PUSHU\u00a8IHEB",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 11,
+      "reps_m1": 11,
+      "detected": 1.0,
+      "n_windows": 11,
+      "votes": {
+        "m1_transformer_pose": "pushups",
+        "m1_cnn_pose": "pushups",
+        "m1_lstm_pose": "pushups",
+        "m1_transformer_both": "pushups"
+      },
+      "vote_primary": "pushups",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "partner/2026-11-10_PUSHUP/set01",
+      "person": "partner",
+      "session_folder": "2026-11-10_PUSHUP",
+      "set": 1,
+      "exercise": "pushups",
+      "exercise_button": "pushups",
+      "note": "PUSHUP 2",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 14,
+      "reps_m1": 14,
+      "detected": 1.0,
+      "n_windows": 11,
+      "votes": {
+        "m1_transformer_pose": "pushups",
+        "m1_cnn_pose": "pushups",
+        "m1_lstm_pose": "pushups",
+        "m1_transformer_both": "pushups"
+      },
+      "vote_primary": "pushups",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "partner/2026-11-10_EX3IHEB/set01",
+      "person": "partner",
+      "session_folder": "2026-11-10_EX3IHEB",
+      "set": 1,
+      "exercise": "jumping_jacks",
+      "exercise_button": "jumping_jacks",
+      "note": "EX2 JUMP JACKS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 11,
+      "reps_m1": 11,
+      "detected": 1.0,
+      "n_windows": 7,
+      "votes": {
+        "m1_transformer_pose": "jumping_jacks",
+        "m1_cnn_pose": "jumping_jacks",
+        "m1_lstm_pose": "jumping_jacks",
+        "m1_transformer_both": "jumping_jacks"
+      },
+      "vote_primary": "jumping_jacks",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "partner/2026-11-10_SHOULDERPRESS/set01",
+      "person": "partner",
+      "session_folder": "2026-11-10_SHOULDERPRESS",
+      "set": 1,
+      "exercise": "dumbbell_shoulder_press",
+      "exercise_button": "dumbbell_shoulder_press",
+      "note": "DUMB SHOULD PRESS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 12,
+      "reps_m1": 12,
+      "detected": 1.0,
+      "n_windows": 17,
+      "votes": {
+        "m1_transformer_pose": "dumbbell_shoulder_press",
+        "m1_cnn_pose": "dumbbell_shoulder_press",
+        "m1_lstm_pose": "dumbbell_shoulder_press",
+        "m1_transformer_both": "dumbbell_shoulder_press"
+      },
+      "vote_primary": "dumbbell_shoulder_press",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.1786,
+      "hr_ok": false,
+      "hr_mean": 104.0,
+      "hr_start": 106.0,
+      "hr_end": NaN
+    },
+    {
+      "key": "partner/2026-11-10_SHOULDERDUMB2/set01",
+      "person": "partner",
+      "session_folder": "2026-11-10_SHOULDERDUMB2",
+      "set": 1,
+      "exercise": "dumbbell_shoulder_press",
+      "exercise_button": "dumbbell_shoulder_press",
+      "note": "DUMB SHOULD PRESS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 17,
+      "reps_m1": 17,
+      "detected": 1.0,
+      "n_windows": 24,
+      "votes": {
+        "m1_transformer_pose": "dumbbell_shoulder_press",
+        "m1_cnn_pose": "dumbbell_shoulder_press",
+        "m1_lstm_pose": "dumbbell_shoulder_press",
+        "m1_transformer_both": "dumbbell_shoulder_press"
+      },
+      "vote_primary": "dumbbell_shoulder_press",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 100.9,
+      "hr_start": 98.0,
+      "hr_end": 97.0
+    },
+    {
+      "key": "partner/2026-11-10_s01/set01",
+      "person": "partner",
+      "session_folder": "2026-11-10_s01",
+      "set": 1,
+      "exercise": "lateral_shoulder_raises",
+      "exercise_button": "lateral_shoulder_raises",
+      "note": "LATERAL",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 11,
+      "reps_m1": 11,
+      "detected": 1.0,
+      "n_windows": 16,
+      "votes": {
+        "m1_transformer_pose": "jumping_jacks",
+        "m1_cnn_pose": "jumping_jacks",
+        "m1_lstm_pose": "jumping_jacks",
+        "m1_transformer_both": "jumping_jacks"
+      },
+      "vote_primary": "jumping_jacks",
+      "no_detection": false,
+      "correct_primary": false,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 105.1,
+      "hr_start": 108.0,
+      "hr_end": 105.0
+    },
+    {
+      "key": "partner/2026-11-10_s01/set02",
+      "person": "partner",
+      "session_folder": "2026-11-10_s01",
+      "set": 2,
+      "exercise": "tricep_extensions",
+      "exercise_button": "tricep_extensions",
+      "note": "TRICEPS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 15,
+      "reps_m1": 18,
+      "detected": 1.0,
+      "n_windows": 20,
+      "votes": {
+        "m1_transformer_pose": "dumbbell_rows",
+        "m1_cnn_pose": "dumbbell_rows",
+        "m1_lstm_pose": "dumbbell_rows",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "dumbbell_rows",
+      "no_detection": false,
+      "correct_primary": false,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 114.6,
+      "hr_start": 107.0,
+      "hr_end": 120.0
+    },
+    {
+      "key": "partner/2026-11-10_s01/set03",
+      "person": "partner",
+      "session_folder": "2026-11-10_s01",
+      "set": 3,
+      "exercise": "situps",
+      "exercise_button": "situps",
+      "note": "SITUPS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 12,
+      "reps_m1": 11,
+      "detected": 1.0,
+      "n_windows": 19,
+      "votes": {
+        "m1_transformer_pose": "pushups",
+        "m1_cnn_pose": "pushups",
+        "m1_lstm_pose": "no_exercise_detected",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "pushups",
+      "no_detection": false,
+      "correct_primary": false,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 131.8,
+      "hr_start": 144.0,
+      "hr_end": 129.0
+    },
+    {
+      "key": "yassine/2026-11-10_s007/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_s007",
+      "set": 1,
+      "exercise": "pushups",
+      "exercise_button": "squats",
+      "note": "PUSHU\u00a8YASSINE",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 11,
+      "reps_m1": 11,
+      "detected": 1.0,
+      "n_windows": 9,
+      "votes": {
+        "m1_transformer_pose": "pushups",
+        "m1_cnn_pose": "pushups",
+        "m1_lstm_pose": "pushups",
+        "m1_transformer_both": "pushups"
+      },
+      "vote_primary": "pushups",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.3529,
+      "hr_ok": false,
+      "hr_mean": 99.0,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "yassine/2026-11-10_PUHSUP2/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_PUHSUP2",
+      "set": 1,
+      "exercise": "pushups",
+      "exercise_button": "",
+      "note": "",
+      "label_source": "folder_name",
+      "use": "eval",
+      "reps_true": null,
+      "reps_typed": null,
+      "reps_source": "unknown",
+      "reps_oracle": 11,
+      "reps_m1": 11,
+      "detected": 1.0,
+      "n_windows": 9,
+      "votes": {
+        "m1_transformer_pose": "pushups",
+        "m1_cnn_pose": "pushups",
+        "m1_lstm_pose": "pushups",
+        "m1_transformer_both": "pushups"
+      },
+      "vote_primary": "pushups",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "yassine/2026-11-10_JUMPJACK/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_JUMPJACK",
+      "set": 1,
+      "exercise": "jumping_jacks",
+      "exercise_button": "",
+      "note": "",
+      "label_source": "folder_name",
+      "use": "eval",
+      "reps_true": null,
+      "reps_typed": null,
+      "reps_source": "unknown",
+      "reps_oracle": 16,
+      "reps_m1": 16,
+      "detected": 1.0,
+      "n_windows": 10,
+      "votes": {
+        "m1_transformer_pose": "jumping_jacks",
+        "m1_cnn_pose": "jumping_jacks",
+        "m1_lstm_pose": "jumping_jacks",
+        "m1_transformer_both": "jumping_jacks"
+      },
+      "vote_primary": "jumping_jacks",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.6667,
+      "hr_ok": true,
+      "hr_mean": 114.5,
+      "hr_start": 114.0,
+      "hr_end": 127.0
+    },
+    {
+      "key": "yassine/2026-11-10_DUMBSHOULD/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_DUMBSHOULD",
+      "set": 1,
+      "exercise": "dumbbell_shoulder_press",
+      "exercise_button": "dumbbell_shoulder_press",
+      "note": "",
+      "label_source": "button",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 6,
+      "reps_m1": 6,
+      "detected": 1.0,
+      "n_windows": 12,
+      "votes": {
+        "m1_transformer_pose": "dumbbell_shoulder_press",
+        "m1_cnn_pose": "dumbbell_shoulder_press",
+        "m1_lstm_pose": "dumbbell_shoulder_press",
+        "m1_transformer_both": "dumbbell_shoulder_press"
+      },
+      "vote_primary": "dumbbell_shoulder_press",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "yassine/2026-11-10_DUMBSHOULD/set02",
+      "person": "yassine",
+      "session_folder": "2026-11-10_DUMBSHOULD",
+      "set": 2,
+      "exercise": "dumbbell_shoulder_press",
+      "exercise_button": "dumbbell_shoulder_press",
+      "note": "DUMB SHOULD PRESS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 9,
+      "reps_m1": 9,
+      "detected": 1.0,
+      "n_windows": 13,
+      "votes": {
+        "m1_transformer_pose": "dumbbell_shoulder_press",
+        "m1_cnn_pose": "dumbbell_shoulder_press",
+        "m1_lstm_pose": "dumbbell_shoulder_press",
+        "m1_transformer_both": "dumbbell_shoulder_press"
+      },
+      "vote_primary": "dumbbell_shoulder_press",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "yassine/2026-11-10_SQUAT/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_SQUAT",
+      "set": 1,
+      "exercise": "squats",
+      "exercise_button": "squats",
+      "note": "SQUAT",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 10,
+      "reps_m1": 10,
+      "detected": 1.0,
+      "n_windows": 15,
+      "votes": {
+        "m1_transformer_pose": "squats",
+        "m1_cnn_pose": "squats",
+        "m1_lstm_pose": "squats",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "squats",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": 0.07233333333333333,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 121.0,
+      "hr_start": 110.0,
+      "hr_end": 129.0
+    },
+    {
+      "key": "yassine/2026-11-10_SQUAT/set02",
+      "person": "yassine",
+      "session_folder": "2026-11-10_SQUAT",
+      "set": 2,
+      "exercise": "squats",
+      "exercise_button": "squats",
+      "note": "SQUAT2",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 10,
+      "reps_m1": 10,
+      "detected": 1.0,
+      "n_windows": 14,
+      "votes": {
+        "m1_transformer_pose": "squats",
+        "m1_cnn_pose": "squats",
+        "m1_lstm_pose": "squats",
+        "m1_transformer_both": "squats"
+      },
+      "vote_primary": "squats",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": 0.04766666666666667,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 125.3,
+      "hr_start": 122.0,
+      "hr_end": 125.0
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_TRICEPS",
+      "set": 1,
+      "exercise": "tricep_extensions",
+      "exercise_button": "squats",
+      "note": "TRICEPS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 7,
+      "reps_m1": null,
+      "detected": 1.0,
+      "n_windows": 13,
+      "votes": {
+        "m1_transformer_pose": "no_exercise_detected",
+        "m1_cnn_pose": "no_exercise_detected",
+        "m1_lstm_pose": "no_exercise_detected",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "no_exercise_detected",
+      "no_detection": true,
+      "correct_primary": false,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.5,
+      "hr_ok": true,
+      "hr_mean": 109.6,
+      "hr_start": 109.0,
+      "hr_end": 110.0
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set02",
+      "person": "yassine",
+      "session_folder": "2026-11-10_TRICEPS",
+      "set": 2,
+      "exercise": "tricep_extensions",
+      "exercise_button": "tricep_extensions",
+      "note": "TRICEP EXTENSION",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 8,
+      "reps_m1": null,
+      "detected": 1.0,
+      "n_windows": 14,
+      "votes": {
+        "m1_transformer_pose": "no_exercise_detected",
+        "m1_cnn_pose": "bicep_curls",
+        "m1_lstm_pose": "no_exercise_detected",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "no_exercise_detected",
+      "no_detection": true,
+      "correct_primary": false,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 116.9,
+      "hr_start": 117.0,
+      "hr_end": 115.0
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set03",
+      "person": "yassine",
+      "session_folder": "2026-11-10_TRICEPS",
+      "set": 3,
+      "exercise": "bicep_curls",
+      "exercise_button": "bicep_curls",
+      "note": "BICEPS 1",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 10,
+      "reps_m1": 10,
+      "detected": 1.0,
+      "n_windows": 15,
+      "votes": {
+        "m1_transformer_pose": "bicep_curls",
+        "m1_cnn_pose": "bicep_curls",
+        "m1_lstm_pose": "bicep_curls",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "bicep_curls",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 115.0,
+      "hr_start": 117.0,
+      "hr_end": 105.0
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set04",
+      "person": "yassine",
+      "session_folder": "2026-11-10_TRICEPS",
+      "set": 4,
+      "exercise": "bicep_curls",
+      "exercise_button": "lateral_shoulder_raises",
+      "note": "BICEP 2",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 33,
+      "reps_m1": 33,
+      "detected": 1.0,
+      "n_windows": 23,
+      "votes": {
+        "m1_transformer_pose": "bicep_curls",
+        "m1_cnn_pose": "bicep_curls",
+        "m1_lstm_pose": "bicep_curls",
+        "m1_transformer_both": "bicep_curls"
+      },
+      "vote_primary": "bicep_curls",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 1.0,
+      "hr_ok": true,
+      "hr_mean": 124.8,
+      "hr_start": 126.0,
+      "hr_end": 120.0
+    },
+    {
+      "key": "yassine/2026-11-10_DUMBLLROWS/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_DUMBLLROWS",
+      "set": 1,
+      "exercise": "dumbbell_rows",
+      "exercise_button": "dumbbell_rows",
+      "note": "DUMBELL ROWS",
+      "label_source": "note",
+      "use": "eval",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 10,
+      "reps_m1": 17,
+      "detected": 1.0,
+      "n_windows": 15,
+      "votes": {
+        "m1_transformer_pose": "pushups",
+        "m1_cnn_pose": "pushups",
+        "m1_lstm_pose": "pushups",
+        "m1_transformer_both": "dumbbell_rows"
+      },
+      "vote_primary": "pushups",
+      "no_detection": false,
+      "correct_primary": false,
+      "m2_p_correct_mean": null,
+      "hr_coverage": 0.0,
+      "hr_ok": false,
+      "hr_mean": NaN,
+      "hr_start": NaN,
+      "hr_end": NaN
+    },
+    {
+      "key": "yassine/2026-11-09_s01/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-09_s01",
+      "set": 1,
+      "exercise": "lunges",
+      "exercise_button": "lunges",
+      "note": "tt",
+      "label_source": "button",
+      "use": "test",
+      "reps_true": 8,
+      "reps_typed": 8,
+      "reps_source": "typed_default",
+      "reps_oracle": 2,
+      "reps_m1": null,
+      "detected": 0.3148148148148148,
+      "n_windows": 0,
+      "votes": {
+        "m1_transformer_pose": "no_exercise_detected",
+        "m1_cnn_pose": "no_exercise_detected",
+        "m1_lstm_pose": "no_exercise_detected",
+        "m1_transformer_both": "no_exercise_detected"
+      },
+      "vote_primary": "no_exercise_detected",
+      "no_detection": true,
+      "correct_primary": false,
+      "m2_p_correct_mean": 0.02666666666666667,
+      "hr_coverage": 0.2308,
+      "hr_ok": false,
+      "hr_mean": 96.0,
+      "hr_start": 96.0,
+      "hr_end": NaN
+    },
+    {
+      "key": "yassine/2026-11-10_s01/set01",
+      "person": "yassine",
+      "session_folder": "2026-11-10_s01",
+      "set": 1,
+      "exercise": "squats",
+      "exercise_button": "squats",
+      "note": "tt",
+      "label_source": "button",
+      "use": "test",
+      "reps_true": 10,
+      "reps_typed": 10,
+      "reps_source": "typed_default",
+      "reps_oracle": 14,
+      "reps_m1": 14,
+      "detected": 0.9983818770226537,
+      "n_windows": 12,
+      "votes": {
+        "m1_transformer_pose": "squats",
+        "m1_cnn_pose": "squats",
+        "m1_lstm_pose": "situps",
+        "m1_transformer_both": "squats"
+      },
+      "vote_primary": "squats",
+      "no_detection": false,
+      "correct_primary": true,
+      "m2_p_correct_mean": 0.19071428571428575,
+      "hr_coverage": 0.2727,
+      "hr_ok": false,
+      "hr_mean": 92.0,
+      "hr_start": NaN,
+      "hr_end": NaN
+    }
+  ],
+  "skipped": [],
+  "n_eval": 20,
+  "n_test": 2
+}

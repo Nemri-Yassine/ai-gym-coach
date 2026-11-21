@@ -1,0 +1,8 @@
+{
+  "risk_auc": 0.5002538473742661,
+  "lead_time": 0.0,
+  "false_alarms": 0.0,
+  "spearman_set_idx": null,
+  "n_sets": 139,
+  "variant": "B1"
+}

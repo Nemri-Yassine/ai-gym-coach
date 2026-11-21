@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AWC Gym Station</title>
+<style>
+:root{--bg:#0B1016;--panel:#141C25;--line:#26313C;--ink:#EEF2F6;--muted:#8C9AA7;--accent:#7393FF;--rec:#FF5A5F;--ok:#4CC487;--warn:#EFB043}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:18px;display:grid;gap:14px}
+h1{font:800 28px/1 system-ui;margin:0} h1 b{color:var(--accent)}
+.sub{color:var(--muted);margin:4px 0 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.lbl{font:700 11px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:inherit;font:inherit}
+.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:700;background:var(--line);color:inherit;cursor:pointer;font:inherit;font-weight:700}
+.btn.primary{background:var(--accent);color:#0B1016}
+.btn.rec{background:var(--rec);color:#fff}
+.btn.ok{background:var(--ok);color:#0B1016}
+.btn.link{background:none;color:var(--muted);text-decoration:underline;padding:6px}
+.btn:disabled{opacity:.4;cursor:default}
+.ex{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.ex button[aria-pressed=true]{background:var(--accent);color:#0B1016}
+.live{position:relative;width:100%;height:62vh;background:#000;border-radius:12px;overflow:hidden;border:3px solid transparent}
+.live.rec{border-color:var(--rec)}
+.live video,.live canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.live .badge{position:absolute;left:10px;top:10px;display:flex;gap:6px}
+.live .msg{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}
+.bpm{font:800 64px/1 system-ui;color:var(--rec)}
+.bpm.warn{color:var(--warn)}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(38,49,60,.85);font:700 12px ui-monospace,monospace}
+.pill.rec{background:var(--rec);color:#fff}
+.pill.ok{background:var(--ok);color:#0B1016}
+.pill.warn{background:var(--warn);color:#0B1016}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.qr{width:200px;height:200px;background:#fff;border-radius:8px}
+.pin{font:800 40px/1 ui-monospace,monospace;letter-spacing:.2em;color:var(--accent)}
+.rpe{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.rpe button[aria-pressed=true]{background:var(--accent);color:#0B1016}
+.exLive{position:absolute;left:12px;bottom:12px;font-size:1.35rem;font-weight:700;text-transform:capitalize;
+  background:rgba(11,16,22,.72);padding:6px 12px;border-radius:8px;letter-spacing:.02em}
+.live{position:relative}
+.stepper{display:flex;gap:10px;align-items:center}
+.stepper button{width:48px;height:48px;font-size:22px;font-weight:800}
+.stepper b{font-size:30px;min-width:50px;text-align:center}
+.hidden{display:none!important}
+.chart{width:100%;height:70px;background:var(--bg);border-radius:8px}
+.ips button{font:600 13px ui-monospace,monospace}
+.alert{color:var(--warn)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;flex:1;min-width:120px}
+.bar i{display:block;height:100%;background:var(--ok);width:0}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div>
+    <h1>AWC <b>Gym Station</b></h1>
+    <p class="sub">iPhone camera over Wi-Fi → saved on this laptop · watch heart rate · labels per set</p>
+  </div>
+
+  <section class="card" id="setup">
+    <div class="grid">
+      <div>
+        <div class="lbl">1 · Phone: scan the QR code with the iPhone camera, open in Safari</div>
+        <div class="row" style="align-items:flex-start;gap:18px">
+          <img class="qr" id="qr" alt="QR">
+          <div>
+            <div class="lbl">PIN</div>
+            <div class="pin" id="pin">····</div>
+            <p class="sub" id="phoneUrl" style="word-break:break-all">…</p>
+            <div class="lbl" style="margin-top:10px">Other laptop addresses (tap to show its QR)</div>
+            <div class="row ips" id="ips"></div>
+            <p class="sub alert" id="certWarn" hidden></p>
+          </div>
+        </div>
+        <p class="sub" id="phoneStatus" style="margin-top:10px">phone: not connected</p>
+        <p class="sub" id="clockStatus">clock: —</p>
+      </div>
+      <div>
+        <div class="lbl">2 · Watch heart rate</div>
+        <div class="row">
+          <select id="hrSource"><option value="ble">A · Bluetooth (Heart for Bluetooth)</option><option value="pulsoid">B · Pulsoid (internet)</option><option value="demo">Demo (FAKE bpm)</option><option value="none">None</option></select>
+          <input id="pulsoidToken" type="password" placeholder="Pulsoid token" class="hidden" style="min-width:220px">
+        </div>
+        <div class="row" style="margin-top:6px">
+          <select id="hrDevice"><option value="">auto / last watch</option></select>
+          <button class="btn" id="hrScan">Scan</button>
+          <button class="btn" id="hrConnect">Connect HR</button>
+        </div>
+        <p class="sub" id="hrStatus">HR idle · open Heart for Bluetooth on the watch <b>before</b> Connect</p>
+        <div class="lbl" style="margin-top:14px">3 · Session</div>
+        <div class="row">
+          <select id="user"><option>yassine</option><option>partner</option></select>
+          <input id="sessionId" value="s01" style="width:90px" title="same id = continue that session">
+          <select id="sessionType"><option>fatigue</option><option>form</option><option>mixed</option></select>
+          <input id="sessionDate" type="date" title="session date">
+        </div>
+        <button class="btn primary" id="startSession" style="margin-top:12px">Start session</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="hidden" id="session">
+    <div class="grid">
+      <div class="card">
+        <div class="live" id="liveBox">
+          <video id="live" autoplay muted playsinline></video>
+          <canvas id="jpeg" class="hidden"></canvas>
+          <div class="msg" id="liveMsg">waiting for the iPhone…</div>
+          <div class="badge"><span class="pill" id="recPill">ready</span><span class="pill" id="liveMode">live: —</span><span class="pill" id="timer">0:00</span></div>
+          <div class="exLive" id="exLive">squats</div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <span class="sub" id="uploadTxt">no set yet</span>
+          <div class="bar"><i id="uploadBar"></i></div>
+        </div>
+        <p class="sub alert" id="recWarn" hidden></p>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div><div class="lbl">Heart rate</div><div class="bpm" id="bpm">--</div></div>
+          <div class="sub" id="hrMini" style="text-align:right"></div>
+        </div>
+        <canvas class="chart" id="chart"></canvas>
+        <div class="lbl" style="margin-top:10px">Exercise</div>
+        <div class="ex" id="exGrid"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn ok" id="setBtn">Start set · Space</button>
+          <button class="btn" id="clap">Clap (C)</button>
+          <button class="btn" id="endSession">End session</button>
+        </div>
+        <p class="sub" id="rest">rest 0:00</p>
+        <p class="sub" id="folder"></p>
+      </div>
+    </div>
+
+    <div class="card" id="details" style="margin-top:12px" hidden>
+      <div class="lbl">Set #<span id="saveSetN"></span></div>
+      <p style="font-size:1.6rem;font-weight:700;text-transform:capitalize;margin:4px 0 10px" id="saveExBig">squats</p>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn link" id="changeEx">change exercise</button>
+        <span class="sub" id="saveEx" hidden></span>
+      </div>
+      <div class="row" style="gap:28px;align-items:flex-start">
+        <div>
+          <div class="lbl">Reps (required — count them)</div>
+          <div class="stepper"><button class="btn" id="repMinus">−</button><b id="reps">—</b><button class="btn" id="repPlus">+</button></div>
+          <input type="number" id="repsInput" min="1" max="99" placeholder="type count" style="width:110px;margin-top:6px">
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="lbl">RPE (1 easy · 10 max) — required, no default</div>
+          <div class="rpe" id="rpe"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><div class="lbl">Form</div><select id="form"></select></div>
+        <div><div class="lbl">Weight kg</div><input id="weight" style="width:100px"></div>
+        <div style="flex:1;min-width:160px"><div class="lbl">Note</div><input id="note" style="width:100%" placeholder="exercise + anything special"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="saveSet" disabled>Save set</button>
+        <span class="sub" id="saveHint">waiting for the video upload…</span>
+        <button class="btn link" id="forceSave">save without full video</button>
+        <button class="btn link" id="discard">discard this set</button>
+      </div>
+      <p class="sub" id="modelHint" style="margin-top:10px;color:#1E4BD2">Model suggestion will appear here after the video is saved (never written into sets.csv).</p>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <table class="table">
+        <thead><tr><th>#</th><th>exercise</th><th>reps</th><th>RPE</th><th>form</th><th>dur</th><th>HR mean/peak</th><th>video</th></tr></thead>
+        <tbody id="setTable"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const S = {
+  exercise: "squats", reps: null, rpe: null, formBy: {},
+  sessionOn: false, recording: false, setStart: null, restSince: Date.now(),
+  pending: null, status: {}, ws: null, pc: null, rtcTimer: null, mode: "none",
+  jpegFrames: 0, videoFrames: 0, lastFpsAt: Date.now(), liveFps: 0,
+};
+function paintEx(){
+  const label = S.exercise.replaceAll("_", " ");
+  const el = $("#exLive"); if (el) el.textContent = label;
+  const big = $("#saveExBig"); if (big) big.textContent = label;
+  const sm = $("#saveEx"); if (sm) sm.textContent = label;
+}
+function paintReps(){
+  $("#reps").textContent = S.reps == null ? "—" : S.reps;
+  const inp = $("#repsInput"); if (inp && document.activeElement !== inp) inp.value = S.reps == null ? "" : S.reps;
+}
+const EX = ["squats","lunges","pushups","situps","dumbbell_rows","bicep_curls","jumping_jacks","tricep_extensions","dumbbell_shoulder_press","lateral_shoulder_raises","plank"];
+
+async function api(path, body){
+  const opts = body === undefined ? {} : { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  let j = {}; try { j = await r.json(); } catch(e) {}
+  if (!r.ok && !j.error) j.error = `HTTP ${r.status}`;
+  return j;
+}
+function mmss(s){ s = Math.max(0, s|0); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
+
+// ---------------------------------------------------------------- setup
+(async function init(){
+  $("#sessionDate").value = new Date().toISOString().slice(0, 10);
+  const setup = await api("/api/setup");
+  $("#pin").textContent = setup.pin;
+  showQr(setup.phone_url, setup.qr_data_url);
+  $("#ips").innerHTML = (setup.ips || []).map(ip => `<button class="btn" data-ip="${ip}">${ip}</button>`).join("");
+  $("#ips").onclick = async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const r = await api("/api/qr?ip=" + encodeURIComponent(b.dataset.ip));
+    showQr(r.phone_url, r.qr_data_url);
+  };
+  if ((setup.cert_missing_ips || []).length) {
+    $("#certWarn").hidden = false;
+    $("#certWarn").textContent = `The certificate does not cover ${setup.cert_missing_ips.join(", ")} (network changed while running). Restart the station.`;
+  }
+  S.formBy = setup.form_by_exercise || {};
+  $("#exGrid").innerHTML = EX.map(e => `<button class="btn" data-e="${e}" aria-pressed="${e==="squats"}">${e.replaceAll("_"," ")}</button>`).join("");
+  $("#exGrid").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.exercise = b.dataset.e;
+    [...$("#exGrid").children].forEach(x => x.setAttribute("aria-pressed", x === b));
+    fillForm(); paintEx();
+  };
+  paintEx();
+  $("#rpe").innerHTML = Array.from({length: 10}, (_, i) => `<button class="btn" data-v="${i+1}">${i+1}</button>`).join("");
+  $("#rpe").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    S.rpe = +b.dataset.v;
+    [...$("#rpe").children].forEach(x => x.setAttribute("aria-pressed", x === b));
+    updateSaveBtn();
+  };
+  fillForm();
+  $("#hrSource").onchange = () => $("#pulsoidToken").classList.toggle("hidden", $("#hrSource").value !== "pulsoid");
+  connectWs();
+})();
+
+function showQr(url, data){ $("#phoneUrl").textContent = url; if (data) $("#qr").src = data; }
+function fillForm(){
+  const opts = S.formBy[S.exercise] || ["correct"];
+  $("#form").innerHTML = opts.map(o => `<option>${o}</option>`).join("");
+}
+
+$("#hrScan").onclick = async () => {
+  $("#hrStatus").textContent = "scanning 5 s… (Heart for Bluetooth open on the watch?)";
+  const r = await api("/api/hr/devices");
+  const sel = $("#hrDevice");
+  sel.innerHTML = `<option value="">auto / last watch</option>`;
+  for (const d of (r.devices || [])) {
+    const o = document.createElement("option");
+    o.value = d.address;
+    o.textContent = `${d.name || "HR"} · ${d.address}${d.rssi != null ? ` · ${d.rssi} dBm` : ""}`;
+    sel.appendChild(o);
+  }
+  if ((r.devices || []).length >= 1) sel.value = r.devices[0].address;
+  $("#hrStatus").textContent = r.error || `found ${(r.devices||[]).length} device(s)`;
+};
+$("#hrConnect").onclick = async () => {
+  const source = $("#hrSource").value;
+  const r = await api("/api/hr/connect", { source, token: $("#pulsoidToken").value.trim(), address: $("#hrDevice").value || undefined });
+  $("#hrStatus").textContent = r.error || r.warning || r.note || `HR source ${source}`;
+};
+
+$("#startSession").onclick = async () => {
+  const r = await api("/api/session/start", {
+    user: $("#user").value, session_id: $("#sessionId").value.trim() || "s01",
+    session_type: $("#sessionType").value, date: $("#sessionDate").value || undefined,
+  });
+  if (r.error) return alert(r.error);
+  S.sessionOn = true; S.restSince = Date.now();
+  $("#folder").textContent = `saving to ${r.folder}` + (r.resumed ? ` · resumed, next set ${r.next_set}` : "");
+  $("#setup").classList.add("hidden"); $("#session").classList.remove("hidden");
+  requestLive();
+};
+
+// ---------------------------------------------------------------- sets
+async function toggleSet(){
+  if (!S.sessionOn) return;
+  if (!S.recording) {
+    if (!$("#details").hidden) { flash("Save (or discard) the previous set first"); return; }
+    const r = await api("/api/set/start", {});
+    if (r.error) { flash(r.error); return; }
+    S.recording = true; S.setStart = Date.now(); S.curSet = r.set;
+    $("#setBtn").textContent = "End set · Space"; $("#setBtn").className = "btn rec";
+    $("#recPill").textContent = `REC set ${r.set}`; $("#recPill").className = "pill rec";
+    $("#liveBox").classList.add("rec");
+  } else {
+    const r = await api("/api/set/end", {});
+    S.recording = false; S.restSince = Date.now();
+    $("#setBtn").textContent = "Start set · Space"; $("#setBtn").className = "btn ok";
+    $("#recPill").textContent = "uploading"; $("#recPill").className = "pill";
+    $("#liveBox").classList.remove("rec");
+    openDetails(r.set);
+  }
+}
+function openDetails(n){
+  S.rpe = null; S.reps = null;
+  [...$("#rpe").children].forEach(x => x.setAttribute("aria-pressed", "false"));
+  $("#saveSetN").textContent = n;
+  paintEx(); paintReps();
+  $("#note").value = "";
+  $("#details").hidden = false;
+  updateSaveBtn();
+}
+function flash(t){ $("#recWarn").hidden = false; $("#recWarn").textContent = t; setTimeout(() => $("#recWarn").hidden = true, 5000); }
+$("#setBtn").onclick = toggleSet;
+window.addEventListener("keydown", e => {
+  const tag = document.activeElement.tagName;
+  if (tag === "INPUT" || tag === "SELECT") return;
+  if (e.code === "Space" && S.sessionOn) { e.preventDefault(); toggleSet(); }
+  if (e.code === "KeyC" && S.sessionOn) api("/api/clap", {});
+});
+$("#clap").onclick = () => api("/api/clap", {});
+$("#endSession").onclick = async () => {
+  if (S.recording) return flash("End the set first");
+  if (!confirm("End this session?")) return;
+  await api("/api/session/end", {}); location.reload();
+};
+$("#repMinus").onclick = () => { S.reps = Math.max(1, (S.reps ?? 1) - 1); paintReps(); updateSaveBtn(); };
+$("#repPlus").onclick = () => { S.reps = (S.reps ?? 0) + 1; paintReps(); updateSaveBtn(); };
+document.addEventListener("input", e => {
+  if (e.target && e.target.id === "repsInput") {
+    const t = e.target.value;
+    S.reps = t === "" ? null : Math.max(1, parseInt(t, 10) || 0);
+    paintReps(); updateSaveBtn();
+  }
+});
+$("#changeEx").onclick = () => {
+  flash("Pick another exercise in the grid above, then save");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+function uploadDone(){ return !!(S.status.pending_labels && S.status.pending_labels.upload_complete); }
+function updateSaveBtn(){
+  const done = uploadDone();
+  const hasReps = S.reps != null && S.reps >= 1;
+  $("#saveSet").disabled = !(S.rpe && done && hasReps);
+  if (!done) $("#saveHint").textContent = "waiting for the video upload…";
+  else if (!hasReps) $("#saveHint").textContent = "type the rep count (no default)";
+  else if (!S.rpe) $("#saveHint").textContent = "pick the RPE";
+  else $("#saveHint").textContent = "ready";
+}
+async function save(force){
+  if (S.reps == null || S.reps < 1) return flash("Type the rep count first (no default)");
+  if (!S.rpe) return flash("Pick the RPE first");
+  const body = { exercise: S.exercise, reps: S.reps, rpe: S.rpe, form_label: $("#form").value,
+                 weight_kg: $("#weight").value, note: $("#note").value, force: !!force };
+  const r = await api("/api/set/save", body);
+  if (r.error) return flash(r.error);
+  const ex = r.extra || {};
+  const row = document.createElement("tr");
+  row.innerHTML = `<td>${r.set}</td><td>${S.exercise.replaceAll("_"," ")}</td><td>${S.reps}</td><td>${S.rpe}</td>`
+    + `<td>${$("#form").value}</td><td>${ex.duration_s ?? ""} s</td><td>${ex.hr_mean || "—"} / ${ex.hr_peak || "—"}</td>`
+    + `<td>${r.video_ok ? `✓ ${r.frames} fr @ ${r.fps ? r.fps.toFixed(1) : "?"} fps` : "✗ missing"}</td>`;
+  $("#setTable").prepend(row);
+  $("#details").hidden = true; S.rpe = null;
+  $("#recPill").textContent = "ready"; $("#recPill").className = "pill";
+}
+$("#saveSet").onclick = () => save(false);
+$("#forceSave").onclick = () => { if (confirm("Save labels even though the video is not complete?")) save(true); };
+$("#discard").onclick = async () => {
+  if (!confirm("Discard this set's labels? (the video file stays on disk)")) return;
+  await api("/api/set/discard", {}); $("#details").hidden = true;
+  $("#recPill").textContent = "ready"; $("#recPill").className = "pill";
+};
+
+// ---------------------------------------------------------------- live view (WebRTC + JPEG fallback)
+function connectWs(){
+  const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws/control`);
+  ws.binaryType = "blob";
+  S.ws = ws;
+  ws.onopen = () => { if (S.status.phone_connected) requestLive(); };
+  ws.onclose = () => setTimeout(connectWs, 1000);
+  ws.onmessage = async ev => {
+    if (typeof ev.data !== "string") { drawJpeg(ev.data); return; }
+    const msg = JSON.parse(ev.data);
+    if (msg.type === "phone_connected") { setTimeout(requestLive, 500); }
+    else if (msg.type === "phone_disconnected") { setMode("none"); }
+    else if (msg.type === "rtc_offer") { await onOffer(msg.sdp); }
+    else if (msg.type === "rtc_ice") { try { if (msg.candidate) await S.pc?.addIceCandidate(msg.candidate); } catch(e) {} }
+    else if (msg.type === "rec_error") { flash("Phone could not record: " + msg.detail); }
+  };
+}
+function send(o){ if (S.ws && S.ws.readyState === 1) S.ws.send(JSON.stringify(o)); }
+function requestLive(){
+  send({ type: "rtc_request" });
+  clearTimeout(S.rtcTimer);
+  // If WebRTC is not up in 5 s, ask the phone for JPEG frames meanwhile.
+  S.rtcTimer = setTimeout(() => { if (S.mode !== "webrtc") send({ type: "jpeg", on: true, fps: 12 }); }, 5000);
+}
+async function onOffer(sdp){
+  try { S.pc?.close(); } catch(e) {}
+  const pc = new RTCPeerConnection({ iceServers: [] });
+  S.pc = pc;
+  pc.ontrack = e => {
+    const v = $("#live");
+    v.srcObject = e.streams[0] || new MediaStream([e.track]);
+    v.play().catch(()=>{});
+  };
+  pc.onicecandidate = e => send({ type: "rtc_ice", candidate: e.candidate ? e.candidate.toJSON() : null });
+  pc.onconnectionstatechange = () => {
+    if (pc !== S.pc) return;
+    if (pc.connectionState === "connected") { setMode("webrtc"); send({ type: "jpeg", on: false }); }
+    if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
+      send({ type: "jpeg", on: true, fps: 12 }); setMode("jpeg");
+      if (pc.connectionState !== "closed") setTimeout(() => { if (S.pc === pc) requestLive(); }, 3000);
+    }
+  };
+  await pc.setRemoteDescription({ type: "offer", sdp });
+  const ans = await pc.createAnswer();
+  await pc.setLocalDescription(ans);
+  send({ type: "rtc_answer", sdp: pc.localDescription.sdp });
+}
+function setMode(m){
+  S.mode = m;
+  $("#live").classList.toggle("hidden", m !== "webrtc");
+  $("#jpeg").classList.toggle("hidden", m !== "jpeg");
+  $("#liveMsg").classList.toggle("hidden", m !== "none");
+}
+async function drawJpeg(blob){
+  if (S.mode === "webrtc") return;
+  if (S.mode !== "jpeg") setMode("jpeg");
+  try {
+    const bmp = await createImageBitmap(blob);
+    const c = $("#jpeg");
+    if (c.width !== bmp.width || c.height !== bmp.height) { c.width = bmp.width; c.height = bmp.height; }
+    c.getContext("2d").drawImage(bmp, 0, 0);
+    bmp.close?.();
+    S.jpegFrames++;
+  } catch(e) {}
+}
+(function countVideoFrames(){
+  const v = $("#live");
+  if (!v.requestVideoFrameCallback) return;
+  const cb = () => { S.videoFrames++; v.requestVideoFrameCallback(cb); };
+  v.requestVideoFrameCallback(cb);
+})();
+
+// ---------------------------------------------------------------- HR chart + status loop
+function drawChart(series){
+  const c = $("#chart"), g = c.getContext("2d");
+  const w = c.width = c.clientWidth, h = c.height = c.clientHeight;
+  g.clearRect(0, 0, w, h);
+  if (!series || series.length < 2) return;
+  const ys = series.map(x => x[1]);
+  const min = Math.min(...ys) - 5, max = Math.max(...ys) + 5;
+  g.strokeStyle = "#FF5A5F"; g.lineWidth = 2; g.beginPath();
+  series.forEach((p, i) => {
+    const x = i / (series.length - 1) * w, y = h - (p[1] - min) / (max - min) * h;
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  });
+  g.stroke();
+}
+
+setInterval(async () => {
+  let st; try { st = await api("/api/status"); } catch(e) { return; }
+  S.status = st;
+  const pi = st.phone_info || {};
+  $("#phoneStatus").textContent = st.phone_connected
+    ? `phone: connected ✓ · ${pi.resolution || "?"} @ ${pi.fps_actual ? Math.round(pi.fps_actual) : "?"} fps${st.phone_battery != null ? ` · batt ${st.phone_battery}%` : ""}`
+    : "phone: not connected";
+  $("#clockStatus").textContent = st.clock_rtt_ms != null ? `clock: delay ${st.clock_rtt_ms.toFixed(0)} ms (offset ${st.clock_offset_ms.toFixed(0)} ms)` : "clock: —";
+  $("#hrStatus").textContent = `HR ${st.hr_status}`;
+  const age = st.hr_age_s;
+  if (st.hr_bpm != null) $("#bpm").textContent = Math.round(st.hr_bpm);
+  const stale = age == null || age > 5;
+  $("#bpm").className = "bpm" + (stale || st.hr_source === "demo" ? " warn" : "");
+  $("#hrMini").innerHTML = `${st.hr_source}${st.hr_source === "demo" ? " (FAKE)" : ""}<br>${age != null ? `last ${age.toFixed(0)} s ago` : "no data"}<br>drops ${st.hr_drops}`;
+  drawChart(st.hr_series);
+
+  // live fps
+  const now = Date.now(), dt = (now - S.lastFpsAt) / 1000;
+  if (dt >= 1) {
+    S.liveFps = (S.mode === "webrtc" ? S.videoFrames : S.jpegFrames) / dt;
+    S.videoFrames = 0; S.jpegFrames = 0; S.lastFpsAt = now;
+  }
+  $("#liveMode").textContent = S.mode === "none" ? "live: —" : `live ${S.mode === "webrtc" ? "video" : "images"} ${Math.round(S.liveFps)} fps`;
+  $("#liveMode").className = "pill" + (S.mode === "webrtc" ? " ok" : S.mode === "jpeg" ? " warn" : "");
+  if (!st.phone_connected && S.mode !== "none") setMode("none");
+
+  if (S.recording && S.setStart) {
+    $("#timer").textContent = mmss((now - S.setStart) / 1000);
+    if (!st.rec_confirmed && now - S.setStart > 3000) { $("#recWarn").hidden = false; $("#recWarn").textContent = "The phone has not confirmed recording — check the iPhone screen."; }
+    else if (st.rec_confirmed) $("#recWarn").hidden = true;
+  } else $("#timer").textContent = "0:00";
+  const rest = (now - S.restSince) / 1000;
+  $("#rest").textContent = `rest ${mmss(rest)}` + (rest > 90 && !S.recording ? " · over 90 s" : "");
+  $("#rest").style.color = rest > 90 && !S.recording ? "var(--warn)" : "";
+
+  // upload progress for the current / last set
+  const n = st.pending_labels?.set ?? st.current_set ?? S.curSet;
+  const u = n != null ? st.upload?.[String(n)] : null;
+  if (u) {
+    const mb = ((u.bytes || 0) / 1e6).toFixed(1);
+    if (u.done) {
+      $("#uploadTxt").textContent = `set ${n}: video saved on laptop ✓ ${u.frames} frames @ ${u.fps ? u.fps.toFixed(1) : "?"} fps`;
+      $("#uploadBar").style.width = "100%";
+    } else {
+      $("#uploadTxt").textContent = `set ${n}: ${u.received} s of video received (${mb} MB)${st.recording ? "" : " · finishing…"}`;
+      $("#uploadBar").style.width = st.recording ? "50%" : "85%";
+    }
+  }
+  if (st.pending_labels && $("#details").hidden && !S.recording && S.sessionOn) openDetails(st.pending_labels.set);
+  if (!$("#details").hidden) updateSaveBtn();
+  // Model suggestion (never written into sets.csv)
+  const aSet = st.pending_labels?.set ?? n;
+  const a = aSet != null ? st.analyses?.[String(aSet)] : null;
+  if (a && a.summary) $("#modelHint").textContent = a.summary;
+  else if (a && a.status === "running") $("#modelHint").textContent = "analysing…";
+  else if (!$("#details").hidden) $("#modelHint").textContent = "Model suggestion will appear here after the video is saved (never written into sets.csv).";
+}, 500);
+</script>
+</body>
+</html>

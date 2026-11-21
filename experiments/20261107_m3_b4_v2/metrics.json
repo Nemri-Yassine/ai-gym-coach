@@ -1,0 +1,132 @@
+{
+  "variant": "B4",
+  "thresh_mode": "youden",
+  "thresh_val_mean": 0.489980012178421,
+  "val_tuned": {
+    "risk_auc": 0.640992046365374,
+    "risk_auc_std": 0.02235510323194802,
+    "lead_time": 1.0894308943089432,
+    "lead_time_std": 0.24090296569152936,
+    "pct_warned_1plus": 0.34146341463414637,
+    "pct_warned_1plus_std": 0.06898602743283391,
+    "false_alarms": 52.599999999999994,
+    "false_alarms_std": 1.5577761927397247,
+    "spearman_set_idx": -0.6664491528697246,
+    "spearman_set_idx_std": 0.041294883083674905,
+    "spearman_speed_loss": -0.08645248007168592,
+    "spearman_speed_loss_std": 0.016028467026202853
+  },
+  "thresh_0.7": {
+    "risk_auc": 0.640992046365374,
+    "risk_auc_std": 0.02235510323194802,
+    "lead_time": 0.14634146341463417,
+    "lead_time_std": 0.11087952599175493,
+    "pct_warned_1plus": 0.07317073170731707,
+    "pct_warned_1plus_std": 0.05268894876754358,
+    "false_alarms": 6.3999999999999995,
+    "false_alarms_std": 4.667618950457146,
+    "spearman_set_idx": -0.6664491528697246,
+    "spearman_set_idx_std": 0.041294883083674905,
+    "spearman_speed_loss": -0.08645248007168592,
+    "spearman_speed_loss_std": 0.016028467026202853
+  },
+  "seeds": [
+    {
+      "seed": 42,
+      "thresh_val": 0.4701002538204193,
+      "val_tuned": {
+        "risk_auc": 0.6491768913003269,
+        "lead_time": 1.3170731707317074,
+        "pct_warned_1plus": 0.3902439024390244,
+        "false_alarms": 52.4,
+        "spearman_set_idx": -0.7159066557710413,
+        "spearman_speed_loss": -0.06791028058319487,
+        "n_sets": 139,
+        "thresh": 0.4701002538204193
+      },
+      "thresh_0.7": {
+        "risk_auc": 0.6491768913003269,
+        "lead_time": 0.17073170731707318,
+        "pct_warned_1plus": 0.0975609756097561,
+        "false_alarms": 8.2,
+        "spearman_set_idx": -0.7159066557710413,
+        "spearman_speed_loss": -0.06791028058319487,
+        "n_sets": 139,
+        "thresh": 0.7
+      }
+    },
+    {
+      "seed": 43,
+      "thresh_val": 0.5149519443511963,
+      "val_tuned": {
+        "risk_auc": 0.6104537887662618,
+        "lead_time": 0.7560975609756098,
+        "pct_warned_1plus": 0.24390243902439024,
+        "false_alarms": 50.8,
+        "spearman_set_idx": -0.6686158956219297,
+        "spearman_speed_loss": -0.10701551328243132,
+        "n_sets": 139,
+        "thresh": 0.5149519443511963
+      },
+      "thresh_0.7": {
+        "risk_auc": 0.6104537887662618,
+        "lead_time": 0.0,
+        "pct_warned_1plus": 0.0,
+        "false_alarms": 0.0,
+        "spearman_set_idx": -0.6686158956219297,
+        "spearman_speed_loss": -0.10701551328243132,
+        "n_sets": 139,
+        "thresh": 0.7
+      }
+    },
+    {
+      "seed": 44,
+      "thresh_val": 0.48488783836364746,
+      "val_tuned": {
+        "risk_auc": 0.6633454590295333,
+        "lead_time": 1.1951219512195121,
+        "pct_warned_1plus": 0.3902439024390244,
+        "false_alarms": 54.6,
+        "spearman_set_idx": -0.6148249072162029,
+        "spearman_speed_loss": -0.08443164634943155,
+        "n_sets": 139,
+        "thresh": 0.48488783836364746
+      },
+      "thresh_0.7": {
+        "risk_auc": 0.6633454590295333,
+        "lead_time": 0.2682926829268293,
+        "pct_warned_1plus": 0.12195121951219512,
+        "false_alarms": 11.0,
+        "spearman_set_idx": -0.6148249072162029,
+        "spearman_speed_loss": -0.08443164634943155,
+        "n_sets": 139,
+        "thresh": 0.7
+      }
+    }
+  ],
+  "exercise_only_auc": 0.7734354769097972,
+  "spearman_diagnostics": {
+    "spearman_n_reps_vs_set_idx": -0.05922114833927096,
+    "mean_n_reps_by_set_idx": {
+      "1": 9.446808510638299,
+      "2": 9.369565217391305,
+      "3": 9.478260869565217
+    }
+  },
+  "risk_auc": 0.640992046365374,
+  "lead_time": 1.0894308943089432,
+  "pct_warned_1plus": 0.34146341463414637,
+  "false_alarms": 52.599999999999994,
+  "spearman_set_idx": -0.6664491528697246,
+  "spearman_speed_loss": -0.08645248007168592,
+  "w05_no_hr": {
+    "risk_auc": 0.8396624472573839,
+    "lead_time": 1.3333333333333333,
+    "pct_warned_1plus": 0.5,
+    "false_alarms": 68.0,
+    "spearman_set_idx": -0.5376999589256992,
+    "spearman_speed_loss": -0.17730812013348163,
+    "n_sets": 30,
+    "thresh": 0.48488783836364746
+  }
+}

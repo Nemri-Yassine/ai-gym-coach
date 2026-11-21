@@ -1,0 +1,142 @@
+{
+  "tradeoff": [
+    {
+      "drop": 0.0,
+      "mendeley_bad_caught": 0.8501945525291829,
+      "own_correct_flagged": 0.5,
+      "own_pairs": 18
+    },
+    {
+      "drop": 0.05,
+      "mendeley_bad_caught": 0.7645914396887159,
+      "own_correct_flagged": 0.2777777777777778,
+      "own_pairs": 18
+    },
+    {
+      "drop": 0.1,
+      "mendeley_bad_caught": 0.6964980544747081,
+      "own_correct_flagged": 0.2777777777777778,
+      "own_pairs": 18
+    },
+    {
+      "drop": 0.15,
+      "mendeley_bad_caught": 0.632295719844358,
+      "own_correct_flagged": 0.2222222222222222,
+      "own_pairs": 18
+    },
+    {
+      "drop": 0.2,
+      "mendeley_bad_caught": 0.5603112840466926,
+      "own_correct_flagged": 0.16666666666666666,
+      "own_pairs": 18
+    }
+  ],
+  "absolute": {
+    "own_sets_called_correct": 0.5882352941176471,
+    "mendeley_set_acc": 0.6908914728682171
+  },
+  "own_sets": [
+    {
+      "key": "partner/2026-11-10_s007/set01",
+      "person": "partner",
+      "exercise": "pushups",
+      "p": 0.5726695558031463
+    },
+    {
+      "key": "partner/2026-11-10_PUSHUP/set01",
+      "person": "partner",
+      "exercise": "pushups",
+      "p": 0.559644500160472
+    },
+    {
+      "key": "partner/2026-11-10_SHOULDERPRESS/set01",
+      "person": "partner",
+      "exercise": "dumbbell_shoulder_press",
+      "p": 0.6385219501500292
+    },
+    {
+      "key": "partner/2026-11-10_SHOULDERDUMB2/set01",
+      "person": "partner",
+      "exercise": "dumbbell_shoulder_press",
+      "p": 0.6684151015691634
+    },
+    {
+      "key": "partner/2026-11-10_s01/set02",
+      "person": "partner",
+      "exercise": "tricep_extensions",
+      "p": 0.47026877655772364
+    },
+    {
+      "key": "yassine/2026-11-10_s007/set01",
+      "person": "yassine",
+      "exercise": "pushups",
+      "p": 0.48115454481522224
+    },
+    {
+      "key": "yassine/2026-11-10_PUHSUP2/set01",
+      "person": "yassine",
+      "exercise": "pushups",
+      "p": 0.592075920501894
+    },
+    {
+      "key": "yassine/2026-11-10_DUMBSHOULD/set01",
+      "person": "yassine",
+      "exercise": "dumbbell_shoulder_press",
+      "p": 0.7865756942207834
+    },
+    {
+      "key": "yassine/2026-11-10_DUMBSHOULD/set02",
+      "person": "yassine",
+      "exercise": "dumbbell_shoulder_press",
+      "p": 0.8156143423913496
+    },
+    {
+      "key": "yassine/2026-11-10_SQUAT/set01",
+      "person": "yassine",
+      "exercise": "squats",
+      "p": 0.9028007065110012
+    },
+    {
+      "key": "yassine/2026-11-10_SQUAT/set02",
+      "person": "yassine",
+      "exercise": "squats",
+      "p": 0.661941171280376
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set01",
+      "person": "yassine",
+      "exercise": "tricep_extensions",
+      "p": 0.4329195120895617
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set02",
+      "person": "yassine",
+      "exercise": "tricep_extensions",
+      "p": 0.40733082461261766
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set03",
+      "person": "yassine",
+      "exercise": "bicep_curls",
+      "p": 0.6036689456815305
+    },
+    {
+      "key": "yassine/2026-11-10_TRICEPS/set04",
+      "person": "yassine",
+      "exercise": "bicep_curls",
+      "p": 0.4452920501012013
+    },
+    {
+      "key": "yassine/2026-11-10_DUMBLLROWS/set01",
+      "person": "yassine",
+      "exercise": "dumbbell_rows",
+      "p": 0.39435882832941277
+    },
+    {
+      "key": "yassine/2026-11-10_s01/set01",
+      "person": "yassine",
+      "exercise": "squats",
+      "p": 0.25139447861871905
+    }
+  ]
+}

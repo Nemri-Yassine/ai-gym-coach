@@ -1,11 +1,16 @@
 # Validation 2 presentation (October 28, 2026)
 
-**Two files for Wednesday:**
+**Week 2 progress deck (demo-first):**
+
+- `AI_Workout_Coach_Week2.html`: open from this folder (keep `demo/week2/*.mp4` next to it). Same look as Week 1. Keys: ← →, F fullscreen; click a video for fullscreen.
+- Rebuild: `python scripts/docs/build_week2.py` (uses `src/week2_template.html` + `src/week2_data.js`). Render demos: `python scripts/docs/render_week2_demos.py`.
+
+**Week 1 files for Wednesday:**
 
 - `AI_Workout_Coach_Week1.html`: the presentation. One self-contained file, same design as the first presentation. Its headline slide plays the full pipeline, frame by frame, on four public gym videos never seen in training (squats 15/14 reps, push-ups 20/19, sit-ups 12/11, jumping jacks 26/26, about 60–70 fps on CPU). Keys: ← → to move, F fullscreen.
 - `AI_Workout_Coach_Week1_Guide.html`: our technical notes: the flow, every input and output, each parameter and why we chose it, diagrams and a glossary.
 
-Rebuild: `python scripts/demo_video.py <video> --truth-reps N` for a demo video, then `python scripts/docs/build_progress.py` (builds both files).
+Rebuild Week 1: `python scripts/demo_video.py <video> --truth-reps N` for a demo video, then `python scripts/docs/build_progress.py` (builds both files).
 
 The earlier slide-deck version is below.
 

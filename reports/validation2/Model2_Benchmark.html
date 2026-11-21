@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model 2 Benchmark</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f5f7; --surface:#fcfcfb; --surface2:#f0f1f3; --line:#dcdfe4; --grid:#e8eaee;
+  --ink:#0b0b0b; --ink2:#52514e; --muted:#7a7d84;
+  --rf:#2a78d6; --stgcn:#eb6834; --lstm:#1baf7a;
+  --good:#1d8a52; --bad:#c23b40;
+  --f:"Segoe UI",system-ui,-apple-system,sans-serif; --mono:"Cascadia Mono",Consolas,ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme:dark;
+    --bg:#111214; --surface:#1a1a19; --surface2:#222321; --line:#34352f; --grid:#2a2b28;
+    --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8e86;
+    --rf:#3987e5; --stgcn:#d95926; --lstm:#199e70;
+    --good:#4cc487; --bad:#ff6b6e;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111214; --surface:#1a1a19; --surface2:#222321; --line:#34352f; --grid:#2a2b28;
+  --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8e86;
+  --rf:#3987e5; --stgcn:#d95926; --lstm:#199e70;
+  --good:#4cc487; --bad:#ff6b6e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f)}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 60px;display:flex;flex-direction:column;gap:18px}
+header .eyebrow{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--rf)}
+h1{font-size:clamp(26px,4vw,38px);margin:4px 0 6px;letter-spacing:-.01em}
+h2{font-size:19px;margin:0 0 4px}
+.lede{color:var(--ink2);margin:0;max-width:820px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.cap{color:var(--muted);font-size:13px;margin:2px 0 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.verdict{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;align-items:stretch}
+@media(max-width:860px){.verdict{grid-template-columns:1fr 1fr}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.tile .k{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-size:34px;font-weight:800;line-height:1.1;margin-top:4px}
+.tile .s{color:var(--ink2);font-size:13px}
+.tile.win{border-left:5px solid var(--rf)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.chart{width:100%;height:auto;display:block}
+.chart text{font-family:var(--f);fill:var(--ink2);font-size:12px}
+.chart .axis{stroke:var(--line)} .chart .gl{stroke:var(--grid)}
+.chart .lbl{fill:var(--ink);font-weight:600}
+#tip{position:fixed;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.18);opacity:0;transition:opacity .1s;z-index:10;max-width:260px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface2)}
+td.n{text-align:right;font-family:var(--mono);font-size:13px;white-space:nowrap}
+td.n small{color:var(--muted)}
+tr.rf td:first-child{font-weight:700}
+td:first-child,td:nth-child(2){white-space:nowrap}
+.mdot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.best{font-weight:700;color:var(--ink)}
+.note{font-size:13px;color:var(--ink2)}
+.pill{display:inline-block;font:600 11px var(--mono);padding:2px 8px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);color:var(--ink2)}
+.scroll{overflow-x:auto}
+.toggle{position:fixed;top:12px;right:12px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 10px;cursor:pointer;font:600 12px var(--f)}
+</style>
+</head>
+<body>
+<button class="toggle" id="theme" aria-label="Switch light or dark">◐ theme</button>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">AI Workout Coach · Model 2 (form) · EC3D</div>
+  <h1>Model 2 benchmark: why the random forest</h1>
+  <p class="lede">Each model is tested on a person it never saw (leave-one-person-out, 4 people). Same test reps for all three, camera view 45°, no mirroring, no augmentation. The random forest uses six 2D body measurements; ST-GCN and LSTM learn from the raw skeleton.</p>
+</header>
+
+<section class="verdict">
+  <div class="tile win"><div class="k">Chosen</div><div class="v" style="color:var(--rf)">Random forest</div><div class="s">better on lunge and plank, tied on squat (within person-to-person noise), and it can explain each decision</div></div>
+  <div class="tile"><div class="k">Overall accuracy at 45°</div><div class="v">68.2%</div><div class="s">random forest · ST-GCN 63.7% · LSTM 51.9%</div></div>
+  <div class="tile"><div class="k">Plank accuracy</div><div class="v">82.8%</div><div class="s">random forest · ST-GCN 70.2% · LSTM 64.0%</div></div>
+  <div class="tile"><div class="k">Training time</div><div class="v">0.2 min</div><div class="s">random forest · ST-GCN 73 min · LSTM 15 min</div></div>
+</section>
+
+<div class="legend" id="legend"></div>
+
+<section class="grid2">
+  <div class="card">
+    <h2>Accuracy at 45°</h2>
+    <p class="cap">Mean of the 4 held-out people, whiskers = ± standard deviation. Higher is better.</p>
+    <svg class="chart" id="acc" viewBox="0 0 540 300" role="img" aria-label="Accuracy at 45 degrees by exercise and model"></svg>
+  </div>
+  <div class="card">
+    <h2>Macro-F1 at 45°</h2>
+    <p class="cap">Treats every mistake type equally, so a model can't win by only predicting the common class.</p>
+    <svg class="chart" id="f1" viewBox="0 0 540 300" role="img" aria-label="Macro-F1 at 45 degrees by exercise and model"></svg>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Accuracy by camera angle (all exercises)</h2>
+  <p class="cap">0° = facing the camera, 90° = side view. 45° is the main result; the other angles check robustness. The random forest is strongest from 30° to 90°, weaker from the front.</p>
+  <svg class="chart" id="angle" viewBox="0 0 1100 320" role="img" aria-label="Overall accuracy by camera angle for each model"></svg>
+</section>
+
+<section class="card">
+  <h2>Per person (accuracy at 45°)</h2>
+  <p class="cap">Why the ± is large: with only four people, one person moves the average a lot. Each dot is one held-out person.</p>
+  <svg class="chart" id="fold" viewBox="0 0 1100 280" role="img" aria-label="Accuracy for each held-out person"></svg>
+</section>
+
+<section class="card">
+  <h2>Conclusion</h2>
+  <p>The ST-GCN's squat lead over the 2D random forest (55.6% vs 53.8%) is within the noise of the four leave-one-person-out folds (std 12.4 and 6.1). The random forest is better on lunge, plank and overall accuracy at 45°. <b>Do not treat the ST-GCN as the winner of this benchmark.</b></p>
+  <p class="note">Context only: the EC3D authors report 90.9% with their graph network, on a different input and setup, so it is not a target for this table. An earlier 3D random forest reached 53% on squats.</p>
+</section>
+
+<section class="card scroll">
+  <h2>Mistake detection at 45°</h2>
+  <p class="cap">Positive class = "not correct". Specificity = share of correct reps recognised as correct. A model that always says "mistake" gets recall 100% and specificity 0%.</p>
+  <table id="mistake"></table>
+  <p class="note" style="margin-top:8px">Correct share in the rep table: squat 31.1%, lunge 36.2%, plank 32.0%.</p>
+</section>
+
+<section class="grid2">
+  <div class="card scroll">
+    <h2>Accuracy and macro-F1 (table)</h2>
+    <table id="tbl"></table>
+  </div>
+  <div class="card scroll">
+    <h2>Random forest on 3D features (separate)</h2>
+    <p class="cap">One 3D feature vector per rep, same people held out. Not part of the 2D comparison.</p>
+    <table>
+      <tr><th>Exercise</th><th style="text-align:right">Accuracy</th></tr>
+      <tr><td>Squat</td><td class="n">55.8 <small>± 24.2</small></td></tr>
+      <tr><td>Lunge</td><td class="n">82.6 <small>± 11.1</small></td></tr>
+      <tr><td>Plank</td><td class="n">91.5 <small>± 5.1</small></td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="card scroll">
+  <h2>Checkpoints</h2>
+  <p class="cap">Each run also saves a model trained on all four people, for live use. It is not scored, because it has seen every person.</p>
+  <table>
+    <tr><th>Model</th><th style="text-align:right">LOSO train min</th><th style="text-align:right">All-people min</th><th style="text-align:right">Parameters</th><th>Checkpoint</th><th>Metrics file</th></tr>
+    <tr><td><span class="mdot" style="background:var(--stgcn)"></span>ST-GCN</td><td class="n">73.34</td><td class="n">24.29</td><td class="n">245,451</td><td><code>models/m2_stgcn.pt</code></td><td><code>experiments/20261104_m2_stgcn/metrics.json</code></td></tr>
+    <tr><td><span class="mdot" style="background:var(--lstm)"></span>LSTM</td><td class="n">14.92</td><td class="n">5.05</td><td class="n">53,195</td><td><code>models/m2_lstm.pt</code></td><td><code>experiments/20261104_m2_lstm/metrics.json</code></td></tr>
+    <tr class="rf"><td><span class="mdot" style="background:var(--rf)"></span>Random forest</td><td class="n">0.19</td><td class="n">0.04</td><td class="n">—</td><td><code>models/m2_rf.pickle</code></td><td><code>experiments/20261104_m2_rf/metrics.json</code></td></tr>
+  </table>
+  <p class="note" style="margin-top:8px">Source: <code>reports/m2_benchmark.md</code>, written by <code>train_m2.py</code> (<code>write_report</code>) from the three metrics files, no hand-typed scores.</p>
+</section>
+
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+"use strict";
+const MODELS = [
+  {key:"rf", name:"Random forest", col:"--rf"},
+  {key:"stgcn", name:"ST-GCN", col:"--stgcn"},
+  {key:"lstm", name:"LSTM", col:"--lstm"},
+];
+const EX = ["Squat","Lunge","Plank"];
+const ACC = {stgcn:[[55.6,12.4],[68.5,8.2],[70.2,19.1]], lstm:[[33.3,11.5],[61.3,15.7],[64.0,18.7]], rf:[[53.8,6.1],[71.6,19.3],[82.8,7.3]]};
+const F1  = {stgcn:[[53.1,16.0],[63.5,10.6],[66.2,20.8]], lstm:[[28.6,9.3],[55.6,20.4],[58.4,21.4]], rf:[[46.3,10.1],[69.0,20.4],[81.5,11.4]]};
+const ANG = [0,15,30,45,60,75,90];
+const OVER = {stgcn:[[66.2,5.7],[65.0,3.7],[65.4,5.3],[63.7,4.1],[61.2,3.3],[59.8,5.4],[59.4,8.6]],
+              lstm:[[48.1,6.7],[51.0,5.2],[49.8,7.3],[51.9,7.0],[55.9,8.0],[56.7,9.6],[56.9,5.3]],
+              rf:[[48.8,6.3],[51.3,5.6],[62.8,7.5],[68.2,8.5],[73.7,4.9],[69.8,9.4],[67.8,6.2]]};
+const PEOPLE = ["Hugues","Isinsu","Sena","Vidit"];
+const FOLD = {stgcn:[[74.2,50.0,50.0,48.4],[59.4,64.5,78.1,71.9],[68.2,91.3,45.5,76.0]],
+              lstm:[[32.3,47.4,34.4,19.4],[65.6,45.2,53.1,81.2],[86.4,52.2,45.5,72.0]],
+              rf:[[51.6,55.3,46.9,61.3],[50.0,67.7,96.9,71.9],[77.3,87.0,90.9,76.0]]};
+const MIST = [ // model, exercise, recall, precision, specificity, majority acc, always-mistake precision
+  ["stgcn","Squat",[81.5,30.9],[79.0,15.9],[40.0,49.0],[31.3,3.5],[68.7,3.5]],
+  ["stgcn","Lunge",[77.9,27.0],[83.9,18.6],[60.4,45.8],[36.2,1.6],[63.8,1.6]],
+  ["stgcn","Plank",[82.1,20.6],[83.2,16.4],[52.7,47.7],[39.6,5.8],[68.0,2.9]],
+  ["lstm","Squat",[72.6,23.4],[73.0,18.0],[30.0,46.9],[31.3,3.5],[68.7,3.5]],
+  ["lstm","Lunge",[55.5,30.9],[84.7,11.5],[76.1,19.8],[36.2,1.6],[63.8,1.6]],
+  ["lstm","Plank",[80.9,15.8],[73.3,13.6],[34.5,36.3],[39.6,5.8],[68.0,2.9]],
+  ["rf","Squat",[82.1,19.6],[85.8,15.1],[62.5,45.0],[31.3,3.5],[68.7,3.5]],
+  ["rf","Lunge",[73.8,18.9],[85.5,17.9],[77.1,28.4],[36.2,1.6],[63.8,1.6]],
+  ["rf","Plank",[86.7,16.3],[91.7,11.8],[74.0,40.7],[39.6,5.8],[68.0,2.9]],
+];
+const NAME = Object.fromEntries(MODELS.map(m => [m.key, m.name]));
+const col = k => `var(${MODELS.find(m => m.key === k).col})`;
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs={}){ const t = el("text", {x, y, ...attrs}, parent); t.textContent = s; return t; }
+
+// tooltip
+const tip = document.getElementById("tip");
+function hover(node, html){
+  node.addEventListener("mousemove", e => { tip.innerHTML = html; tip.style.opacity = 1;
+    const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8); tip.style.left = x + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+  node.addEventListener("mouseleave", () => tip.style.opacity = 0);
+}
+
+// legend
+document.getElementById("legend").innerHTML = MODELS.map(m => `<span><i style="background:var(${m.col})"></i>${m.name}${m.key === "rf" ? " (chosen)" : ""}</span>`).join("");
+
+// grouped bars with error whiskers
+function bars(id, data, label){
+  const svg = document.getElementById(id);
+  const W = 540, H = 300, L = 40, R = 10, T = 14, B = 34, ph = H - T - B, pw = W - L - R;
+  const y = v => T + ph - v / 100 * ph;
+  for (let v = 0; v <= 100; v += 20){ el("line", {x1:L, x2:W - R, y1:y(v), y2:y(v), class: v ? "gl" : "axis"}, svg); txt(svg, L - 6, y(v) + 4, v, {"text-anchor":"end"}); }
+  const gw = pw / EX.length, bw = 30, gap = 4;
+  EX.forEach((ex, i) => {
+    const cx = L + gw * i + gw / 2;
+    txt(svg, cx, H - 12, ex, {"text-anchor":"middle", class:"lbl"});
+    MODELS.forEach((m, j) => {
+      const [mean, sd] = data[m.key][i];
+      const x = cx + (j - 1) * (bw + gap) - bw / 2;
+      const top = y(mean), h = y(0) - top;
+      el("path", {d:`M${x},${y(0)} V${top + 4} q0,-4 4,-4 h${bw - 8} q4,0 4,4 V${y(0)} Z`, fill:col(m.key)}, svg);
+      const lo = y(Math.max(0, mean - sd)), hi = y(Math.min(100, mean + sd)), wx = x + bw / 2;
+      el("line", {x1:wx, x2:wx, y1:lo, y2:hi, stroke:"var(--ink2)", "stroke-width":1.5}, svg);
+      el("line", {x1:wx - 5, x2:wx + 5, y1:hi, y2:hi, stroke:"var(--ink2)", "stroke-width":1.5}, svg);
+      el("line", {x1:wx - 5, x2:wx + 5, y1:lo, y2:lo, stroke:"var(--ink2)", "stroke-width":1.5}, svg);
+      const hit = el("rect", {x:x - 2, y:T, width:bw + 4, height:ph, fill:"transparent"}, svg);
+      hover(hit, `<b>${m.name}</b> · ${ex}<br>${label}: <b>${mean.toFixed(1)}%</b> ± ${sd.toFixed(1)}`);
+    });
+    // label the best mean of the group
+    const best = MODELS.reduce((a, m) => data[m.key][i][0] > data[a.key][i][0] ? m : a, MODELS[0]);
+    const j = MODELS.indexOf(best), bx = cx + (j - 1) * (bw + gap);
+    txt(svg, bx, y(Math.min(100, data[best.key][i][0] + data[best.key][i][1])) - 6, data[best.key][i][0].toFixed(1), {"text-anchor":"middle", class:"lbl"});
+  });
+}
+bars("acc", ACC, "Accuracy");
+bars("f1", F1, "Macro-F1");
+
+// lines by angle
+(function(){
+  const svg = document.getElementById("angle");
+  const W = 1100, H = 320, L = 50, R = 140, T = 16, B = 36, ph = H - T - B, pw = W - L - R;
+  const lo = 40, hi = 80;
+  const y = v => T + ph - (v - lo) / (hi - lo) * ph;
+  const x = i => L + i / (ANG.length - 1) * pw;
+  for (let v = lo; v <= hi; v += 10){ el("line", {x1:L, x2:L + pw, y1:y(v), y2:y(v), class: v === lo ? "axis" : "gl"}, svg); txt(svg, L - 8, y(v) + 4, v + "%", {"text-anchor":"end"}); }
+  ANG.forEach((a, i) => txt(svg, x(i), H - 12, a + "°" + (a === 45 ? " (main)" : ""), {"text-anchor":"middle", class: a === 45 ? "lbl" : ""}));
+  el("line", {x1:x(3), x2:x(3), y1:T, y2:T + ph, stroke:"var(--line)", "stroke-dasharray":"4 4"}, svg);
+  MODELS.forEach(m => {
+    const pts = OVER[m.key].map(([v], i) => `${x(i)},${y(v)}`).join(" ");
+    el("polyline", {points:pts, fill:"none", stroke:col(m.key), "stroke-width":2.5, "stroke-linejoin":"round"}, svg);
+    OVER[m.key].forEach(([v, sd], i) => {
+      el("circle", {cx:x(i), cy:y(v), r:5, fill:col(m.key), stroke:"var(--surface)", "stroke-width":2}, svg);
+      const hit = el("circle", {cx:x(i), cy:y(v), r:14, fill:"transparent"}, svg);
+      hover(hit, `<b>${m.name}</b> · ${ANG[i]}°<br>Overall accuracy: <b>${v.toFixed(1)}%</b> ± ${sd.toFixed(1)}`);
+    });
+    const last = OVER[m.key][ANG.length - 1][0];
+    const dy = m.key === "lstm" ? 12 : m.key === "rf" ? -2 : 4;
+    txt(svg, x(ANG.length - 1) + 12, y(last) + dy, `${m.name} ${last.toFixed(1)}%`, {class:"lbl"});
+  });
+})();
+
+// per-person dot plot (small multiples per exercise)
+(function(){
+  const svg = document.getElementById("fold");
+  const W = 1100, H = 280, T = 26, B = 30, ph = H - T - B;
+  const panelW = W / 3, L0 = 50;
+  const y = v => T + ph - v / 100 * ph;
+  EX.forEach((ex, e) => {
+    const ox = e * panelW, L = ox + (e === 0 ? L0 : 20), R = ox + panelW - 16;
+    txt(svg, (L + R) / 2, 16, ex, {"text-anchor":"middle", class:"lbl"});
+    for (let v = 0; v <= 100; v += 25){ el("line", {x1:L, x2:R, y1:y(v), y2:y(v), class: v ? "gl" : "axis"}, svg); if (e === 0) txt(svg, L - 8, y(v) + 4, v + "%", {"text-anchor":"end"}); }
+    const cw = (R - L) / MODELS.length;
+    MODELS.forEach((m, j) => {
+      const cx = L + cw * j + cw / 2;
+      txt(svg, cx, H - 10, m.name.replace("Random forest", "RF"), {"text-anchor":"middle"});
+      const vals = FOLD[m.key][e];
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      el("line", {x1:cx - 20, x2:cx + 20, y1:y(mean), y2:y(mean), stroke:"var(--ink2)", "stroke-width":2}, svg);
+      vals.forEach((v, p) => {
+        const dx = (p - 1.5) * 7;
+        el("circle", {cx:cx + dx, cy:y(v), r:6, fill:col(m.key), stroke:"var(--surface)", "stroke-width":2}, svg);
+        const hit = el("circle", {cx:cx + dx, cy:y(v), r:12, fill:"transparent"}, svg);
+        hover(hit, `<b>${m.name}</b> · ${ex}<br>Held-out person: <b>${PEOPLE[p]}</b><br>Accuracy: <b>${v.toFixed(1)}%</b>`);
+      });
+    });
+  });
+})();
+
+// tables
+function fmt([m, s]){ return `${m.toFixed(1)} <small>± ${s.toFixed(1)}</small>`; }
+(function(){
+  const t = document.getElementById("tbl");
+  let h = `<tr><th>Model</th><th>Metric</th>${EX.map(e => `<th style="text-align:right">${e}</th>`).join("")}</tr>`;
+  for (const [lab, D] of [["Accuracy", ACC], ["Macro-F1", F1]]){
+    MODELS.forEach(m => {
+      h += `<tr class="${m.key}"><td><span class="mdot" style="background:var(${m.col})"></span>${m.name}</td><td>${lab}</td>` +
+        EX.map((_, i) => { const best = Math.max(...MODELS.map(k => D[k.key][i][0])); return `<td class="n${D[m.key][i][0] === best ? " best" : ""}">${fmt(D[m.key][i])}</td>`; }).join("") + "</tr>";
+    });
+  }
+  t.innerHTML = h;
+})();
+(function(){
+  const t = document.getElementById("mistake");
+  let h = `<tr><th>Model</th><th>Exercise</th><th style="text-align:right">Recall</th><th style="text-align:right">Precision</th><th style="text-align:right">Specificity</th><th style="text-align:right">Majority acc.</th><th style="text-align:right">Always-mistake prec.</th></tr>`;
+  MIST.forEach(([k, ex, ...v]) => {
+    h += `<tr class="${k}"><td><span class="mdot" style="background:${col(k)}"></span>${NAME[k]}</td><td>${ex}</td>${v.map(x => `<td class="n">${fmt(x)}</td>`).join("")}</tr>`;
+  });
+  t.innerHTML = h;
+})();
+
+// theme toggle
+document.getElementById("theme").onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+};
+</script>
+</body>
+</html>

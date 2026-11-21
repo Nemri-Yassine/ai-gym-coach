@@ -8,6 +8,10 @@ Authors' graph network: 90.9%. Different input and setup, so this is context onl
 
 Earlier 3D random forest on squats: 53%. That number is from the earlier analysis, not from this benchmark.
 
+## Conclusion
+
+The ST-GCN's squat lead over the 2D random forest (55.6% vs 53.8%) is within the noise of the four leave-one-person-out folds (std 12.4 and 6.1). The random forest is better on lunge, plank and overall accuracy at 45°. Do not treat the ST-GCN as the winner of this benchmark.
+
 ## Accuracy at 45° (mean ± std, %)
 
 | Model | Squat | Lunge | Plank | Train minutes |

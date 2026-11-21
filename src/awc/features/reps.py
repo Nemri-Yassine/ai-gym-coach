@@ -128,3 +128,9 @@ def count_reps(pose, fps=VIDEO_FPS, exercise=None):
     if method == "arms":
         return _count_arms(pose, fps)
     return _count_on(movement_signal(pose), fps)
+
+
+def rep_boundaries(pose, fps=VIDEO_FPS, exercise=None):
+    """Peak/valley rep segments from `count_reps`. Returns list of (start, end) indices."""
+    _count, boundaries = count_reps(pose, fps=fps, exercise=exercise)
+    return boundaries
