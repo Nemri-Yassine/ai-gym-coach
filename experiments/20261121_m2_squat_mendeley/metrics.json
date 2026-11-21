@@ -1,0 +1,195 @@
+{
+  "date": "2026-11-21",
+  "epochs": 15,
+  "folds": 5,
+  "seconds": 4270,
+  "data": {
+    "mendeley_reps": 2116,
+    "mendeley_people": 25,
+    "ec3d_squat_views": 1848
+  },
+  "cv_on_mendeley": {
+    "A_rf": {
+      "n": 2116,
+      "balanced_acc": 0.5,
+      "auc": 0.5961426202469974,
+      "good_called_good": 0.0,
+      "bad_called_bad": 1.0,
+      "by_view": {
+        "diagonal": 0.5,
+        "front": 0.5,
+        "side": 0.5
+      },
+      "video_acc": 0.5033557046979866,
+      "n_videos": 149,
+      "fold_balanced_acc": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "A_stgcn": {
+      "n": 2116,
+      "balanced_acc": 0.5,
+      "auc": 0.4547546786932288,
+      "good_called_good": 0.0,
+      "bad_called_bad": 1.0,
+      "by_view": {
+        "diagonal": 0.5,
+        "front": 0.5,
+        "side": 0.5
+      },
+      "video_acc": 0.5033557046979866,
+      "n_videos": 149,
+      "fold_balanced_acc": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "B_rf": {
+      "n": 2116,
+      "balanced_acc": 0.7250917412739634,
+      "auc": 0.793291824411001,
+      "good_called_good": 0.6935014548981572,
+      "bad_called_bad": 0.7566820276497696,
+      "by_view": {
+        "diagonal": 0.6817706849054812,
+        "front": 0.8346564735862001,
+        "side": 0.6601221359285876
+      },
+      "video_acc": 0.7583892617449665,
+      "n_videos": 149,
+      "fold_balanced_acc": [
+        0.5715962441314554,
+        0.8567791145011008,
+        0.7135340611454929,
+        0.7305806938159879,
+        0.7468839031339032
+      ]
+    },
+    "B_stgcn": {
+      "n": 2116,
+      "balanced_acc": 0.6706633531044532,
+      "auc": 0.7017431959486338,
+      "good_called_good": 0.7099903006789525,
+      "bad_called_bad": 0.631336405529954,
+      "by_view": {
+        "diagonal": 0.6285266457680251,
+        "front": 0.7415629390048679,
+        "side": 0.6430223002803648
+      },
+      "video_acc": 0.6778523489932886,
+      "n_videos": 149,
+      "fold_balanced_acc": [
+        0.5529719195677207,
+        0.8254797749560808,
+        0.6676633521081056,
+        0.5641025641025641,
+        0.7416310541310542
+      ]
+    },
+    "C_rf": {
+      "n": 2116,
+      "balanced_acc": 0.6958006856570731,
+      "auc": 0.7719971214918182,
+      "good_called_good": 0.6275460717749758,
+      "bad_called_bad": 0.7640552995391705,
+      "by_view": {
+        "diagonal": 0.6802745321554099,
+        "front": 0.7671436505602928,
+        "side": 0.640782604492282
+      },
+      "video_acc": 0.7181208053691275,
+      "n_videos": 149,
+      "fold_balanced_acc": [
+        0.49617990964655856,
+        0.8524872690075385,
+        0.6942377674246112,
+        0.7162518853695324,
+        0.7144764957264957
+      ]
+    },
+    "C_stgcn": {
+      "n": 2116,
+      "balanced_acc": 0.6263557818233829,
+      "auc": 0.6536890942979614,
+      "good_called_good": 0.6702230843840931,
+      "bad_called_bad": 0.5824884792626728,
+      "by_view": {
+        "diagonal": 0.6215208511446756,
+        "front": 0.7038126041360384,
+        "side": 0.5549088008765428
+      },
+      "video_acc": 0.6577181208053692,
+      "n_videos": 149,
+      "fold_balanced_acc": [
+        0.5428293028611924,
+        0.7123462829949521,
+        0.5904897665901768,
+        0.5878582202111614,
+        0.712962962962963
+      ]
+    },
+    "shortcut_static_first_frames_rf": {
+      "n": 2116,
+      "balanced_acc": 0.5998297031650182,
+      "auc": 0.6386891166466274,
+      "good_called_good": 0.6042677012609118,
+      "bad_called_bad": 0.5953917050691244,
+      "by_view": {
+        "diagonal": 0.5939251448655838,
+        "front": 0.6448920252213401,
+        "side": 0.5608182140440205
+      },
+      "video_acc": 0.5838926174496645,
+      "n_videos": 149
+    }
+  },
+  "own_correct_squats": {
+    "A_rf": {
+      "n_reps": 34,
+      "mean_p_correct": 0.23591619981325862,
+      "pct_called_correct": 0.08823529411764706,
+      "by_set": {
+        "yassine/2026-11-10_SQUAT/set01": 0.076,
+        "yassine/2026-11-10_SQUAT/set02": 0.203,
+        "yassine/2026-11-10_s01/set01": 0.373
+      }
+    },
+    "B_rf": {
+      "n_reps": 34,
+      "mean_p_correct": 0.5893511904761904,
+      "pct_called_correct": 0.5882352941176471,
+      "by_set": {
+        "yassine/2026-11-10_SQUAT/set01": 0.786,
+        "yassine/2026-11-10_SQUAT/set02": 0.74,
+        "yassine/2026-11-10_s01/set01": 0.342
+      }
+    },
+    "C_rf": {
+      "n_reps": 34,
+      "mean_p_correct": 0.5858804388422034,
+      "pct_called_correct": 0.6764705882352942,
+      "by_set": {
+        "yassine/2026-11-10_SQUAT/set01": 0.686,
+        "yassine/2026-11-10_SQUAT/set02": 0.713,
+        "yassine/2026-11-10_s01/set01": 0.423
+      }
+    },
+    "C_stgcn": {
+      "n_reps": 34,
+      "mean_p_correct": 0.8788161277770996,
+      "pct_called_correct": 0.9705882352941176,
+      "by_set": {
+        "yassine/2026-11-10_SQUAT/set01": 0.885,
+        "yassine/2026-11-10_SQUAT/set02": 0.951,
+        "yassine/2026-11-10_s01/set01": 0.823
+      }
+    }
+  }
+}
